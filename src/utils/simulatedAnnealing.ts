@@ -1,10 +1,30 @@
-
 import { City, SimulationParams, SimulationState } from "./types";
 
+// Haversine formula to calculate distance between two points on Earth
 export function distance(city1: City, city2: City): number {
-  const dx = city1.x - city2.x;
-  const dy = city1.y - city2.y;
-  return Math.sqrt(dx * dx + dy * dy);
+  // Convert normalized coordinates to lon/lat
+  const lon1 = -180 + city1.x * 360;
+  const lat1 = 90 - city1.y * 180;
+  const lon2 = -180 + city2.x * 360;
+  const lat2 = 90 - city2.y * 180;
+  
+  // Earth radius in kilometers
+  const R = 6371;
+  
+  // Convert degrees to radians
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  
+  // Haversine formula
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distance = R * c; // Distance in kilometers
+  
+  return distance;
 }
 
 export function calculatePathDistance(cities: City[], path: number[]): number {
@@ -42,13 +62,30 @@ export function getInitialState(numCities: number = 0): SimulationState {
 
 export function createRandomCities(count: number): City[] {
   const cities: City[] = [];
+  
   for (let i = 0; i < count; i++) {
+    // Generate cities biased towards India for a more realistic distribution
+    // Approximate bounds for India
+    const indiaLngMin = 68;
+    const indiaLngMax = 97;
+    const indiaLatMin = 8;
+    const indiaLatMax = 37;
+    
+    // Generate random coordinates within India
+    const lng = indiaLngMin + Math.random() * (indiaLngMax - indiaLngMin);
+    const lat = indiaLatMin + Math.random() * (indiaLatMax - indiaLatMin);
+    
+    // Convert to normalized coordinates (0-1 range)
+    const normalizedX = (lng + 180) / 360;
+    const normalizedY = 1 - ((lat + 90) / 180);
+    
     cities.push({
       id: i,
-      x: Math.random() * 0.8 + 0.1, // 0.1 - 0.9 to keep away from edges
-      y: Math.random() * 0.8 + 0.1
+      x: normalizedX,
+      y: normalizedY
     });
   }
+  
   return cities;
 }
 
