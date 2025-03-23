@@ -97,9 +97,9 @@ const MapCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
       label.style.textShadow = "0 0 3px black";
       markerEl.appendChild(label);
       
-      // Add the marker to the map
+      // Add the marker to the map - Fix: Ensure lngLat is a LngLatLike object
       new mapboxgl.Marker(markerEl)
-        .setLngLat(lngLat)
+        .setLngLat({ lng: lngLat[0], lat: lngLat[1] })
         .addTo(map.current!);
     });
     
@@ -108,7 +108,8 @@ const MapCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
       const pathCoordinates = [];
       
       // Start from the first city (index 0)
-      pathCoordinates.push(convertNormalizedToLngLat(state.cities[0].x, state.cities[0].y));
+      const startCoords = convertNormalizedToLngLat(state.cities[0].x, state.cities[0].y);
+      pathCoordinates.push(startCoords);
       
       // Add all cities in the path
       for (const cityIndex of state.currentPath) {
@@ -117,7 +118,7 @@ const MapCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
       }
       
       // Return to start
-      pathCoordinates.push(convertNormalizedToLngLat(state.cities[0].x, state.cities[0].y));
+      pathCoordinates.push(startCoords);
       
       // Add current path
       map.current.addSource("route", {
@@ -154,7 +155,8 @@ const MapCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
       const bestPathCoordinates = [];
       
       // Start from the first city (index 0)
-      bestPathCoordinates.push(convertNormalizedToLngLat(state.cities[0].x, state.cities[0].y));
+      const startCoords = convertNormalizedToLngLat(state.cities[0].x, state.cities[0].y);
+      bestPathCoordinates.push(startCoords);
       
       // Add all cities in the best path
       for (const cityIndex of state.bestPath) {
@@ -163,7 +165,7 @@ const MapCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
       }
       
       // Return to start
-      bestPathCoordinates.push(convertNormalizedToLngLat(state.cities[0].x, state.cities[0].y));
+      bestPathCoordinates.push(startCoords);
       
       // Add best path
       map.current.addSource("best-route", {
@@ -269,7 +271,7 @@ function convertLngLatToNormalized(lng: number, lat: number) {
   };
 }
 
-function convertNormalizedToLngLat(x: number, y: number) {
+function convertNormalizedToLngLat(x: number, y: number): [number, number] {
   // World bounds (approximate)
   const minLng = -180;
   const maxLng = 180;
