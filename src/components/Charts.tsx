@@ -6,19 +6,7 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 const Charts: React.FC<ChartProps> = ({ state }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   
-  useEffect(() => {
-    if (chartContainerRef.current) {
-      // Scroll to the end when distances update
-      if (state.isRunning && state.distances.length > 0) {
-        chartContainerRef.current.scrollTo({
-          left: chartContainerRef.current.scrollWidth,
-          behavior: "smooth",
-        });
-      }
-    }
-  }, [state.distances, state.isRunning]);
-  
-  // Create chart data
+  // Create chart data with a fixed width for better visualization
   const chartData = state.distances.map((distance, index) => ({
     iteration: index,
     distance,
@@ -35,11 +23,8 @@ const Charts: React.FC<ChartProps> = ({ state }) => {
       <h2 className="text-lg font-medium mb-4">Distance Over Iterations</h2>
       
       {state.distances.length > 1 ? (
-        <div 
-          ref={chartContainerRef} 
-          className="w-full h-60 overflow-x-auto scrollbar-none"
-        >
-          <ResponsiveContainer width={Math.max(600, state.distances.length * 5)} height="100%">
+        <div className="w-full h-60">
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <XAxis 
                 dataKey="iteration" 
