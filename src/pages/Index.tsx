@@ -11,7 +11,7 @@ import CityCanvas from "@/components/CityCanvas";
 import ControlPanel from "@/components/ControlPanel";
 import InfoPanel from "@/components/InfoPanel";
 import Charts from "@/components/Charts";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 const Index = () => {
   // Simulation state and parameters
