@@ -9,8 +9,7 @@ import {
   XAxis, 
   YAxis,
   CartesianGrid,
-  ReferenceLine,
-  Label
+  ReferenceLine
 } from "recharts";
 
 const Charts: React.FC<ChartProps> = ({ state }) => {
@@ -30,7 +29,7 @@ const Charts: React.FC<ChartProps> = ({ state }) => {
   
   return (
     <div className="glass-panel rounded-xl p-6">
-      <h2 className="text-lg font-medium mb-4">Distance Over Iterations (km)</h2>
+      <h2 className="text-lg font-medium mb-4">Distance Over Iterations</h2>
       
       {state.distances.length > 1 ? (
         <div className="w-full h-64">
@@ -58,13 +57,12 @@ const Charts: React.FC<ChartProps> = ({ state }) => {
                 axisLine={{ stroke: '#ffffff40' }}
                 domain={[yAxisMin, yAxisMax]}
                 label={{ 
-                  value: 'Distance (km)', 
+                  value: 'Distance', 
                   angle: -90, 
                   position: 'insideLeft',
                   fill: '#ffffff80',
                   offset: -10
                 }}
-                tickFormatter={(value) => value.toFixed(0)}
               />
               <Tooltip 
                 contentStyle={{ 
@@ -76,7 +74,7 @@ const Charts: React.FC<ChartProps> = ({ state }) => {
                 }}
                 itemStyle={{ color: 'white' }}
                 labelStyle={{ color: 'rgba(255, 255, 255, 0.7)' }}
-                formatter={(value: number) => [value.toFixed(1) + " km", 'Distance']}
+                formatter={(value: number) => [value.toFixed(2), 'Distance']}
                 labelFormatter={(value) => `Iteration: ${value}`}
               />
               
@@ -104,7 +102,7 @@ const Charts: React.FC<ChartProps> = ({ state }) => {
                   strokeWidth={1.5}
                   strokeDasharray="5 5"
                   label={{
-                    value: `Best: ${state.bestDistance.toFixed(1)} km`,
+                    value: `Best: ${state.bestDistance.toFixed(2)}`,
                     fill: '#13df83',
                     position: 'left'
                   }}
@@ -127,7 +125,7 @@ const Charts: React.FC<ChartProps> = ({ state }) => {
           </div>
           <div>
             <span className="inline-block w-3 h-3 bg-tsp-best rounded-full mr-1"></span>
-            Best distance found: {state.bestDistance.toFixed(1)} km
+            Best distance found: {state.bestDistance.toFixed(2)}
           </div>
         </div>
       )}

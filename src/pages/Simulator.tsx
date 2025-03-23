@@ -8,7 +8,7 @@ import {
   simulationStep
 } from "@/utils/simulatedAnnealing";
 import { City, SimulationParams, SimulationState } from "@/utils/types";
-import MapCanvas from "@/components/MapCanvas";
+import CityCanvas from "@/components/CityCanvas";
 import ControlPanel from "@/components/ControlPanel";
 import InfoPanel from "@/components/InfoPanel";
 import Charts from "@/components/Charts";
@@ -90,33 +90,10 @@ const Simulator = () => {
     toast.success("Simulation reset");
   }, [state.isRunning, state.cities.length, params]);
   
-  // Generate random cities - updated to use a more realistic distribution
+  // Generate random cities
   const handleRandomizeCities = useCallback((count: number) => {
     if (state.isRunning) return;
-    
-    // Generate cities around India for a more focused example
-    const newCities: City[] = [];
-    for (let i = 0; i < count; i++) {
-      // Approximate bounds for India
-      const indiaLngMin = 68;
-      const indiaLngMax = 97;
-      const indiaLatMin = 8;
-      const indiaLatMax = 37;
-      
-      // Generate random coordinates within India
-      const lng = indiaLngMin + Math.random() * (indiaLngMax - indiaLngMin);
-      const lat = indiaLatMin + Math.random() * (indiaLatMax - indiaLatMin);
-      
-      // Convert to normalized coordinates
-      const normalizedX = (lng + 180) / 360;
-      const normalizedY = 1 - ((lat + 90) / 180);
-      
-      newCities.push({
-        id: i,
-        x: normalizedX,
-        y: normalizedY
-      });
-    }
+    const newCities = createRandomCities(count);
     
     // Always set city 0 as the start point
     setState({
@@ -124,7 +101,7 @@ const Simulator = () => {
       isRunning: false,
       animationSpeed: state.animationSpeed
     });
-    toast.success(`Generated ${count} random cities in India`);
+    toast.success(`Generated ${count} random cities`);
   }, [state.isRunning, params, state.animationSpeed]);
   
   // Start or stop the simulation
@@ -224,7 +201,7 @@ const Simulator = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left column - Canvas */}
           <div className="lg:col-span-2 space-y-6">
-            <MapCanvas state={state} onAddCity={handleAddCity} />
+            <CityCanvas state={state} onAddCity={handleAddCity} />
             <Charts state={state} />
           </div>
           

@@ -113,35 +113,6 @@
     stroke-width: 1px;
   }
   
-  /* Mapbox specific styles */
-  .mapboxgl-popup {
-    @apply text-sm font-medium;
-  }
-  
-  .mapboxgl-popup-content {
-    @apply bg-card text-card-foreground shadow-lg rounded-lg border border-white/10 px-4 py-2;
-  }
-  
-  .mapboxgl-popup-close-button {
-    @apply text-white/70 hover:text-white focus:outline-none;
-  }
-  
-  .marker-start {
-    animation: pulse-start 2s infinite;
-  }
-  
-  @keyframes pulse-start {
-    0% {
-      box-shadow: 0 0 0 0 rgba(19, 223, 131, 0.5);
-    }
-    70% {
-      box-shadow: 0 0 0 10px rgba(19, 223, 131, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(19, 223, 131, 0);
-    }
-  }
-  
   .animate-delay-100 {
     animation-delay: 100ms;
   }
@@ -162,3 +133,4 @@
     @apply bg-gradient-to-br from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
   }
 }
+
