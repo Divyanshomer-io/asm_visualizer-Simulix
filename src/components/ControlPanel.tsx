@@ -39,7 +39,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="flex flex-wrap gap-3">
           <Button
             onClick={onStartStop}
-            className={`flex items-center gap-2 ${state.isRunning ? 'bg-orange-500 hover:bg-orange-600' : 'bg-accent hover:bg-accent/80'}`}
+            className={`flex items-center gap-2 ${state.isRunning ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}`}
             disabled={state.cities.length < 3}
           >
             {state.isRunning ? (
@@ -55,7 +55,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           
           <Button
             onClick={onReset}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"
+            className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
             disabled={state.isRunning}
           >
             <RefreshCw size={18} /> Reset
@@ -63,7 +63,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           
           <Button
             onClick={onClearCities}
-            className="bg-destructive hover:bg-destructive/80 flex items-center gap-2"
+            className="bg-rose-600 hover:bg-rose-700 flex items-center gap-2"
             disabled={state.isRunning || state.cities.length === 0}
           >
             <Trash2 size={18} /> Clear
@@ -87,7 +87,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               />
               <Button
                 onClick={() => onRandomizeCities(cityCount)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2"
+                className="bg-teal-600 hover:bg-teal-700 text-white flex items-center gap-2"
                 disabled={state.isRunning}
               >
                 <Plus size={18} /> Generate

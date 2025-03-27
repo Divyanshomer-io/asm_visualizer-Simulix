@@ -64,10 +64,10 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
         tsp: {
-          current: "rgba(255, 127, 31, 1)",  // Brighter orange for better visibility
-          best: "rgba(19, 223, 131, 0.9)",
-          start: "rgba(29, 161, 242, 0.9)",
-          city: "rgba(255, 255, 255, 0.9)",
+          current: "rgba(255, 140, 0, 1)",  // Brighter orange for better visibility
+          best: "rgba(0, 255, 127, 1)",     // Brighter green for best path
+          start: "rgba(29, 161, 242, 1)",   // Brighter blue for start
+          city: "rgba(255, 255, 255, 1)",   // Brighter white for cities
           grid: "rgba(255, 255, 255, 0.05)",
         }
       },

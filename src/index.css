@@ -96,18 +96,20 @@
   
   .path-current {
     stroke: theme('colors.tsp.current');
-    stroke-width: 3px;
+    stroke-width: 3.5px;
     stroke-linecap: round;
+    stroke-linejoin: round;
     fill: none;
-    filter: drop-shadow(0 0 2px theme('colors.tsp.current'));
+    filter: drop-shadow(0 0 3px theme('colors.tsp.current'));
   }
   
   .path-best {
     stroke: theme('colors.tsp.best');
     stroke-width: 2.5px;
     stroke-linecap: round;
+    stroke-linejoin: round;
     fill: none;
-    filter: drop-shadow(0 0 1px theme('colors.tsp.best'));
+    filter: drop-shadow(0 0 2px theme('colors.tsp.best'));
   }
   
   .grid-lines {
