@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { CheckCircle, Circle, Info, Code } from "lucide-react";
+import { CheckCircle, Info, Code } from "lucide-react";
 
 const InfoPanel: React.FC<InfoPanelProps> = ({ state, params }) => {
   const formatDistance = (distance: number | undefined) => {
@@ -88,7 +88,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ state, params }) => {
                 <div>
                   <h5 className="font-medium text-tsp-current">Initial Temperature (T₀)</h5>
                   <p className="mt-1">
-                    Controls the initial probability of accepting worse solutions. In SA, the temperature parameter represents the system's energy.
+                    Controls the initial probability of accepting worse solutions. In SA, the temperature parameter represents the system&apos;s energy.
                   </p>
                   <ul className="list-disc list-inside mt-1 pl-2 text-xs opacity-90">
                     <li><strong>Higher values (1000-5000):</strong> Wider exploration early in the search, higher chance of escaping local optima</li>
@@ -159,7 +159,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ state, params }) => {
               shortest possible route.
             </p>
             <p>
-              This is an NP-hard problem, meaning there's no known polynomial-time algorithm to find the 
+              This is an NP-hard problem, meaning there&apos;s no known polynomial-time algorithm to find the 
               exact solution for large instances. For n cities, there are (n-1)!/2 possible tours.
             </p>
             <div className="mt-3 space-y-1.5">
@@ -193,10 +193,10 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ state, params }) => {
                 newDistance = calculatePathDistance(cities, newTour)
                 
                 // Apply Metropolis criterion
-                if (newDistance < currentDistance || 
-                    random(0,1) < exp((currentDistance - newDistance) / T)) {
+                if (newDistance &lt; currentDistance || 
+                    random(0,1) &lt; exp((currentDistance - newDistance) / T)) {"{"}
                   accept the new tour
-                }
+                {"}"}
               </div>
               <p className="mt-1.5">
                 The algorithm complexity is O(n²) per iteration for n cities, with:
