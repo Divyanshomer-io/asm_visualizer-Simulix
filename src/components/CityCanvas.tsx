@@ -118,21 +118,21 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
     
     return (
       <>
-        {/* Best path */}
+        {/* Current path - rendering first so best path is on top */}
+        <path 
+          d={currentPathData} 
+          className="path-current opacity-100"
+          strokeWidth={3.5}
+          strokeDasharray="none"
+        />
+        
+        {/* Best path - now rendering after current path so it's on top */}
         <path 
           d={bestPathData} 
           className="path-best"
           strokeWidth={2.5}
           strokeDasharray={state.isRunning ? "1" : "none"}
           strokeDashoffset={state.isRunning ? "1" : "0"}
-        />
-        
-        {/* Current path - render after best path to ensure it's on top */}
-        <path 
-          d={currentPathData} 
-          className="path-current opacity-100"  // Changed from opacity-80 to opacity-100 for better visibility
-          strokeWidth={3.5}  // Increased stroke width for better visibility
-          strokeDasharray="none"
         />
       </>
     );
