@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { CheckCircle, Circle } from "lucide-react";
+import { CheckCircle, Circle, Info } from "lucide-react";
 
 const InfoPanel: React.FC<InfoPanelProps> = ({ state, params }) => {
   const formatDistance = (distance: number | undefined) => {
@@ -82,19 +82,34 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ state, params }) => {
               helping it escape local minima and find the global optimum.
             </p>
             <div className="mt-3 space-y-1.5">
-              <h4 className="font-medium">Key Concepts:</h4>
+              <h4 className="font-medium">Key Parameters:</h4>
               <div className="flex items-start gap-2">
                 <Circle size={16} className="min-w-4 mt-0.5 text-tsp-current" />
-                <p><span className="font-medium">Temperature</span> - Controls the probability of accepting worse solutions.</p>
+                <p><span className="font-medium">Initial Temperature</span> - Higher values (1000-5000) increase exploration, allowing the algorithm to accept worse solutions more frequently in early iterations. Lower values (100-500) focus more on immediate improvement.</p>
               </div>
               <div className="flex items-start gap-2">
                 <Circle size={16} className="min-w-4 mt-0.5 text-tsp-current" />
-                <p><span className="font-medium">Cooling Rate</span> - How quickly the temperature decreases.</p>
+                <p><span className="font-medium">Cooling Rate</span> - Controls how quickly temperature decreases. Values closer to 1 (e.g., 0.99) cool slowly, allowing more exploration but requiring more iterations. Lower values (e.g., 0.8) cool quickly, converging faster but potentially missing global optima.</p>
               </div>
               <div className="flex items-start gap-2">
                 <Circle size={16} className="min-w-4 mt-0.5 text-tsp-current" />
-                <p><span className="font-medium">Iterations</span> - Number of solution attempts.</p>
+                <p><span className="font-medium">Iterations</span> - More iterations allow thorough exploration of the solution space but increase computation time. For complex problems, 5000+ iterations may be necessary.</p>
               </div>
+            </div>
+            <div className="mt-3 pt-2 border-t border-white/10">
+              <h4 className="font-medium flex items-center gap-1.5">
+                <Info size={14} className="text-primary" />
+                Mathematical Model:
+              </h4>
+              <p className="mt-1.5">
+                The probability of accepting a worse solution is calculated as: 
+                <code className="bg-secondary/50 px-1.5 py-0.5 rounded ml-1 font-mono">
+                  P = exp((currentDistance - newDistance) / temperature)
+                </code>
+              </p>
+              <p className="mt-1.5">
+                As temperature decreases with each iteration (T = T * coolingRate), the probability of accepting worse solutions diminishes, focusing the search on improvements.
+              </p>
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -115,17 +130,31 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ state, params }) => {
             </p>
             <div className="mt-3 space-y-1.5">
               <div className="flex items-start gap-2">
-                <CheckCircle size={16} className="min-w-4 mt-0.5 text-tsp-best" />
+                <CheckCircle size={16} className="min-w-4 mt-0.5 text-tsp-start" />
                 <p>The blue dot represents the starting city.</p>
               </div>
               <div className="flex items-start gap-2">
-                <CheckCircle size={16} className="min-w-4 mt-0.5 text-tsp-best" />
+                <CheckCircle size={16} className="min-w-4 mt-0.5 text-tsp-current" />
                 <p>The orange line shows the current path being tested.</p>
               </div>
               <div className="flex items-start gap-2">
                 <CheckCircle size={16} className="min-w-4 mt-0.5 text-tsp-best" />
                 <p>The green line shows the best path found so far.</p>
               </div>
+            </div>
+            <div className="mt-3 pt-2 border-t border-white/10">
+              <h4 className="font-medium">Technical Details:</h4>
+              <p className="mt-1.5">
+                For a TSP with n cities, there are (n-1)!/2 possible routes. The algorithm works by randomly swapping cities in the current path and using the temperature parameter to accept or reject changes based on their impact on total distance.
+              </p>
+              <p className="mt-1.5">
+                The solution quality heavily depends on parameter tuning:
+              </p>
+              <ul className="list-disc list-inside mt-1.5 space-y-1 pl-2">
+                <li>For complex city layouts, use higher initial temperatures and slower cooling</li>
+                <li>For simple layouts, faster cooling works well</li>
+                <li>For near-optimal solutions, increase iterations significantly</li>
+              </ul>
             </div>
           </AccordionContent>
         </AccordionItem>

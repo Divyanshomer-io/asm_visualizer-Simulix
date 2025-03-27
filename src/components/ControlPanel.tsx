@@ -39,7 +39,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="flex flex-wrap gap-3">
           <Button
             onClick={onStartStop}
-            className={`flex items-center gap-2 ${state.isRunning ? 'bg-orange-500/80 hover:bg-orange-600/80' : 'bg-accent hover:bg-accent/80'}`}
+            className={`flex items-center gap-2 ${state.isRunning ? 'bg-orange-500 hover:bg-orange-600' : 'bg-accent hover:bg-accent/80'}`}
             disabled={state.cities.length < 3}
           >
             {state.isRunning ? (
@@ -55,7 +55,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           
           <Button
             onClick={onReset}
-            className="bg-secondary hover:bg-secondary/80 flex items-center gap-2"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"
             disabled={state.isRunning}
           >
             <RefreshCw size={18} /> Reset
@@ -87,7 +87,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               />
               <Button
                 onClick={() => onRandomizeCities(cityCount)}
-                className="bg-secondary hover:bg-secondary/80 flex items-center gap-2"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2"
                 disabled={state.isRunning}
               >
                 <Plus size={18} /> Generate

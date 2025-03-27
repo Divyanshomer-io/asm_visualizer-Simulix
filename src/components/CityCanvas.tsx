@@ -121,14 +121,16 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
         {/* Current path */}
         <path 
           d={currentPathData} 
-          className="path-current opacity-60"
-          strokeDasharray="4,1"
+          className="path-current opacity-80"
+          strokeWidth={3}
+          strokeDasharray="none"
         />
         
         {/* Best path */}
         <path 
           d={bestPathData} 
           className="path-best"
+          strokeWidth={2.5}
           strokeDasharray={state.isRunning ? "1" : "none"}
           strokeDashoffset={state.isRunning ? "1" : "0"}
         />
