@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Home, Play, RotateCcw } from "lucide-react";
@@ -20,6 +19,9 @@ type AliasMethodState = {
   sampleSize: number;
   isAnimating: boolean;
   highlightedItem: number | null;
+  animationPhase: 'bucket' | 'flip' | 'result' | null;
+  selectedBucket: number | null;
+  flipResult: boolean | null;
 };
 
 const AliasMethod = () => {
@@ -34,7 +36,10 @@ const AliasMethod = () => {
     empiricalFrequencies: [],
     sampleSize: 1000,
     isAnimating: false,
-    highlightedItem: null
+    highlightedItem: null,
+    animationPhase: null,
+    selectedBucket: null,
+    flipResult: null
   });
   
   // Canvas references
@@ -122,7 +127,12 @@ const AliasMethod = () => {
     maxValue: number = 1.05,
     isAliasTable: boolean = false,
     aliasTable: number[] = [],
-    highlightIndex: number | null = null
+    highlightIndex: number | null = null,
+    animationInfo: {
+      phase: 'bucket' | 'flip' | 'result' | null,
+      bucket: number | null,
+      flipResult: boolean | null
+    } = { phase: null, bucket: null, flipResult: null }
   ) => {
     if (!canvas) return;
     
@@ -134,7 +144,7 @@ const AliasMethod = () => {
     
     // Draw title
     ctx.fillStyle = 'white';
-    ctx.font = '16px sans-serif';
+    ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(title, canvas.width / 2, 20);
     
@@ -152,12 +162,14 @@ const AliasMethod = () => {
       ctx.translate(15, canvas.height / 2);
       ctx.rotate(-Math.PI / 2);
       ctx.textAlign = 'center';
+      ctx.font = '14px sans-serif';
       ctx.fillText(isAliasTable ? '' : 'Probability', 0, 0);
       ctx.restore();
     }
     
     // X-axis label
     ctx.textAlign = 'center';
+    ctx.font = '14px sans-serif';
     ctx.fillText('Item ID', canvas.width / 2, canvas.height - 10);
     
     // Calculate bar width and spacing
@@ -176,6 +188,8 @@ const AliasMethod = () => {
       // Highlight selected bar
       if (highlightIndex === i) {
         ctx.fillStyle = 'rgba(255, 215, 0, 0.8)'; // Gold for highlight
+      } else if (animationInfo.phase === 'bucket' && animationInfo.bucket === i) {
+        ctx.fillStyle = 'rgba(155, 135, 245, 0.8)'; // Purple for selected bucket
       } else {
         ctx.fillStyle = color;
       }
@@ -186,12 +200,14 @@ const AliasMethod = () => {
       // Draw x-axis labels
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
+      ctx.font = '14px sans-serif';
       ctx.fillText(`${i + 1}`, x + (barWidth - barPadding) / 2, canvas.height - 25);
       
       // Draw alias values for the alias table
       if (isAliasTable) {
         ctx.fillStyle = 'rgba(255, 0, 0, 1)';
         ctx.textAlign = 'center';
+        ctx.font = 'bold 14px sans-serif';
         ctx.fillText(`→ ${aliasTable[i] + 1}`, x + (barWidth - barPadding) / 2, y + barHeight / 2);
       }
       
@@ -199,7 +215,26 @@ const AliasMethod = () => {
       if (!isAliasTable) {
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
+        ctx.font = '14px sans-serif';
         ctx.fillText(data[i].toFixed(2), x + (barWidth - barPadding) / 2, y - 5);
+      }
+      
+      // Draw flip line for probability table during animation
+      if (!isAliasTable && animationInfo.phase === 'flip' && animationInfo.bucket === i) {
+        const coinFlipY = y + barHeight * (1 - (animationInfo.flipResult ? 1 : 0));
+        ctx.strokeStyle = 'rgba(155, 0, 255, 1)'; // Purple for coin flip
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, coinFlipY);
+        ctx.lineTo(x + barWidth - barPadding, coinFlipY);
+        ctx.stroke();
+        
+        // Add a label to explain the coin flip
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.textAlign = 'left';
+        ctx.font = '12px sans-serif';
+        const flipText = animationInfo.flipResult ? "Coin landed here (keep)" : "Coin landed here (alias)";
+        ctx.fillText(flipText, x + barWidth, coinFlipY);
       }
     }
     
@@ -227,6 +262,7 @@ const AliasMethod = () => {
       ctx.fillRect(canvas.width - 120, 40, 15, 15);
       ctx.fillStyle = 'white';
       ctx.textAlign = 'left';
+      ctx.font = '13px sans-serif';
       ctx.fillText('Sampled', canvas.width - 100, 52);
       
       ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
@@ -236,6 +272,40 @@ const AliasMethod = () => {
       ctx.stroke();
       ctx.fillStyle = 'white';
       ctx.fillText('Expected', canvas.width - 100, 72);
+    }
+    
+    // Draw animation explainer text if we're in an animation phase
+    if (animationInfo.phase) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 14px sans-serif';
+      
+      let message = "";
+      if (animationInfo.phase === 'bucket') {
+        message = "Step 1: Random bucket selected";
+      } else if (animationInfo.phase === 'flip') {
+        message = animationInfo.flipResult 
+          ? "Step 2: Coin flip lands in this item's area (keep item)" 
+          : "Step 2: Coin flip lands outside this item's area (use alias)";
+      } else if (animationInfo.phase === 'result') {
+        message = "Step 3: Final outcome selected";
+      }
+      
+      if (message) {
+        // Create a semi-transparent background for the text
+        const textWidth = ctx.measureText(message).width;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(
+          canvas.width/2 - textWidth/2 - 10, 
+          canvas.height - 70, 
+          textWidth + 20, 
+          25
+        );
+        
+        // Draw the text
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillText(message, canvas.width/2, canvas.height - 55);
+      }
     }
   }, [state.probs]);
   
@@ -256,7 +326,15 @@ const AliasMethod = () => {
       state.probTable,
       'rgba(75, 192, 192, 0.5)', // Green
       '2. Probability Table (Prob[j])',
-      1.05
+      1.05,
+      false,
+      [],
+      null,
+      {
+        phase: state.animationPhase === 'flip' ? 'flip' : null,
+        bucket: state.selectedBucket,
+        flipResult: state.flipResult
+      }
     );
     
     // Draw the alias table
@@ -267,7 +345,13 @@ const AliasMethod = () => {
       '3. Alias Table (Alias[j])',
       1.05,
       true,
-      state.aliasTable
+      state.aliasTable,
+      null,
+      {
+        phase: state.animationPhase === 'bucket' ? 'bucket' : null,
+        bucket: state.selectedBucket,
+        flipResult: null
+      }
     );
     
     // Draw the empirical distribution
@@ -279,7 +363,12 @@ const AliasMethod = () => {
       1.05,
       false,
       [],
-      state.highlightedItem
+      state.highlightedItem,
+      {
+        phase: state.animationPhase === 'result' ? 'result' : null,
+        bucket: null,
+        flipResult: null
+      }
     );
   }, [state, drawBarChart]);
   
@@ -312,7 +401,11 @@ const AliasMethod = () => {
       probs: normalizedProbs,
       probTable,
       aliasTable,
-      empiricalFrequencies: new Array(normalizedProbs.length).fill(0)
+      empiricalFrequencies: new Array(normalizedProbs.length).fill(0),
+      highlightedItem: null,
+      animationPhase: null,
+      selectedBucket: null,
+      flipResult: null
     });
   };
   
@@ -330,39 +423,68 @@ const AliasMethod = () => {
     setState({
       ...state,
       empiricalFrequencies: frequencies,
-      highlightedItem: null
+      highlightedItem: null,
+      animationPhase: null,
+      selectedBucket: null,
+      flipResult: null
     });
     
     toast.success(`Generated ${state.sampleSize} samples`);
   };
   
-  // Handle sample one button click
+  // Handle sample one button click with improved animation
   const handleSampleOne = () => {
     if (state.isAnimating) return;
     
-    setState({ ...state, isAnimating: true });
+    setState({ ...state, isAnimating: true, animationPhase: 'bucket' });
     
-    const sample = Math.floor(Math.random() * state.probs.length);
+    // Generate the sample values now so we can animate through the process
+    const bucket = Math.floor(Math.random() * state.probs.length);
     const coinFlip = Math.random();
-    const outcome = coinFlip < state.probTable[sample] ? sample : state.aliasTable[sample];
+    const flipResult = coinFlip < state.probTable[bucket];
+    const outcome = flipResult ? bucket : state.aliasTable[bucket];
     
-    // Highlight the outcome
+    // Step 1: Highlight the random bucket
     setState(prev => ({
       ...prev,
       isAnimating: true,
-      highlightedItem: outcome
+      animationPhase: 'bucket',
+      selectedBucket: bucket,
+      flipResult: null,
+      highlightedItem: null
     }));
     
-    // Reset after animation
+    // Step 2: Show the coin flip after a delay
     setTimeout(() => {
       setState(prev => ({
         ...prev,
-        isAnimating: false,
-        highlightedItem: null
+        animationPhase: 'flip',
+        flipResult: flipResult
       }));
-    }, 1000);
+      
+      // Step 3: Show the final outcome after another delay
+      setTimeout(() => {
+        setState(prev => ({
+          ...prev,
+          animationPhase: 'result',
+          highlightedItem: outcome
+        }));
+        
+        // Finally, reset the animation state but keep the highlighted item
+        setTimeout(() => {
+          setState(prev => ({
+            ...prev,
+            isAnimating: false,
+            animationPhase: null,
+            selectedBucket: null,
+            flipResult: null
+          }));
+        }, 1500);
+        
+      }, 1500);
+    }, 1500);
     
-    toast.success(`Sampled item ${outcome + 1}`);
+    toast.success(`Sampling process for item ${outcome + 1}`);
   };
   
   // Handle reset button click
@@ -377,7 +499,10 @@ const AliasMethod = () => {
       empiricalFrequencies: new Array(normalized.length).fill(0),
       sampleSize: 1000,
       isAnimating: false,
-      highlightedItem: null
+      highlightedItem: null,
+      animationPhase: null,
+      selectedBucket: null,
+      flipResult: null
     });
     
     toast.info("Probabilities reset to default");
@@ -453,6 +578,18 @@ const AliasMethod = () => {
                 ></canvas>
               </div>
             </div>
+            
+            {/* Animation status message */}
+            {state.isAnimating && (
+              <div className="mt-4 text-center p-2 bg-accent/20 rounded-lg border border-accent/30 animate-pulse">
+                <p>{
+                  state.animationPhase === 'bucket' ? 'Step 1: Randomly selecting a bucket...' :
+                  state.animationPhase === 'flip' ? `Step 2: Flipping a coin for bucket ${(state.selectedBucket || 0) + 1}...` :
+                  state.animationPhase === 'result' ? 'Step 3: Determining the final outcome...' :
+                  'Sampling in progress...'
+                }</p>
+              </div>
+            )}
           </div>
           
           {/* Controls panel - takes up 1/3 of the space on large screens */}
@@ -527,6 +664,18 @@ const AliasMethod = () => {
                 <RotateCcw className="h-4 w-4" />
                 Reset Probabilities
               </button>
+            </div>
+            
+            {/* Quick reference */}
+            <div className="mt-6 p-3 glass-panel rounded-lg text-sm">
+              <h3 className="font-medium mb-2">Quick Reference</h3>
+              <ul className="space-y-1 opacity-90">
+                <li>• <span className="inline-block w-3 h-3 bg-[#36a2eb] rounded-full mr-1"></span> Original probabilities</li>
+                <li>• <span className="inline-block w-3 h-3 bg-[#4bc0c0] rounded-full mr-1"></span> Probability table (coin flip threshold)</li>
+                <li>• <span className="inline-block w-3 h-3 text-red-500 mr-1">→</span> Alias table (alternative item)</li>
+                <li>• <span className="inline-block w-3 h-3 bg-[#ff9f40] rounded-full mr-1"></span> Sampled frequency</li>
+                <li>• <span className="inline-block w-3 h-3 bg-[#ff0000] rounded-full mr-1"></span> Expected frequency</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -634,9 +783,57 @@ const AliasMethod = () => {
                   <li>Otherwise, return Alias[j].</li>
                 </ol>
                 
+                <h3 className="text-lg font-medium mt-4">Applications</h3>
+                <p>The Alias Method is widely used in:</p>
+                <ul className="list-disc pl-6 space-y-2 mt-2">
+                  <li><strong>Gaming:</strong> Loot drops, random encounters, and procedural generation.</li>
+                  <li><strong>Simulations:</strong> Monte Carlo methods and physical simulations.</li>
+                  <li><strong>Machine Learning:</strong> For algorithms like Stochastic Gradient Descent.</li>
+                  <li><strong>Statistics:</strong> For efficient sampling from discrete distributions.</li>
+                </ul>
+                
                 <p className="mt-4">
                   The efficiency comes from the fact that we've pre-computed all the necessary values,
                   allowing each sample to be generated with just two random numbers and a single comparison.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="history" className="border-white/10">
+              <AccordionTrigger className="text-xl font-medium">
+                Historical Context & Alternatives
+              </AccordionTrigger>
+              <AccordionContent className="text-base opacity-90 space-y-4 pt-4">
+                <h3 className="text-lg font-medium">Origins</h3>
+                <p>
+                  The Alias Method was invented by A.J. Walker in 1974 and published in his paper "New fast method for generating discrete random numbers with arbitrary frequency distributions." It was later refined by Michael Vose in 1991.
+                </p>
+                
+                <h3 className="text-lg font-medium mt-4">Alternative Methods</h3>
+                <p>Other methods for sampling from discrete distributions include:</p>
+                <ul className="list-disc pl-6 space-y-2 mt-2">
+                  <li>
+                    <strong>Linear Search:</strong> O(n) time complexity. Simple but inefficient for large distributions.
+                  </li>
+                  <li>
+                    <strong>Binary Search:</strong> O(log n) time complexity. Builds a cumulative distribution function and searches through it.
+                  </li>
+                  <li>
+                    <strong>Rejection Sampling:</strong> Variable time complexity. Proposes samples and accepts/rejects based on target distribution.
+                  </li>
+                </ul>
+                
+                <p className="mt-4">
+                  The Alias Method outperforms these alternatives when many samples are needed, as it has:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 mt-2">
+                  <li>O(n) preprocessing time to build the tables</li>
+                  <li>O(1) time per sample after preprocessing</li>
+                  <li>O(n) memory requirement (proportional to the size of the distribution)</li>
+                </ul>
+                
+                <p className="mt-4">
+                  This makes it particularly valuable in applications where speed is critical and the same distribution is sampled repeatedly.
                 </p>
               </AccordionContent>
             </AccordionItem>
