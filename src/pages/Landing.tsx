@@ -1,18 +1,30 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, GraduationCap, User, Code, Lightbulb } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code } from "lucide-react";
 
 const Landing = () => {
+  const visualizations = [
+    {
+      id: "simulated-annealing",
+      title: "Simulated Annealing",
+      description: "Interactive exploration of the Traveling Salesman Problem using simulated annealing optimization.",
+      path: "/simulator",
+      icon: <Compass className="h-6 w-6" />,
+      tags: ["Optimization", "Metaheuristics", "Combinatorial"]
+    },
+    // More visualizations will be added later
+  ];
+
   return (
     <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
       {/* Header */}
       <header className="w-full glass-panel border-b border-white/5">
         <div className="container py-6 px-4 md:px-8">
           <h1 className="text-2xl md:text-3xl font-light tracking-tight">
-            Simulated Annealing
+            Applied Statistical Mathematics
             <span className="text-sm ml-3 opacity-70 font-normal">
-              Algorithm Visualization Project
+              Interactive Visualizations
             </span>
           </h1>
         </div>
@@ -22,23 +34,76 @@ const Landing = () => {
       <section className="container px-4 md:px-8 py-16 md:py-24">
         <div className="max-w-4xl mx-auto space-y-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gradient-primary">
-            Traveling Salesman Problem Solver
+            Explore Mathematics Through Interactive Visualizations
           </h1>
           
           <p className="text-xl opacity-80 max-w-3xl">
-            An interactive visualization of the Simulated Annealing algorithm applied to the classic Traveling Salesman Problem.
+            Discover and understand complex statistical concepts and algorithms through 
+            hands-on, interactive simulations and visualizations.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Link to="/simulator" className="control-btn-primary flex items-center justify-center gap-2">
-              Launch Simulator
+            <a href="#visualizations" className="control-btn-primary flex items-center justify-center gap-2">
+              Explore Visualizations
               <MoveRight className="h-4 w-4" />
-            </Link>
+            </a>
             
             <Link to="/about" className="control-btn flex items-center justify-center gap-2">
               About Project
-              <User className="h-4 w-4" />
+              <Atom className="h-4 w-4" />
             </Link>
+          </div>
+        </div>
+      </section>
+      
+      {/* Visualizations section */}
+      <section id="visualizations" className="container px-4 md:px-8 py-16">
+        <div className="max-w-5xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-semibold">Available Visualizations</h2>
+            <p className="opacity-70 max-w-2xl mx-auto">
+              Select any of the interactive modules below to explore different ASM concepts and algorithms through hands-on simulations.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {visualizations.map((visualization) => (
+              <Link 
+                key={visualization.id}
+                to={visualization.path}
+                className="glass-panel p-6 rounded-xl transition-all hover:border-primary/40 hover:bg-secondary/30 group"
+              >
+                <div className="w-12 h-12 bg-accent/30 rounded-lg flex items-center justify-center mb-4 group-hover:bg-accent/50 transition-colors">
+                  {visualization.icon}
+                </div>
+                
+                <h3 className="text-2xl font-medium mb-2 group-hover:text-primary transition-colors">{visualization.title}</h3>
+                <p className="opacity-70 mb-4">{visualization.description}</p>
+                
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {visualization.tags.map((tag) => (
+                    <span key={tag} className="bg-secondary/50 px-2 py-1 rounded-md text-xs">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                
+                <div className="flex justify-end mt-6">
+                  <span className="text-sm flex items-center gap-1 text-primary group-hover:gap-2 transition-all">
+                    Explore <MoveRight className="h-3 w-3" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+
+            {/* Placeholder for upcoming visualizations */}
+            <div className="glass-panel p-6 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center text-center space-y-3 min-h-[250px]">
+              <ChartLine className="h-8 w-8 opacity-40" />
+              <h3 className="text-xl font-medium opacity-70">More Visualizations Coming Soon</h3>
+              <p className="text-sm opacity-50">
+                Additional ASM concepts and algorithms will be added here
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -53,24 +118,24 @@ const Landing = () => {
               <div className="w-12 h-12 bg-accent/30 rounded-lg flex items-center justify-center">
                 <Code className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-medium">Interactive Canvas</h3>
-              <p className="opacity-70">Add cities to the map and see the algorithm find optimal paths in real-time.</p>
+              <h3 className="text-xl font-medium">Interactive Learning</h3>
+              <p className="opacity-70">Hands-on experience with mathematical concepts through adjustable parameters and real-time visualization.</p>
             </div>
             
             <div className="glass-panel p-6 rounded-xl space-y-4">
               <div className="w-12 h-12 bg-accent/30 rounded-lg flex items-center justify-center">
-                <Lightbulb className="h-6 w-6" />
+                <Compass className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-medium">Algorithmic Insight</h3>
-              <p className="opacity-70">Visualize how simulated annealing converges toward an optimal solution over time.</p>
+              <h3 className="text-xl font-medium">Algorithm Exploration</h3>
+              <p className="opacity-70">Visualize how complex algorithms work with step-by-step processes and intuitive interfaces.</p>
             </div>
             
             <div className="glass-panel p-6 rounded-xl space-y-4">
               <div className="w-12 h-12 bg-accent/30 rounded-lg flex items-center justify-center">
-                <GraduationCap className="h-6 w-6" />
+                <ChartLine className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-medium">Educational Tool</h3>
-              <p className="opacity-70">Perfect for understanding heuristic algorithms and optimization problems.</p>
+              <h3 className="text-xl font-medium">Data Visualization</h3>
+              <p className="opacity-70">See mathematical concepts come to life with dynamic charts and visual representations of complex data.</p>
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -183,15 +184,18 @@ const Simulator = () => {
       {/* Header */}
       <header className="w-full glass-panel border-b border-white/5 mb-8">
         <div className="container py-6 px-4 md:px-8 flex justify-between items-center">
-          <h1 className="text-2xl md:text-3xl font-light tracking-tight">
-            Simulated Annealing
-            <span className="text-sm ml-3 opacity-70 font-normal">
-              Traveling Salesman Problem Solver
-            </span>
-          </h1>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-light tracking-tight">
+              Simulated Annealing
+              <span className="text-sm ml-3 opacity-70 font-normal">
+                Visualization
+              </span>
+            </h1>
+            <p className="text-sm opacity-70">Traveling Salesman Problem Solver</p>
+          </div>
           <Link to="/" className="control-btn flex items-center gap-2 text-sm">
             <Home className="h-4 w-4" />
-            Home
+            Back to Visualizations
           </Link>
         </div>
       </header>
@@ -226,8 +230,7 @@ const Simulator = () => {
       <footer className="w-full glass-panel border-t border-white/5 mt-auto">
         <div className="container py-4 px-4 md:px-8 text-center">
           <p className="text-sm opacity-70">
-            <span className="inline-block">Created by Divyanshu Lila</span>
-            <span className="inline-block text-xs opacity-50 ml-2">2022A3PS1056G</span>
+            <span className="inline-block">Applied Statistical Mathematics • Interactive Visualizations</span>
             <span className="mx-2">•</span>
             <span className="inline-block">BITS Pilani, K.K. Birla Goa Campus</span>
           </p>
