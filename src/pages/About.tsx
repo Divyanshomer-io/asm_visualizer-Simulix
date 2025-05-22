@@ -26,13 +26,27 @@ const About = () => {
           <section className="glass-panel rounded-xl p-8 space-y-6">
             <h2 className="text-2xl font-medium">Project Overview</h2>
             <p className="opacity-80 leading-relaxed">
-              This project presents an interactive visualization of the Simulated Annealing algorithm
-              applied to the Traveling Salesman Problem. It demonstrates how a probabilistic technique
-              can be used to find an approximate global optimum for a discrete optimization problem.
+              This project presents interactive visualizations of various Applied Statistical Mathematics 
+              concepts and algorithms. Each visualization is designed to help students and educators 
+              understand complex mathematical principles through hands-on exploration.
             </p>
             <p className="opacity-80 leading-relaxed">
-              The simulator allows users to place cities on a map, customize algorithm parameters,
-              and observe in real-time how the algorithm evolves to find increasingly better solutions.
+              Currently, the project features visualizations for:
+            </p>
+            <ul className="list-disc pl-6 opacity-80 space-y-2">
+              <li>
+                <strong>Simulated Annealing:</strong> An interactive demonstration of how this 
+                probabilistic technique can be used to find approximate global optimums for discrete 
+                optimization problems like the Traveling Salesman Problem.
+              </li>
+              <li>
+                <strong>Alias Method:</strong> A visualization of how to efficiently sample from 
+                discrete probability distributions with constant-time complexity.
+              </li>
+            </ul>
+            <p className="opacity-80 leading-relaxed">
+              Each simulator allows users to customize parameters and observe in real-time how 
+              these algorithms work, making complex concepts more accessible.
             </p>
           </section>
           
@@ -90,8 +104,8 @@ const About = () => {
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Link>
-            <Link to="/simulator" className="control-btn-primary flex items-center gap-2">
-              Launch Simulator
+            <Link to="/" className="control-btn-primary flex items-center gap-2">
+              Available Visualizations
             </Link>
           </div>
         </div>
