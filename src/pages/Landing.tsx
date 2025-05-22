@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, DiceIcon } from "lucide-react";
 
 const Landing = () => {
   const visualizations = [
@@ -12,6 +12,14 @@ const Landing = () => {
       path: "/simulator",
       icon: <Compass className="h-6 w-6" />,
       tags: ["Optimization", "Metaheuristics", "Combinatorial"]
+    },
+    {
+      id: "alias-method",
+      title: "Alias Method",
+      description: "Visualize how to efficiently sample from discrete probability distributions with the Alias Method.",
+      path: "/alias-method",
+      icon: <DiceIcon className="h-6 w-6" />,
+      tags: ["Probability", "Sampling", "Algorithm"]
     },
     // More visualizations will be added later
   ];
