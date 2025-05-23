@@ -189,7 +189,7 @@ export function runToySimulation(params: ToySimulationParams): SimulatedAnnealin
     binaryRepresentation: intToBinaryArray(currentState, r)
   });
   
-  // Main simulation loop - FIXED: Use bounded for-loop instead of while
+  // FIXED: Use bounded for-loop instead of while - this ensures exact iteration count
   for (let iteration = 1; iteration <= maxIterations; iteration++) {
     const temperature = calculateTemperature(iteration, initialTemperature, coolingRate, maxIterations, coolingSchedule);
     
@@ -197,20 +197,20 @@ export function runToySimulation(params: ToySimulationParams): SimulatedAnnealin
     const neighborState = generateNeighbor(currentState, r, neighborType);
     const neighborValue = evaluatePolynomial(neighborState, coefficients);
     
-    // Calculate acceptance probability - FIXED: Correct delta calculation
+    // FIXED: Calculate acceptance probability with correct delta
     const acceptanceProbability = calculateAcceptanceProbability(currentValue, neighborValue, temperature);
     
     // Decide whether to accept the neighbor
     const shouldAccept = Math.random() < acceptanceProbability;
     
     if (shouldAccept) {
-      currentState = neighborState;
-      currentValue = neighborValue;
-      
-      // Count accepted worse solutions
+      // Count accepted worse solutions BEFORE updating current values
       if (neighborValue < currentValue) {
         acceptedWorse++;
       }
+      
+      currentState = neighborState;
+      currentValue = neighborValue;
     }
     
     // Update best solution
@@ -229,6 +229,11 @@ export function runToySimulation(params: ToySimulationParams): SimulatedAnnealin
       acceptanceProbability,
       binaryRepresentation: intToBinaryArray(currentState, r)
     });
+    
+    // CRITICAL: Stop exactly at maxIterations
+    if (iteration >= maxIterations) {
+      break;
+    }
   }
   
   return {
@@ -236,7 +241,7 @@ export function runToySimulation(params: ToySimulationParams): SimulatedAnnealin
     bestState,
     bestValue,
     acceptedWorse,
-    currentIteration: maxIterations,
+    currentIteration: Math.min(maxIterations, history.length - 1),
     searchSpace
   };
 }
