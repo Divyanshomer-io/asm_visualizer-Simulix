@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings } from "lucide-react";
 
 const Landing = () => {
   const visualizations = [
@@ -12,6 +12,14 @@ const Landing = () => {
       path: "/simulator",
       icon: <Compass className="h-6 w-6" />,
       tags: ["Optimization", "Metaheuristics", "Combinatorial"]
+    },
+    {
+      id: "simulated-annealing-toy",
+      title: "Simulated Annealing: Toy Example",
+      description: "Learn simulated annealing concepts through polynomial optimization with binary-encoded solutions.",
+      path: "/simulated-annealing-toy",
+      icon: <Settings className="h-6 w-6" />,
+      tags: ["Optimization", "Educational", "Binary Encoding"]
     },
     {
       id: "alias-method",
@@ -74,7 +82,7 @@ const Landing = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {visualizations.map((visualization) => (
               <Link 
                 key={visualization.id}
@@ -85,8 +93,8 @@ const Landing = () => {
                   {visualization.icon}
                 </div>
                 
-                <h3 className="text-2xl font-medium mb-2 group-hover:text-primary transition-colors">{visualization.title}</h3>
-                <p className="opacity-70 mb-4">{visualization.description}</p>
+                <h3 className="text-xl font-medium mb-2 group-hover:text-primary transition-colors">{visualization.title}</h3>
+                <p className="opacity-70 mb-4 text-sm">{visualization.description}</p>
                 
                 <div className="flex flex-wrap gap-2 mt-4">
                   {visualization.tags.map((tag) => (
