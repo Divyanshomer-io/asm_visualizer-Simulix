@@ -35,9 +35,12 @@ const About = () => {
             </p>
             <ul className="list-disc pl-6 opacity-80 space-y-2">
               <li>
-                <strong>Simulated Annealing:</strong> An interactive demonstration of how this 
+                <strong>Simulated Annealing- Traveling salesman problem:</strong> An interactive demonstration of how this 
                 probabilistic technique can be used to find approximate global optimums for discrete 
                 optimization problems like the Traveling Salesman Problem.
+              </li>
+              <li>
+                <strong>Simulated Annealing- Toy example:</strong> A simple, intuitive visualization of simulated annealing applied to a polynomial optimization problem, helping users grasp the fundamental mechanics of the algorithm.
               </li>
               <li>
                 <strong>Alias Method:</strong> A visualization of how to efficiently sample from 
