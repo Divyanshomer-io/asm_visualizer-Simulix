@@ -39,6 +39,7 @@ const SimulatedAnnealingToy = () => {
   
   // Animation control
   const [isRunning, setIsRunning] = useState(false);
+  const [currentIteration, setCurrentIteration] = useState(0);
   const animationRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(0);
   
@@ -51,6 +52,7 @@ const SimulatedAnnealingToy = () => {
   const runSimulation = useCallback(() => {
     const result = runToySimulation(params);
     setState(result);
+    setCurrentIteration(result.currentIteration);
   }, [params]);
   
   // Handle parameter changes
@@ -89,6 +91,7 @@ const SimulatedAnnealingToy = () => {
       coefficients: [1, -2, 3, -1, 2, -1]
     });
     setIsRunning(false);
+    setCurrentIteration(0);
     toast.success("Parameters reset to defaults");
   }, []);
   
@@ -97,7 +100,7 @@ const SimulatedAnnealingToy = () => {
     setIsRunning(prev => !prev);
   }, []);
   
-  // FIXED: Animation loop that respects iteration limits
+  // FIXED: Animation loop that respects iteration limits and updates progress
   useEffect(() => {
     if (!isRunning) {
       if (animationRef.current) {
@@ -115,6 +118,7 @@ const SimulatedAnnealingToy = () => {
         lastFrameTimeRef.current = timestamp;
         runSimulation();
         iterationCount++;
+        setCurrentIteration(iterationCount);
         
         // Stop animation when reaching max iterations
         if (iterationCount >= params.maxIterations) {
@@ -141,6 +145,7 @@ const SimulatedAnnealingToy = () => {
   // Initial simulation run
   useEffect(() => {
     runSimulation();
+    setCurrentIteration(0);
   }, [params]);
   
   return (
@@ -191,7 +196,7 @@ const SimulatedAnnealingToy = () => {
                     <div className="text-xs opacity-70">Accepted Worse</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-mono">{state.currentIteration} / {params.maxIterations}</div>
+                    <div className="text-2xl font-mono">{currentIteration} / {params.maxIterations}</div>
                     <div className="text-xs opacity-70">Progress</div>
                   </div>
                 </CardContent>
@@ -481,8 +486,8 @@ const SimulatedAnnealingToy = () => {
             </div>
           </div>
           
-          {/* Educational Content */}
-          <div className="max-w-4xl mx-auto">
+          {/* Educational Content with added spacing */}
+          <div className="max-w-4xl mx-auto mt-12">
             <Accordion type="single" collapsible className="glass-panel rounded-xl border-white/10">
               <AccordionItem value="overview">
                 <AccordionTrigger className="px-6 text-lg font-medium">
@@ -490,27 +495,116 @@ const SimulatedAnnealingToy = () => {
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-6 space-y-4">
                   <p className="opacity-80 leading-relaxed">
-                    This toy example demonstrates simulated annealing on polynomial optimization problems. 
-                    The algorithm searches for the maximum value of a polynomial function by exploring 
-                    different binary-encoded solutions and gradually focusing on promising regions.
+                    Imagine you're searching for the tallest hill in a foggy landscape. Simulated annealing is your smart hiker—it explores carefully, sometimes going downhill to avoid missing the highest peak. Let's see how this works in our example!
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-lg">What Are We Solving?</h4>
                     <div className="space-y-2">
-                      <h4 className="font-medium">Key Concepts:</h4>
-                      <ul className="space-y-1 text-sm opacity-80">
-                        <li>• Binary representation of solutions</li>
-                        <li>• Temperature-controlled exploration</li>
-                        <li>• Acceptance probability for worse moves</li>
-                        <li>• Different neighborhood structures</li>
+                      <p className="opacity-80"><strong>Your Goal:</strong></p>
+                      <p className="opacity-80">Find the best 5-bit binary number (like 10101) that gives the highest score for this math formula:</p>
+                      <p className="font-mono bg-secondary/30 p-2 rounded">f(n) = 1 - 2n + 3n² - n³ + 2n⁴ - n⁵</p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="opacity-80"><strong>Example:</strong></p>
+                      <div className="bg-secondary/20 p-3 rounded space-y-1">
+                        <p className="font-mono">n = 3 (binary 00011):</p>
+                        <p className="font-mono">Score = 1 - 6 + 27 - 27 + 162 - 243 = -143</p>
+                        <p className="font-mono">n = 1 (binary 00001):</p>
+                        <p className="font-mono">Score = 1 - 2 + 3 - 1 + 2 - 1 = 2</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="opacity-80"><strong>Why This Example?</strong></p>
+                      <ul className="space-y-1 text-sm opacity-80 ml-4">
+                        <li>• Simple enough to see all 32 possible solutions (with 5 bits).</li>
+                        <li>• Shows how the algorithm balances exploring new areas and exploiting good finds.</li>
                       </ul>
                     </div>
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Applications:</h4>
+                  </div>
+                  
+                  <div className="space-y-4 mt-6">
+                    <h4 className="font-medium text-lg">How It Works</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <div>
+                          <p className="font-medium">Step 1: Start Random</p>
+                          <p className="text-sm opacity-80">The algorithm begins with a random guess, like 01011 (decimal 11).</p>
+                        </div>
+                        <div>
+                          <p className="font-medium">Step 2: Flip a Bit</p>
+                          <p className="text-sm opacity-80">It tweaks the solution slightly—flipping one bit (e.g., 01011 → 01010).</p>
+                        </div>
+                        <div>
+                          <p className="font-medium">Step 3: Evaluate</p>
+                          <p className="text-sm opacity-80">It calculates the score for both the old and new solutions.</p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="font-medium">Step 4: Decide</p>
+                          <ul className="text-sm opacity-80 ml-4">
+                            <li>• If the new score is better, it keeps the new solution.</li>
+                            <li>• If it's worse, it might still accept it (based on temperature).</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <p className="font-medium">Step 5: Repeat</p>
+                          <p className="text-sm opacity-80">This process repeats until the max iterations are reached.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4 mt-6">
+                    <h4 className="font-medium text-lg">Key Concepts in Action</h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left p-2">Concept</th>
+                            <th className="text-left p-2">What It Means</th>
+                            <th className="text-left p-2">Visualization Connection</th>
+                          </tr>
+                        </thead>
+                        <tbody className="opacity-80">
+                          <tr className="border-b">
+                            <td className="p-2 font-medium">Exploration</td>
+                            <td className="p-2">Trying new solutions, even if they're worse early on.</td>
+                            <td className="p-2">Red spikes in Acceptance Probability</td>
+                          </tr>
+                          <tr className="border-b">
+                            <td className="p-2 font-medium">Exploitation</td>
+                            <td className="p-2">Focusing on the best-known solutions as the algorithm "cools down."</td>
+                            <td className="p-2">Stable bits in Binary State Heatmap</td>
+                          </tr>
+                          <tr>
+                            <td className="p-2 font-medium">Temperature</td>
+                            <td className="p-2">Starts high (adventurous) and cools over time (cautious).</td>
+                            <td className="p-2">Sloping line in Acceptance Probability</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4 mt-6">
+                    <h4 className="font-medium text-lg">Why This Matters for You</h4>
+                    <ul className="space-y-2 opacity-80">
+                      <li><strong>See All Possibilities:</strong> With only 32 solutions, you can literally watch the algorithm explore every option.</li>
+                      <li><strong>Learn by Doing:</strong> Adjust parameters and instantly see how the graphs change.</li>
+                      <li><strong>Build Intuition:</strong> Understand how simulated annealing works before applying it to complex problems.</li>
+                    </ul>
+                    
+                    <div className="bg-accent/10 p-4 rounded mt-4">
+                      <h5 className="font-medium mb-2">Try This!</h5>
                       <ul className="space-y-1 text-sm opacity-80">
-                        <li>• Combinatorial optimization</li>
-                        <li>• Neural network training</li>
-                        <li>• Scheduling problems</li>
-                        <li>• Circuit design</li>
+                        <li>1. Click Reset to start fresh.</li>
+                        <li>2. Watch how the algorithm flips bits in the Binary State Heatmap.</li>
+                        <li>3. Notice when the Acceptance Probability spikes (exploration) vs. drops (exploitation).</li>
+                        <li><strong>Tip:</strong> Hover over graphs for instant tooltips! 🎯</li>
                       </ul>
                     </div>
                   </div>
@@ -522,22 +616,63 @@ const SimulatedAnnealingToy = () => {
                   Parameter Guide
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <p className="opacity-80">Welcome! Here's a quick guide to the controls you see on this page. Adjusting these sliders and options will change how Simulated Annealing explores the search space.</p>
+                  
+                  <div className="space-y-6">
                     <div>
-                      <h4 className="font-medium mb-2">Temperature Parameters:</h4>
-                      <ul className="space-y-2 text-sm opacity-80">
-                        <li><strong>Initial Temperature:</strong> Controls initial exploration. Higher values allow more random moves.</li>
-                        <li><strong>Cooling Rate:</strong> How quickly temperature decreases. Slower cooling allows better exploration.</li>
-                        <li><strong>Cooling Schedule:</strong> Pattern of temperature reduction over time.</li>
-                      </ul>
+                      <h4 className="font-medium text-lg mb-3">Algorithm Parameters</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="font-medium">Bits (r):</p>
+                          <p className="text-sm opacity-80">Sets the problem size (number of binary digits)</p>
+                          <p className="text-sm opacity-80">More bits = a bigger search space (for example, 5 bits means 32 possible solutions).</p>
+                          <p className="text-sm text-accent"><strong>Beginner tip:</strong> Start with 5-8 bits to see clear patterns and fast results.</p>
+                        </div>
+                        
+                        <div>
+                          <p className="font-medium">Max Iterations:</p>
+                          <p className="text-sm opacity-80">How many steps the algorithm takes</p>
+                          <p className="text-sm opacity-80">More iterations = more chances to find the best solution.</p>
+                          <p className="text-sm text-accent"><strong>Beginner tip:</strong> For small problems, 50-200 iterations is usually enough.</p>
+                        </div>
+                        
+                        <div>
+                          <p className="font-medium">Initial Temp:</p>
+                          <p className="text-sm opacity-80">Controls how much the algorithm explores at the start</p>
+                          <p className="text-sm opacity-80">Higher temperature = more risk-taking early on (the algorithm will try more "bad" moves).</p>
+                          <p className="text-sm text-accent"><strong>Beginner tip:</strong> Try 1.0 for a careful search, or 10.0 for a bold, adventurous search.</p>
+                        </div>
+                        
+                        <div>
+                          <p className="font-medium">Cooling Rate:</p>
+                          <p className="text-sm opacity-80">How quickly the algorithm becomes more selective</p>
+                          <p className="text-sm opacity-80">0.99 = slow cooling (keeps exploring longer), 0.9 = fast cooling (settles down quickly).</p>
+                          <p className="text-sm text-accent"><strong>Beginner tip:</strong> A slower cooling rate (0.95–0.99) usually finds better solutions.</p>
+                        </div>
+                      </div>
                     </div>
+                    
                     <div>
-                      <h4 className="font-medium mb-2">Search Parameters:</h4>
-                      <ul className="space-y-2 text-sm opacity-80">
-                        <li><strong>Bits (r):</strong> Solution representation size. More bits = larger search space.</li>
-                        <li><strong>Neighbor Type:</strong> How new solutions are generated from current ones.</li>
-                        <li><strong>Max Iterations:</strong> How long the algorithm runs.</li>
-                      </ul>
+                      <h4 className="font-medium text-lg mb-3">Algorithm Options</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="font-medium">Neighbor Type:</p>
+                          <ul className="text-sm opacity-80 ml-4 space-y-1">
+                            <li><strong>Single Bit Flip:</strong> Change just one bit at a time (small steps).</li>
+                            <li><strong>Two Bit Flip:</strong> Change two bits at once (bigger jumps).</li>
+                            <li><strong>Random Walk:</strong> Jump to a completely random solution (wild exploration).</li>
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <p className="font-medium">Cooling Schedule:</p>
+                          <ul className="text-sm opacity-80 ml-4 space-y-1">
+                            <li><strong>Geometric:</strong> Temperature is multiplied by the cooling rate each step (default).</li>
+                            <li><strong>Linear:</strong> Temperature drops by the same amount each time.</li>
+                            <li><strong>Logarithmic:</strong> Temperature drops slowly at first, then faster.</li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </AccordionContent>
@@ -547,33 +682,82 @@ const SimulatedAnnealingToy = () => {
                 <AccordionTrigger className="px-6 text-lg font-medium">
                   Understanding the Visualizations
                 </AccordionTrigger>
-                <AccordionContent className="px-6 pb-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AccordionContent className="px-6 pb-6 space-y-6">
+                  <p className="opacity-80">Here's what each graph and statistic means as you run the simulation:</p>
+                  
+                  <div className="space-y-6">
                     <div>
-                      <h4 className="font-medium mb-2">Function Value Evolution:</h4>
-                      <p className="text-sm opacity-80">
-                        Shows how the solution quality changes over time. The blue line tracks 
-                        current values while the green dashed line shows the best found so far.
-                      </p>
-                      
-                      <h4 className="font-medium mb-2 mt-4">Binary State Representation:</h4>
-                      <p className="text-sm opacity-80">
-                        Heatmap showing how each bit changes over iterations. Dark regions 
-                        represent 0 bits, bright regions represent 1 bits.
-                      </p>
+                      <h4 className="font-medium text-lg">Function Value Evolution (Top Left)</h4>
+                      <p className="text-sm opacity-80 mb-2"><strong>What you see:</strong> A line graph showing how good the current solution is at each step.</p>
+                      <div className="space-y-1 text-sm opacity-80">
+                        <p><strong>How to read it:</strong></p>
+                        <ul className="ml-4 space-y-1">
+                          <li>• Big jumps = the algorithm found a much better solution.</li>
+                          <li>• Flat line = it's sticking with the current solution.</li>
+                        </ul>
+                        <p><strong>In your run:</strong> You might see a quick jump from a low value (like -330,000) to 0, then the line stays flat—meaning it found a good solution fast.</p>
+                      </div>
                     </div>
+                    
                     <div>
-                      <h4 className="font-medium mb-2">Acceptance Probability:</h4>
-                      <p className="text-sm opacity-80">
-                        Shows the probability of accepting worse solutions. High early 
-                        (exploration phase), low later (exploitation phase).
-                      </p>
-                      
-                      <h4 className="font-medium mb-2 mt-4">State Space Exploration:</h4>
-                      <p className="text-sm opacity-80">
-                        Scatter plot of visited solutions colored by iteration. Shows how 
-                        the search focuses over time and explores the solution landscape.
-                      </p>
+                      <h4 className="font-medium text-lg">Binary State Representation (Top Right)</h4>
+                      <p className="text-sm opacity-80 mb-2"><strong>What you see:</strong> A heatmap showing which bits are ON (blue) or OFF (empty) at each step.</p>
+                      <div className="space-y-1 text-sm opacity-80">
+                        <p><strong>How to read it:</strong></p>
+                        <ul className="ml-4 space-y-1">
+                          <li>• Each row is one iteration (time moves down).</li>
+                          <li>• Each column is a bit (from left to right).</li>
+                          <li>• If a column stays blue, that bit is important for a good solution!</li>
+                        </ul>
+                        <p><strong>In your run:</strong> The rightmost bit often stays ON, showing it's crucial for the best answer.</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-lg">Acceptance Probability (Bottom Left)</h4>
+                      <p className="text-sm opacity-80 mb-2"><strong>What you see:</strong> Red spikes showing how likely the algorithm is to accept a "worse" move at each step.</p>
+                      <div className="space-y-1 text-sm opacity-80">
+                        <p><strong>How to read it:</strong></p>
+                        <ul className="ml-4 space-y-1">
+                          <li>• High spikes = the algorithm is still exploring (taking risks).</li>
+                          <li>• Near zero = it's only accepting better moves (being careful).</li>
+                        </ul>
+                        <p><strong>In your run:</strong> You'll see more spikes early on, then the line drops as the algorithm settles down.</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-lg">State Space Exploration (Bottom Right)</h4>
+                      <p className="text-sm opacity-80 mb-2"><strong>What you see:</strong> A scatter plot of all the solutions the algorithm has tried.</p>
+                      <div className="space-y-1 text-sm opacity-80">
+                        <p><strong>How to read it:</strong></p>
+                        <ul className="ml-4 space-y-1">
+                          <li>• X-axis: Solution as a decimal number (0–31 for 5 bits).</li>
+                          <li>• Y-axis: How good that solution is.</li>
+                          <li>• Blue dots = early tries, gray dots = later tries.</li>
+                          <li>• Dots spread out = wide exploration; dots clustered = focusing on good areas.</li>
+                        </ul>
+                        <p><strong>In your run:</strong> The algorithm explores widely at first, then focuses on the best region.</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-lg">Real-Time Statistics (Bottom Bar)</h4>
+                      <ul className="space-y-1 text-sm opacity-80 ml-4">
+                        <li><strong>Best Value:</strong> The highest score found so far.</li>
+                        <li><strong>Best State:</strong> The binary solution that achieved the best value (for example, 00001).</li>
+                        <li><strong>Accepted Worse:</strong> How many times the algorithm took a risk and accepted a worse solution.</li>
+                        <li><strong>Progress:</strong> How many steps have been completed out of the total (e.g., 100/100).</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-lg">How to Read the Results Together</h4>
+                      <ul className="space-y-1 text-sm opacity-80 ml-4">
+                        <li><strong>Quick convergence:</strong> If you see a sharp jump in the top-left graph, the algorithm found a great solution fast.</li>
+                        <li><strong>Moderate exploration:</strong> If the "Accepted Worse" count is more than zero, the algorithm explored before settling.</li>
+                        <li><strong>Final stabilization:</strong> The graphs flatten out, and the best solution stays the same—congratulations, you've optimized!</li>
+                      </ul>
                     </div>
                   </div>
                 </AccordionContent>
