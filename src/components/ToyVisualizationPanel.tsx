@@ -20,7 +20,8 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
     bestValue: entry.bestValue
   }));
   
-  const acceptanceProbData = state.history.map(entry => ({
+  // FIXED: Proper acceptance probability calculation from actual history
+  const acceptanceProbData = state.history.slice(1).map(entry => ({
     iteration: entry.iteration,
     probability: entry.acceptanceProbability
   }));
@@ -31,8 +32,8 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
     iteration: entry.iteration
   }));
   
-  // Binary representation heatmap data
-  const binaryHeatmapData = state.history.length > 0 ? 
+  // FIXED: Binary representation heatmap data - transposed for proper visualization
+  const binaryHeatmapData = state.history.length > 0 && params.r > 0 ? 
     Array.from({ length: params.r }, (_, bitIndex) => ({
       bitIndex,
       data: state.history.map((entry, iterIndex) => ({
@@ -70,7 +71,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                 color: "hsl(var(--accent))",
               },
             }}
-            className="h-[200px] w-full"
+            className="h-[250px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={functionValueData}>
@@ -78,11 +79,13 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                 <XAxis 
                   dataKey="iteration" 
                   stroke="hsl(var(--muted-foreground))"
-                  fontSize={11}
+                  fontSize={12}
+                  fontFamily="Inter, system-ui, sans-serif"
                 />
                 <YAxis 
                   stroke="hsl(var(--muted-foreground))"
-                  fontSize={11}
+                  fontSize={12}
+                  fontFamily="Inter, system-ui, sans-serif"
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line 
@@ -106,7 +109,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
         </CardContent>
       </Card>
       
-      {/* Binary State Representation */}
+      {/* FIXED: Binary State Representation */}
       <Card className="glass-panel border-white/10">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -122,7 +125,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[200px] w-full">
+          <div className="h-[250px] w-full">
             {binaryHeatmapData.length > 0 ? (
               <div className="relative h-full w-full bg-secondary/20 rounded border border-white/10">
                 <svg viewBox={`0 0 ${Math.max(state.history.length, 1)} ${params.r}`} className="w-full h-full">
@@ -140,16 +143,16 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                     ))
                   )}
                 </svg>
-                {/* Axes labels */}
-                <div className="absolute bottom-0 left-0 text-xs opacity-70 transform -translate-y-1">
+                {/* Axes labels with improved font */}
+                <div className="absolute bottom-0 left-0 text-xs opacity-70 transform -translate-y-1 font-mono">
                   Iteration →
                 </div>
-                <div className="absolute top-0 left-0 text-xs opacity-70 transform -rotate-90 origin-left translate-y-4">
+                <div className="absolute top-0 left-0 text-xs opacity-70 transform -rotate-90 origin-left translate-y-4 font-mono">
                   Bit Index →
                 </div>
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground">
+              <div className="h-full flex items-center justify-center text-muted-foreground font-mono">
                 No data to display
               </div>
             )}
@@ -157,7 +160,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
         </CardContent>
       </Card>
       
-      {/* Acceptance Probability */}
+      {/* FIXED: Acceptance Probability */}
       <Card className="glass-panel border-white/10">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -180,7 +183,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                 color: "hsl(var(--destructive))",
               },
             }}
-            className="h-[200px] w-full"
+            className="h-[250px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={acceptanceProbData}>
@@ -188,12 +191,14 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                 <XAxis 
                   dataKey="iteration" 
                   stroke="hsl(var(--muted-foreground))"
-                  fontSize={11}
+                  fontSize={12}
+                  fontFamily="Inter, system-ui, sans-serif"
                 />
                 <YAxis 
                   domain={[0, 1]}
                   stroke="hsl(var(--muted-foreground))"
-                  fontSize={11}
+                  fontSize={12}
+                  fontFamily="Inter, system-ui, sans-serif"
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line 
@@ -236,7 +241,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                 color: "hsl(var(--muted-foreground))",
               },
             }}
-            className="h-[200px] w-full"
+            className="h-[250px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart>
@@ -246,14 +251,16 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                   dataKey="state"
                   name="State"
                   stroke="hsl(var(--muted-foreground))"
-                  fontSize={11}
+                  fontSize={12}
+                  fontFamily="Inter, system-ui, sans-serif"
                 />
                 <YAxis 
                   type="number"
                   dataKey="value"
                   name="Function Value"
                   stroke="hsl(var(--muted-foreground))"
-                  fontSize={11}
+                  fontSize={12}
+                  fontFamily="Inter, system-ui, sans-serif"
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 

@@ -19,13 +19,13 @@ import {
 } from "@/utils/simulatedAnnealingToy";
 
 const SimulatedAnnealingToy = () => {
-  // Simulation state and parameters
+  // Simulation state and parameters with FIXED defaults
   const [state, setState] = useState<SimulatedAnnealingToyState>(getInitialToyState());
   const [params, setParams] = useState<ToySimulationParams>({
     r: 5,
     maxIterations: 100,
-    initialTemperature: 1.0,
-    coolingRate: 0.95,
+    initialTemperature: 5.0, // FIXED: Was 1.0
+    coolingRate: 0.99, // FIXED: Was 0.95
     neighborType: 'Single Bit Flip',
     coolingSchedule: 'Geometric',
     coefficients: [1, -2, 3, -1, 2, -1]
@@ -71,8 +71,8 @@ const SimulatedAnnealingToy = () => {
     setParams({
       r: 5,
       maxIterations: 100,
-      initialTemperature: 1.0,
-      coolingRate: 0.95,
+      initialTemperature: 5.0, // FIXED: Reset to correct default
+      coolingRate: 0.99, // FIXED: Reset to correct default
       neighborType: 'Single Bit Flip',
       coolingSchedule: 'Geometric',
       coefficients: [1, -2, 3, -1, 2, -1]
@@ -145,303 +145,310 @@ const SimulatedAnnealingToy = () => {
         
         {/* Main content */}
         <main className="container px-4 md:px-8 pb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Visualization Panel - 3 columns */}
-            <div className="lg:col-span-3 space-y-6">
-              <ToyVisualizationPanel state={state} params={params} />
-            </div>
+          {/* FIXED LAYOUT: Visualization Panel - Full Width */}
+          <div className="mb-8">
+            <ToyVisualizationPanel state={state} params={params} />
+          </div>
+          
+          {/* FIXED LAYOUT: Controls and Statistics - Horizontal Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Animation Controls */}
+            <Card className="glass-panel border-white/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 opacity-70" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Control the simulation animation and reset parameters</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  Controls
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={toggleAnimation}
+                    className={isRunning ? "control-btn-secondary" : "control-btn-primary"}
+                    size="sm"
+                  >
+                    {isRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    {isRunning ? "Pause" : "Run"}
+                  </Button>
+                  <Button onClick={handleReset} variant="outline" size="sm">
+                    <RotateCcw className="h-4 w-4" />
+                    Reset
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
             
-            {/* Controls Panel - 1 column */}
-            <div className="space-y-6">
-              {/* Animation Controls */}
-              <Card className="glass-panel border-white/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+            {/* Polynomial Configuration */}
+            <Card className="glass-panel border-white/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 opacity-70" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Configure the polynomial function to optimize</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  Polynomial Function
+                </CardTitle>
+                <CardDescription>
+                  f(n) = Σ aᵢ × nᵢ
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {/* Polynomial Degree */}
+                <div className="space-y-2">
+                  <Label className="text-xs">Degree: {params.coefficients.length - 1}</Label>
+                  <Slider
+                    value={[params.coefficients.length - 1]}
+                    onValueChange={([value]) => handleDegreeChange(value)}
+                    min={0}
+                    max={8}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                
+                {/* Coefficient Sliders - Compact */}
+                <div className="grid grid-cols-2 gap-2">
+                  {params.coefficients.map((coef, index) => (
+                    <div key={index} className="space-y-1">
+                      <Label className="text-xs">a{index}: {coef}</Label>
+                      <Slider
+                        value={[coef]}
+                        onValueChange={([value]) => handleCoefficientChange(index, value)}
+                        min={-5}
+                        max={5}
+                        step={1}
+                        className="w-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Statistics */}
+            <Card className="glass-panel border-white/10">
+              <CardHeader>
+                <CardTitle>Statistics</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Best Value:</span>
+                  <span className="font-mono">{state.bestValue.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Best State:</span>
+                  <span className="font-mono">{state.bestState}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Accepted Worse:</span>
+                  <span className="font-mono">{state.acceptedWorse}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Current Iteration:</span>
+                  <span className="font-mono">{state.currentIteration}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Algorithm Parameters - Full Width */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <Card className="glass-panel border-white/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 opacity-70" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Adjust the core parameters of the simulated annealing algorithm</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  Algorithm Parameters
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Bits (r) */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label>Bits (r): {params.r}</Label>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Info className="h-4 w-4 opacity-70" />
+                        <Info className="h-3 w-3 opacity-50" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Control the simulation animation and reset parameters</p>
+                        <p>Number of bits in the solution representation. Higher values increase the search space exponentially.</p>
                       </TooltipContent>
                     </Tooltip>
-                    Controls
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={toggleAnimation}
-                      className={isRunning ? "control-btn-secondary" : "control-btn-primary"}
-                      size="sm"
-                    >
-                      {isRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                      {isRunning ? "Pause" : "Run"}
-                    </Button>
-                    <Button onClick={handleReset} variant="outline" size="sm">
-                      <RotateCcw className="h-4 w-4" />
-                      Reset
-                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-              
-              {/* Algorithm Parameters */}
-              <Card className="glass-panel border-white/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <Slider
+                    value={[params.r]}
+                    onValueChange={([value]) => handleParamChange('r', value)}
+                    min={1}
+                    max={10}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                
+                {/* Max Iterations */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label>Max Iterations: {params.maxIterations}</Label>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Info className="h-4 w-4 opacity-70" />
+                        <Info className="h-3 w-3 opacity-50" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Adjust the core parameters of the simulated annealing algorithm</p>
+                        <p>Maximum number of iterations to run the algorithm. More iterations allow for better exploration.</p>
                       </TooltipContent>
                     </Tooltip>
-                    Algorithm Parameters
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Bits (r) */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Label>Bits (r): {params.r}</Label>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-3 w-3 opacity-50" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Number of bits in the solution representation. Higher values increase the search space exponentially.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <Slider
-                      value={[params.r]}
-                      onValueChange={([value]) => handleParamChange('r', value)}
-                      min={1}
-                      max={10}
-                      step={1}
-                      className="w-full"
-                    />
                   </div>
-                  
-                  {/* Max Iterations */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Label>Max Iterations: {params.maxIterations}</Label>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-3 w-3 opacity-50" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Maximum number of iterations to run the algorithm. More iterations allow for better exploration.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <Slider
-                      value={[params.maxIterations]}
-                      onValueChange={([value]) => handleParamChange('maxIterations', value)}
-                      min={10}
-                      max={500}
-                      step={10}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  {/* Initial Temperature */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Label>Initial Temp: {params.initialTemperature.toFixed(1)}</Label>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-3 w-3 opacity-50" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Starting temperature. Higher values allow more exploration early in the search.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <Slider
-                      value={[params.initialTemperature]}
-                      onValueChange={([value]) => handleParamChange('initialTemperature', value)}
-                      min={0.1}
-                      max={10.0}
-                      step={0.1}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  {/* Cooling Rate */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Label>Cooling Rate: {params.coolingRate.toFixed(2)}</Label>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-3 w-3 opacity-50" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Rate at which temperature decreases. Values closer to 1 cool more slowly.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <Slider
-                      value={[params.coolingRate]}
-                      onValueChange={([value]) => handleParamChange('coolingRate', value)}
-                      min={0.5}
-                      max={0.99}
-                      step={0.01}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  {/* Neighbor Type */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Label>Neighbor Type</Label>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-3 w-3 opacity-50" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Controls how neighboring solutions are generated during the search.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <RadioGroup
-                      value={params.neighborType}
-                      onValueChange={(value) => handleParamChange('neighborType', value)}
-                      className="grid grid-cols-1 gap-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Single Bit Flip" id="single" />
-                        <Label htmlFor="single" className="text-xs">Single Bit Flip</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Two Bit Flip" id="double" />
-                        <Label htmlFor="double" className="text-xs">Two Bit Flip</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Random Walk" id="random" />
-                        <Label htmlFor="random" className="text-xs">Random Walk</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                  
-                  {/* Cooling Schedule */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Label>Cooling Schedule</Label>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-3 w-3 opacity-50" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Determines how the temperature decreases over time.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <RadioGroup
-                      value={params.coolingSchedule}
-                      onValueChange={(value) => handleParamChange('coolingSchedule', value)}
-                      className="grid grid-cols-1 gap-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Geometric" id="geometric" />
-                        <Label htmlFor="geometric" className="text-xs">Geometric</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Linear" id="linear" />
-                        <Label htmlFor="linear" className="text-xs">Linear</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Logarithmic" id="logarithmic" />
-                        <Label htmlFor="logarithmic" className="text-xs">Logarithmic</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Polynomial Configuration */}
-              <Card className="glass-panel border-white/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <Slider
+                    value={[params.maxIterations]}
+                    onValueChange={([value]) => handleParamChange('maxIterations', value)}
+                    min={10}
+                    max={500}
+                    step={10}
+                    className="w-full"
+                  />
+                </div>
+                
+                {/* Initial Temperature */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label>Initial Temp: {params.initialTemperature.toFixed(1)}</Label>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Info className="h-4 w-4 opacity-70" />
+                        <Info className="h-3 w-3 opacity-50" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Configure the polynomial function to optimize</p>
+                        <p>Starting temperature. Higher values allow more exploration early in the search.</p>
                       </TooltipContent>
                     </Tooltip>
-                    Polynomial Function
-                  </CardTitle>
-                  <CardDescription>
-                    f(n) = Σ aᵢ × nᵢ
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Polynomial Degree */}
-                  <div className="space-y-2">
-                    <Label>Degree: {params.coefficients.length - 1}</Label>
-                    <Slider
-                      value={[params.coefficients.length - 1]}
-                      onValueChange={([value]) => handleDegreeChange(value)}
-                      min={0}
-                      max={8}
-                      step={1}
-                      className="w-full"
-                    />
                   </div>
-                  
-                  {/* Coefficient Sliders */}
-                  <div className="space-y-3">
-                    {params.coefficients.map((coef, index) => (
-                      <div key={index} className="space-y-1">
-                        <Label className="text-xs">a{index}: {coef}</Label>
-                        <Slider
-                          value={[coef]}
-                          onValueChange={([value]) => handleCoefficientChange(index, value)}
-                          min={-5}
-                          max={5}
-                          step={1}
-                          className="w-full"
-                        />
-                      </div>
-                    ))}
+                  <Slider
+                    value={[params.initialTemperature]}
+                    onValueChange={([value]) => handleParamChange('initialTemperature', value)}
+                    min={0.1}
+                    max={10.0}
+                    step={0.1}
+                    className="w-full"
+                  />
+                </div>
+                
+                {/* Cooling Rate */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label>Cooling Rate: {params.coolingRate.toFixed(2)}</Label>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className="h-3 w-3 opacity-50" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Rate at which temperature decreases. Values closer to 1 cool more slowly.</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
-                </CardContent>
-              </Card>
-              
-              {/* Statistics */}
-              <Card className="glass-panel border-white/10">
-                <CardHeader>
-                  <CardTitle>Statistics</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Best Value:</span>
-                    <span className="font-mono">{state.bestValue.toFixed(2)}</span>
+                  <Slider
+                    value={[params.coolingRate]}
+                    onValueChange={([value]) => handleParamChange('coolingRate', value)}
+                    min={0.5}
+                    max={0.99}
+                    step={0.01}
+                    className="w-full"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass-panel border-white/10">
+              <CardHeader>
+                <CardTitle>Algorithm Options</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Neighbor Type */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label>Neighbor Type</Label>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className="h-3 w-3 opacity-50" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Controls how neighboring solutions are generated during the search.</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Best State:</span>
-                    <span className="font-mono">{state.bestState}</span>
+                  <RadioGroup
+                    value={params.neighborType}
+                    onValueChange={(value) => handleParamChange('neighborType', value)}
+                    className="grid grid-cols-1 gap-2"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Single Bit Flip" id="single" />
+                      <Label htmlFor="single" className="text-xs">Single Bit Flip</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Two Bit Flip" id="double" />
+                      <Label htmlFor="double" className="text-xs">Two Bit Flip</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Random Walk" id="random" />
+                      <Label htmlFor="random" className="text-xs">Random Walk</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                
+                {/* Cooling Schedule */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label>Cooling Schedule</Label>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className="h-3 w-3 opacity-50" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Determines how the temperature decreases over time.</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Accepted Worse:</span>
-                    <span className="font-mono">{state.acceptedWorse}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Current Iteration:</span>
-                    <span className="font-mono">{state.currentIteration}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <RadioGroup
+                    value={params.coolingSchedule}
+                    onValueChange={(value) => handleParamChange('coolingSchedule', value)}
+                    className="grid grid-cols-1 gap-2"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Geometric" id="geometric" />
+                      <Label htmlFor="geometric" className="text-xs">Geometric</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Linear" id="linear" />
+                      <Label htmlFor="linear" className="text-xs">Linear</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Logarithmic" id="logarithmic" />
+                      <Label htmlFor="logarithmic" className="text-xs">Logarithmic</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </CardContent>
+            </Card>
           </div>
           
           {/* Educational Content */}
-          <div className="mt-12 max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <Accordion type="single" collapsible className="glass-panel rounded-xl border-white/10">
               <AccordionItem value="overview">
                 <AccordionTrigger className="px-6 text-lg font-medium">

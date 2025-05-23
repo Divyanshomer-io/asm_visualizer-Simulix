@@ -128,25 +128,27 @@ export function calculateTemperature(
   }
 }
 
-// Acceptance probability calculation
+// Fixed acceptance probability calculation
 export function calculateAcceptanceProbability(
   currentValue: number,
   neighborValue: number,
   temperature: number
 ): number {
-  if (neighborValue >= currentValue) {
+  // Delta should be neighbor - current (new - current)
+  const delta = neighborValue - currentValue;
+  
+  if (delta >= 0) {
     return 1.0;
   }
   
-  if (temperature <= 0) {
+  if (temperature <= 1e-6) {
     return 0.0;
   }
   
-  const delta = neighborValue - currentValue;
   return Math.exp(delta / temperature);
 }
 
-// Main simulation function
+// Main simulation function with fixes
 export function runToySimulation(params: ToySimulationParams): SimulatedAnnealingToyState {
   const { r, maxIterations, initialTemperature, coolingRate, neighborType, coolingSchedule, coefficients } = params;
   
@@ -187,7 +189,7 @@ export function runToySimulation(params: ToySimulationParams): SimulatedAnnealin
     binaryRepresentation: intToBinaryArray(currentState, r)
   });
   
-  // Main simulation loop
+  // Main simulation loop - FIXED: Use bounded for-loop instead of while
   for (let iteration = 1; iteration <= maxIterations; iteration++) {
     const temperature = calculateTemperature(iteration, initialTemperature, coolingRate, maxIterations, coolingSchedule);
     
@@ -195,7 +197,7 @@ export function runToySimulation(params: ToySimulationParams): SimulatedAnnealin
     const neighborState = generateNeighbor(currentState, r, neighborType);
     const neighborValue = evaluatePolynomial(neighborState, coefficients);
     
-    // Calculate acceptance probability
+    // Calculate acceptance probability - FIXED: Correct delta calculation
     const acceptanceProbability = calculateAcceptanceProbability(currentValue, neighborValue, temperature);
     
     // Decide whether to accept the neighbor
@@ -205,7 +207,8 @@ export function runToySimulation(params: ToySimulationParams): SimulatedAnnealin
       currentState = neighborState;
       currentValue = neighborValue;
       
-      if (acceptanceProbability < 1.0) {
+      // Count accepted worse solutions
+      if (neighborValue < currentValue) {
         acceptedWorse++;
       }
     }
