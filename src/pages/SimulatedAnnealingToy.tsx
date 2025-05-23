@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Home, Info, RotateCcw, Play, Pause, ChevronDown, ChevronRight } from "lucide-react";
@@ -21,11 +20,13 @@ import {
   SimulatedAnnealingToyState, 
   ToySimulationParams, 
   runToySimulation,
-  getInitialToyState 
+  getInitialToyState,
+  initializeToySimulation,
+  runSingleIteration
 } from "@/utils/simulatedAnnealingToy";
 
 const SimulatedAnnealingToy = () => {
-  // Simulation state and parameters with FIXED defaults
+  // FIXED: Enhanced state management for pause/resume
   const [state, setState] = useState<SimulatedAnnealingToyState>(getInitialToyState());
   const [params, setParams] = useState<ToySimulationParams>({
     r: 5,
@@ -48,16 +49,22 @@ const SimulatedAnnealingToy = () => {
   const [isAlgorithmOpen, setIsAlgorithmOpen] = useState(true);
   const [isOptionsOpen, setIsOptionsOpen] = useState(true);
   
-  // Run simulation with current parameters
-  const runSimulation = useCallback(() => {
+  // FIXED: Run complete simulation (for reset/parameter changes)
+  const runCompleteSimulation = useCallback(() => {
     const result = runToySimulation(params);
     setState(result);
-    setCurrentIteration(result.currentIteration);
+  }, [params]);
+  
+  // FIXED: Initialize simulation state
+  const initializeSimulation = useCallback(() => {
+    const initialState = initializeToySimulation(params);
+    setState(initialState);
   }, [params]);
   
   // Handle parameter changes
   const handleParamChange = useCallback((key: keyof ToySimulationParams, value: any) => {
     setParams(prev => ({ ...prev, [key]: value }));
+    setIsRunning(false); // Stop animation when parameters change
   }, []);
   
   // Handle coefficient changes
@@ -66,6 +73,7 @@ const SimulatedAnnealingToy = () => {
       ...prev,
       coefficients: prev.coefficients.map((coef, i) => i === index ? value : coef)
     }));
+    setIsRunning(false);
   }, []);
   
   // Handle polynomial degree change
@@ -77,9 +85,10 @@ const SimulatedAnnealingToy = () => {
       }
       return { ...prev, coefficients: newCoefficients };
     });
+    setIsRunning(false);
   }, []);
   
-  // Reset to defaults
+  // Reset to defaults and reinitialize
   const handleReset = useCallback(() => {
     setParams({
       r: 5,
@@ -91,16 +100,15 @@ const SimulatedAnnealingToy = () => {
       coefficients: [1, -2, 3, -1, 2, -1]
     });
     setIsRunning(false);
-    setCurrentIteration(0);
     toast.success("Parameters reset to defaults");
   }, []);
   
-  // Toggle animation
+  // Toggle animation with pause/resume capability
   const toggleAnimation = useCallback(() => {
     setIsRunning(prev => !prev);
   }, []);
   
-  // FIXED: Animation loop that respects iteration limits and updates progress
+  // FIXED: Animation loop that supports pause/resume
   useEffect(() => {
     if (!isRunning) {
       if (animationRef.current) {
@@ -110,22 +118,24 @@ const SimulatedAnnealingToy = () => {
       return;
     }
     
-    let iterationCount = 0;
     const animate = (timestamp: number) => {
       const elapsed = timestamp - lastFrameTimeRef.current;
       
       if (elapsed > 300) { // Update every 300ms for better visibility
         lastFrameTimeRef.current = timestamp;
-        runSimulation();
-        iterationCount++;
-        setCurrentIteration(iterationCount);
         
-        // Stop animation when reaching max iterations
-        if (iterationCount >= params.maxIterations) {
-          setIsRunning(false);
-          toast.success(`Simulation completed after ${params.maxIterations} iterations`);
-          return;
-        }
+        // FIXED: Run single iteration instead of complete simulation
+        setState(prevState => {
+          const newState = runSingleIteration(prevState, params);
+          
+          // Stop animation when reaching max iterations
+          if (newState.isComplete) {
+            setIsRunning(false);
+            toast.success(`Simulation completed after ${params.maxIterations} iterations`);
+          }
+          
+          return newState;
+        });
       }
       
       if (isRunning) {
@@ -140,13 +150,12 @@ const SimulatedAnnealingToy = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isRunning, runSimulation, params.maxIterations]);
+  }, [isRunning, params]);
   
-  // Initial simulation run
+  // FIXED: Initialize simulation when parameters change
   useEffect(() => {
-    runSimulation();
-    setCurrentIteration(0);
-  }, [params]);
+    initializeSimulation();
+  }, [initializeSimulation]);
   
   return (
     <TooltipProvider>
@@ -177,7 +186,7 @@ const SimulatedAnnealingToy = () => {
             <div className="xl:col-span-3 space-y-6">
               <ToyVisualizationPanel state={state} params={params} />
               
-              {/* Statistics - Below graphs */}
+              {/* FIXED: Statistics with real-time current iteration */}
               <Card className="glass-panel border-white/10">
                 <CardHeader>
                   <CardTitle>Real-time Statistics</CardTitle>
@@ -196,7 +205,7 @@ const SimulatedAnnealingToy = () => {
                     <div className="text-xs opacity-70">Accepted Worse</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-mono">{currentIteration} / {params.maxIterations}</div>
+                    <div className="text-2xl font-mono">{state.currentIteration} / {params.maxIterations}</div>
                     <div className="text-xs opacity-70">Progress</div>
                   </div>
                 </CardContent>
@@ -486,8 +495,8 @@ const SimulatedAnnealingToy = () => {
             </div>
           </div>
           
-          {/* Educational Content with added spacing */}
-          <div className="max-w-4xl mx-auto mt-12">
+          {/* FIXED: Educational Content with added spacing */}
+          <div className="max-w-4xl mx-auto mt-16">
             <Accordion type="single" collapsible className="glass-panel rounded-xl border-white/10">
               <AccordionItem value="overview">
                 <AccordionTrigger className="px-6 text-lg font-medium">

@@ -1,4 +1,3 @@
-
 export interface ToySimulationParams {
   r: number;
   maxIterations: number;
@@ -26,6 +25,9 @@ export interface SimulatedAnnealingToyState {
   acceptedWorse: number;
   currentIteration: number;
   searchSpace: { state: number; value: number }[];
+  currentState: number;
+  currentValue: number;
+  isComplete: boolean;
 }
 
 // Core mathematical functions
@@ -156,13 +158,13 @@ export function runToySimulation(params: ToySimulationParams): SimulatedAnnealin
     return getInitialToyState();
   }
   
-  // Initialize
+  // Initialize - CRITICAL: Best value starts at negative infinity
   let currentState = Math.floor(Math.random() * Math.pow(2, r));
   let currentValue = evaluatePolynomial(currentState, coefficients);
   
   let bestState = currentState;
-  let bestValue = currentValue;
-  let acceptedWorse = 0;
+  let bestValue = currentValue; // Initialize with first value, not -Infinity since we have a valid first solution
+  let acceptedWorse = 0; // NEVER reset this counter during simulation
   
   const history: IterationData[] = [];
   
@@ -242,7 +244,89 @@ export function runToySimulation(params: ToySimulationParams): SimulatedAnnealin
     bestValue,
     acceptedWorse,
     currentIteration: Math.min(maxIterations, history.length - 1),
-    searchSpace
+    searchSpace,
+    currentState,
+    currentValue,
+    isComplete: true
+  };
+}
+
+// FIXED: New function for step-by-step simulation (for pause/resume)
+export function runSingleIteration(
+  currentState: SimulatedAnnealingToyState,
+  params: ToySimulationParams
+): SimulatedAnnealingToyState {
+  if (currentState.currentIteration >= params.maxIterations || currentState.isComplete) {
+    return { ...currentState, isComplete: true };
+  }
+  
+  const nextIteration = currentState.currentIteration + 1;
+  const temperature = calculateTemperature(
+    nextIteration, 
+    params.initialTemperature, 
+    params.coolingRate, 
+    params.maxIterations, 
+    params.coolingSchedule
+  );
+  
+  // Generate neighbor
+  const neighborState = generateNeighbor(currentState.currentState, params.r, params.neighborType);
+  const neighborValue = evaluatePolynomial(neighborState, params.coefficients);
+  
+  // Calculate acceptance probability
+  const acceptanceProbability = calculateAcceptanceProbability(
+    currentState.currentValue, 
+    neighborValue, 
+    temperature
+  );
+  
+  // Decide whether to accept the neighbor
+  const shouldAccept = Math.random() < acceptanceProbability;
+  
+  let newCurrentState = currentState.currentState;
+  let newCurrentValue = currentState.currentValue;
+  let newAcceptedWorse = currentState.acceptedWorse;
+  
+  if (shouldAccept) {
+    // Count accepted worse solutions
+    if (neighborValue < currentState.currentValue) {
+      newAcceptedWorse++;
+    }
+    
+    newCurrentState = neighborState;
+    newCurrentValue = neighborValue;
+  }
+  
+  // Update best solution only if strictly better
+  let newBestState = currentState.bestState;
+  let newBestValue = currentState.bestValue;
+  
+  if (newCurrentValue > currentState.bestValue) {
+    newBestState = newCurrentState;
+    newBestValue = newCurrentValue;
+  }
+  
+  // Create new history entry
+  const newHistoryEntry: IterationData = {
+    iteration: nextIteration,
+    state: newCurrentState,
+    value: newCurrentValue,
+    bestValue: newBestValue,
+    temperature,
+    acceptanceProbability,
+    binaryRepresentation: intToBinaryArray(newCurrentState, params.r)
+  };
+  
+  return {
+    ...currentState,
+    history: [...currentState.history, newHistoryEntry],
+    bestState: newBestState,
+    bestValue: newBestValue,
+    acceptedWorse: newAcceptedWorse,
+    currentIteration: nextIteration,
+    currentState: newCurrentState,
+    currentValue: newCurrentValue,
+    isComplete: nextIteration >= params.maxIterations
   };
 }
 
@@ -250,9 +334,56 @@ export function getInitialToyState(): SimulatedAnnealingToyState {
   return {
     history: [],
     bestState: 0,
-    bestValue: 0,
+    bestValue: -Infinity,
     acceptedWorse: 0,
     currentIteration: 0,
-    searchSpace: []
+    searchSpace: [],
+    currentState: 0,
+    currentValue: 0,
+    isComplete: false
+  };
+}
+
+// FIXED: Initialize simulation state properly
+export function initializeToySimulation(params: ToySimulationParams): SimulatedAnnealingToyState {
+  if (params.r <= 0) {
+    return getInitialToyState();
+  }
+  
+  // Initialize with random state
+  const initialState = Math.floor(Math.random() * Math.pow(2, params.r));
+  const initialValue = evaluatePolynomial(initialState, params.coefficients);
+  
+  // Generate search space if feasible
+  const searchSpace: { state: number; value: number }[] = [];
+  if (params.r <= 8) {
+    for (let state = 0; state < Math.pow(2, params.r); state++) {
+      searchSpace.push({
+        state,
+        value: evaluatePolynomial(state, params.coefficients)
+      });
+    }
+  }
+  
+  const initialTemp = calculateTemperature(0, params.initialTemperature, params.coolingRate, params.maxIterations, params.coolingSchedule);
+  
+  return {
+    history: [{
+      iteration: 0,
+      state: initialState,
+      value: initialValue,
+      bestValue: initialValue,
+      temperature: initialTemp,
+      acceptanceProbability: 1.0,
+      binaryRepresentation: intToBinaryArray(initialState, params.r)
+    }],
+    bestState: initialState,
+    bestValue: initialValue,
+    acceptedWorse: 0,
+    currentIteration: 0,
+    searchSpace,
+    currentState: initialState,
+    currentValue: initialValue,
+    isComplete: false
   };
 }
