@@ -254,24 +254,22 @@ const Bootstrapping = () => {
               </AccordionTrigger>
               <AccordionContent className="pb-4 space-y-4">
                 <p className="text-base leading-relaxed">
-                  Imagine you want to know how confident you can be about a survey result, but you only have one sample. 
-                  Bootstrapping is like creating many "what-if" scenarios by repeatedly resampling from your original data 
-                  to understand the variability of your statistic.
+                  Imagine you surveyed 100 people about their favorite ice cream flavor, but you're worried your results might change if you surveyed another group. 
+                  Bootstrapping helps you answer: "How confident can I be in my results?"
                 </p>
 
                 <div className="space-y-3">
                   <h4 className="font-medium text-primary">What Are We Doing?</h4>
                   <div className="bg-secondary/20 p-4 rounded-lg">
-                    <p><strong>Your Goal:</strong> Estimate the sampling distribution of a statistic (mean or median) 
-                    without collecting new data.</p>
+                    <p><strong>Your Goal:</strong> Guess how much your "average" or "middle value" might change if you could repeat your survey many times—without actually doing it!</p>
                     
                     <p className="mt-2"><strong>How It Works:</strong></p>
                     <ol className="list-decimal pl-6 space-y-1">
-                      <li>Start with your original sample of data</li>
-                      <li>Randomly sample (with replacement) from this data</li>
-                      <li>Calculate your statistic (mean/median) for this bootstrap sample</li>
-                      <li>Repeat thousands of times</li>
-                      <li>Analyze the distribution of these bootstrap statistics</li>
+                      <li>Start with your original data (like your 100 survey responses)</li>
+                      <li><strong>Copy & Shuffle:</strong> Randomly pick people from your data while allowing repeats (like drawing names from a hat and putting them back)</li>
+                      <li><strong>Calculate:</strong> Find the average or middle value of this new "shuffled" group</li>
+                      <li><strong>Repeat:</strong> Do this 1,000+ times to create many pretend "surveys"</li>
+                      <li><strong>Learn:</strong> Look at all your pretend results to see how much they vary</li>
                     </ol>
                   </div>
                 </div>
@@ -279,17 +277,15 @@ const Bootstrapping = () => {
                 <div className="space-y-3">
                   <h4 className="font-medium text-primary">Why This Example?</h4>
                   <ul className="list-disc pl-6 space-y-1 opacity-90">
-                    <li>Shows how bootstrap estimates converge to true population parameters</li>
-                    <li>Demonstrates confidence interval construction without normal assumptions</li>
-                    <li>Visualizes the relationship between sample size and estimate precision</li>
-                    <li>Compares different statistics (mean vs median) under the same framework</li>
+                    <li><strong>No Math Formulas Needed:</strong> Learn by seeing patterns in the visualizations</li>
+                    <li><strong>Real-Life Ready:</strong> Works even if your data is messy or uneven</li>
+                    <li><strong>Build Intuition:</strong> Watch how more "pretend surveys" make your results clearer</li>
                   </ul>
                 </div>
 
                 <div className="bg-accent/10 p-4 rounded-lg">
                   <p className="font-medium text-accent mb-2">💡 Key Insight:</p>
-                  <p>The bootstrap distribution approximates what we would see if we could 
-                  repeatedly sample from the true population. It's a powerful way to quantify uncertainty!</p>
+                  <p>Bootstrapping lets you pretend you have thousands of surveys by cleverly reusing your original data. It's like a crystal ball for your statistics!</p>
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -308,19 +304,22 @@ const Bootstrapping = () => {
                     <div className="bg-secondary/20 p-3 rounded-lg">
                       <p><strong>Sample Size:</strong> How many observations to include in each bootstrap sample</p>
                       <p className="text-sm opacity-80">• Larger samples = more stable estimates but slower computation</p>
-                      <p className="text-sm opacity-80">• Typical choice: same size as original data</p>
+                      <p className="text-sm opacity-80">• Typical choice: Same size as original data (maintains sample characteristics)</p>
+                      <p className="text-sm opacity-80">• Experiment: Try smaller sizes to see increased variability</p>
                     </div>
 
                     <div className="bg-secondary/20 p-3 rounded-lg">
                       <p><strong>Number of Bootstrap Samples:</strong> How many bootstrap replications to perform</p>
                       <p className="text-sm opacity-80">• More samples = smoother distribution approximation</p>
                       <p className="text-sm opacity-80">• Common choices: 500-2000 for most applications</p>
+                      <p className="text-sm opacity-80">• Rule of thumb: At least 1000 for reliable confidence intervals</p>
                     </div>
 
                     <div className="bg-secondary/20 p-3 rounded-lg">
                       <p><strong>Confidence Level:</strong> The coverage probability for confidence intervals</p>
                       <p className="text-sm opacity-80">• 95% means the interval should contain the true value 95% of the time</p>
                       <p className="text-sm opacity-80">• Higher confidence = wider intervals</p>
+                      <p className="text-sm opacity-80">• Common levels: 90%, 95%, 99%</p>
                     </div>
                   </div>
 
@@ -338,8 +337,13 @@ const Bootstrapping = () => {
                     
                     <div className="bg-secondary/20 p-3 rounded-lg">
                       <p><strong>Show Confidence Interval:</strong> Display the percentile-based confidence bounds</p>
-                      <p><strong>Show Normal Fit:</strong> Overlay a normal distribution for comparison</p>
+                      <p><strong>Show Normal Fit:</strong> Overlay a normal distribution for comparison (tests Central Limit Theorem)</p>
                     </div>
+                  </div>
+
+                  <div className="bg-accent/10 p-4 rounded-lg">
+                    <p className="font-medium text-accent mb-2">⚡ Quick Start:</p>
+                    <p>Try the defaults first, then experiment with different sample sizes to see the effect!</p>
                   </div>
                 </div>
               </AccordionContent>
@@ -354,7 +358,7 @@ const Bootstrapping = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-medium text-primary mb-2">Bootstrap Distribution (Top Left)</h4>
+                    <h4 className="font-medium text-primary mb-2">📊 Bootstrap Distribution (Top)</h4>
                     <div className="bg-secondary/20 p-3 rounded-lg space-y-2">
                       <p><strong>What you see:</strong> Histogram of bootstrap statistics with confidence intervals</p>
                       <p><strong>How to read it:</strong></p>
@@ -369,22 +373,22 @@ const Bootstrapping = () => {
                   </div>
 
                   <div>
-                    <h4 className="font-medium text-primary mb-2">Original vs Bootstrap Comparison (Top Right)</h4>
+                    <h4 className="font-medium text-primary mb-2">📈 Original vs Bootstrap Comparison (Bottom Left)</h4>
                     <div className="bg-secondary/20 p-3 rounded-lg space-y-2">
                       <p><strong>What you see:</strong> Side-by-side comparison of original data and bootstrap statistics</p>
                       <p><strong>How to read it:</strong></p>
                       <ul className="list-disc pl-6 text-sm space-y-1">
                         <li>Gray bars = distribution of original data points</li>
                         <li>Orange bars = distribution of bootstrap statistics</li>
-                        <li>Black line = mean of original data</li>
+                        <li>Black dashed line = mean of original data</li>
                         <li>Orange dashed line = mean of bootstrap statistics</li>
                       </ul>
-                      <p className="text-sm opacity-80"><strong>Key insight:</strong> Bootstrap statistics are typically more concentrated than original data</p>
+                      <p className="text-sm opacity-80"><strong>Key insight:</strong> Bootstrap statistics are typically more concentrated than original data (less variability)</p>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="font-medium text-primary mb-2">Convergence Analysis (Bottom)</h4>
+                    <h4 className="font-medium text-primary mb-2">📉 Convergence Analysis (Bottom Right)</h4>
                     <div className="bg-secondary/20 p-3 rounded-lg space-y-2">
                       <p><strong>What you see:</strong> How bias and mean squared error change with sample size</p>
                       <p><strong>How to read it:</strong></p>
@@ -402,9 +406,19 @@ const Bootstrapping = () => {
                   <p className="font-medium text-accent mb-2">🎯 Pro Tips:</p>
                   <ul className="list-disc pl-6 space-y-1 text-sm">
                     <li>Compare mean vs median - median is more robust to outliers</li>
-                    <li>Watch how confidence intervals change with different confidence levels</li>
-                    <li>Notice that bootstrap means are less variable than individual data points</li>
-                    <li>The normal fit shows whether the Central Limit Theorem applies</li>
+                    <li>Watch confidence intervals change with different confidence levels</li>
+                    <li>Notice concentration - bootstrap means are less variable than individual data points</li>
+                    <li>Normal fit reveals whether the Central Limit Theorem applies to your data</li>
+                    <li>Experiment freely - try extreme parameter values to build intuition!</li>
+                  </ul>
+                </div>
+
+                <div className="bg-secondary/10 p-4 rounded-lg">
+                  <p className="font-medium text-secondary mb-2">🔍 What to Look For:</p>
+                  <ul className="list-disc pl-6 space-y-1 text-sm">
+                    <li>Symmetric vs skewed bootstrap distributions</li>
+                    <li>How quickly bias and MSE stabilize</li>
+                    <li>Differences between mean and median behavior with the same data</li>
                   </ul>
                 </div>
               </AccordionContent>

@@ -152,14 +152,11 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
       }
     });
 
-    // Convert to density following Python logic
-    const originalTotal = state.originalData.length;
-    const bootstrapTotal = currentStats.length;
-
+    // Convert to frequency (not density) following Python logic
     return histogram.map(bin => ({
       ...bin,
-      original: (bin.original / originalTotal) / binWidth,
-      bootstrap: bootstrapTotal > 0 ? (bin.bootstrap / bootstrapTotal) / binWidth : 0,
+      original: bin.original,
+      bootstrap: bin.bootstrap,
     }));
   };
 
@@ -270,7 +267,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   />
                 )}
                 
-                {/* Confidence Interval lines - following Python axvline logic */}
+                {/* Confidence Interval vertical dotted lines */}
                 {state.showCI && confidenceInterval && (
                   <>
                     <ReferenceLine 
@@ -278,12 +275,22 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                       stroke="#ff0000" 
                       strokeWidth={2}
                       strokeDasharray="5 5"
+                      label={{
+                        value: "CI Lower",
+                        position: "topLeft",
+                        style: { fill: "#ff0000", fontSize: "10px" }
+                      }}
                     />
                     <ReferenceLine 
                       x={confidenceInterval.upper} 
                       stroke="#ff0000" 
                       strokeWidth={2}
                       strokeDasharray="5 5"
+                      label={{
+                        value: "CI Upper",
+                        position: "topRight",
+                        style: { fill: "#ff0000", fontSize: "10px" }
+                      }}
                     />
                   </>
                 )}
@@ -294,6 +301,11 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     x={confidenceInterval.mean} 
                     stroke="#00ff00" 
                     strokeWidth={2}
+                    label={{
+                      value: "Bootstrap Mean",
+                      position: "top",
+                      style: { fill: "#00ff00", fontSize: "10px" }
+                    }}
                   />
                 )}
               </ComposedChart>
@@ -338,7 +350,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   />
                   <YAxis 
                     stroke="#ffffff80"
-                    label={{ value: 'Density', angle: -90, position: 'insideLeft', fill: '#ffffff80' }}
+                    label={{ value: 'Frequency', angle: -90, position: 'insideLeft', fill: '#ffffff80' }}
                   />
                   <Tooltip
                     contentStyle={{
@@ -348,7 +360,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                       color: 'white'
                     }}
                     formatter={(value: number, name: string) => [
-                      formatNumber(value, 4),
+                      value,
                       name === 'original' ? `Original Data (n=${state.originalData.length})` : `Bootstrap ${params.statistic}s (n=${state.currentIteration})`
                     ]}
                   />
@@ -371,13 +383,24 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     x={state.originalData.reduce((a, b) => a + b, 0) / state.originalData.length} 
                     stroke="#000000" 
                     strokeWidth={2}
+                    strokeDasharray="6 6"
+                    label={{
+                      value: "Original Mean",
+                      position: "topLeft",
+                      style: { fill: "#000000", fontSize: "10px" }
+                    }}
                   />
                   {confidenceInterval && (
                     <ReferenceLine 
                       x={confidenceInterval.mean} 
                       stroke="#ff8c00" 
                       strokeWidth={2}
-                      strokeDasharray="5 5"
+                      strokeDasharray="6 6"
+                      label={{
+                        value: "Bootstrap Mean",
+                        position: "topRight", 
+                        style: { fill: "#ff8c00", fontSize: "10px" }
+                      }}
                     />
                   )}
                 </ComposedChart>
