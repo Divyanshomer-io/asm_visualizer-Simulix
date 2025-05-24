@@ -220,10 +220,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   dataKey="x" 
                   stroke="#ffffff80"
                   tickFormatter={(value) => formatNumber(value, 2)}
-                  domain={[
-    dataMin => Math.min(dataMin, confidenceInterval.lower),
-    dataMax => Math.max(dataMax, confidenceInterval.upper)
-  ]}
+                  domain={['dataMin', 'dataMax']}
                 />
                 <YAxis stroke="#ffffff80" />
                 <Tooltip
@@ -284,13 +281,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                         style: { fill: "#ff0000", fontSize: "10px" }
                       }}
                     />
-                    <ReferenceLine
-  x={confidenceInterval.lower}
-  stroke="#ff0000"
-  strokeWidth={2}
-  strokeDasharray="5 5"
-  ifOverflow="extendDomain"
-/>
+                   
 
                     <ReferenceLine 
                       x={confidenceInterval.upper} 
@@ -358,10 +349,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     dataKey="x" 
                     stroke="#ffffff80"
                     tickFormatter={(value) => formatNumber(value, 1)}
-                    domain={[
-    dataMin => Math.min(dataMin, confidenceInterval.lower),
-    dataMax => Math.max(dataMax, confidenceInterval.upper)
-  ]}
+                 
                   />
                   <YAxis 
                     stroke="#ffffff80"
@@ -394,13 +382,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   />
 
                   {/* Add mean lines */}
-                  <ReferenceLine
-  x={confidenceInterval.lower}
-  stroke="#ff0000"
-  strokeWidth={2}
-  strokeDasharray="5 5"
-  ifOverflow="extendDomain"
-/>
+                 
 
                   <ReferenceLine 
                     x={state.originalData.reduce((a, b) => a + b, 0) / state.originalData.length} 
