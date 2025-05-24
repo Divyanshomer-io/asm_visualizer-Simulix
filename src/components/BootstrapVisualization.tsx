@@ -34,6 +34,16 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     const bins = 20;
     const min = Math.min(...currentStats);
     const max = Math.max(...currentStats);
+    
+    // Handle edge case where all values are the same
+    if (min === max) {
+      return [{
+        x: min,
+        count: currentStats.length,
+        bin: 0,
+      }];
+    }
+    
     const binWidth = (max - min) / bins;
     
     const histogram = Array(bins).fill(0).map((_, i) => ({
@@ -43,8 +53,13 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     }));
 
     currentStats.forEach(value => {
-      const binIndex = Math.min(Math.floor((value - min) / binWidth), bins - 1);
-      histogram[binIndex].count++;
+      // Ensure binIndex is valid
+      if (binWidth > 0) {
+        const binIndex = Math.min(Math.floor((value - min) / binWidth), bins - 1);
+        if (binIndex >= 0 && binIndex < bins && histogram[binIndex]) {
+          histogram[binIndex].count++;
+        }
+      }
     });
 
     return histogram;
@@ -72,6 +87,16 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     const originalBins = 15;
     const originalMin = Math.min(...state.originalData);
     const originalMax = Math.max(...state.originalData);
+    
+    // Handle edge case where all original values are the same
+    if (originalMin === originalMax) {
+      return [{
+        x: originalMin,
+        original: state.originalData.length,
+        bootstrap: 0,
+      }];
+    }
+    
     const originalBinWidth = (originalMax - originalMin) / originalBins;
 
     const originalHistogram = Array(originalBins).fill(0).map((_, i) => ({
@@ -82,17 +107,23 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
 
     // Fill original data histogram
     state.originalData.forEach(value => {
-      const binIndex = Math.min(Math.floor((value - originalMin) / originalBinWidth), originalBins - 1);
-      originalHistogram[binIndex].original++;
+      if (originalBinWidth > 0) {
+        const binIndex = Math.min(Math.floor((value - originalMin) / originalBinWidth), originalBins - 1);
+        if (binIndex >= 0 && binIndex < originalBins && originalHistogram[binIndex]) {
+          originalHistogram[binIndex].original++;
+        }
+      }
     });
 
     // Fill bootstrap statistics histogram (scaled to same range)
     const currentStats = state.currentStatValues.slice(0, state.currentIteration);
     if (currentStats.length > 0) {
       currentStats.forEach(value => {
-        const binIndex = Math.min(Math.floor((value - originalMin) / originalBinWidth), originalBins - 1);
-        if (binIndex >= 0) {
-          originalHistogram[binIndex].bootstrap++;
+        if (originalBinWidth > 0) {
+          const binIndex = Math.min(Math.floor((value - originalMin) / originalBinWidth), originalBins - 1);
+          if (binIndex >= 0 && binIndex < originalBins && originalHistogram[binIndex]) {
+            originalHistogram[binIndex].bootstrap++;
+          }
         }
       });
     }
@@ -119,15 +150,17 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
 
     for (let i = 10; i <= state.currentIteration; i += stepSize) {
       const currentStats = state.currentStatValues.slice(0, i);
-      const mean = currentStats.reduce((a, b) => a + b, 0) / currentStats.length;
-      const bias = Math.abs(mean - trueValue);
-      const mse = currentStats.reduce((acc, val) => acc + Math.pow(val - trueValue, 2), 0) / currentStats.length;
+      if (currentStats.length > 0) {
+        const mean = currentStats.reduce((a, b) => a + b, 0) / currentStats.length;
+        const bias = Math.abs(mean - trueValue);
+        const mse = currentStats.reduce((acc, val) => acc + Math.pow(val - trueValue, 2), 0) / currentStats.length;
 
-      data.push({
-        samples: i,
-        bias,
-        mse,
-      });
+        data.push({
+          samples: i,
+          bias,
+          mse,
+        });
+      }
     }
 
     return data;
