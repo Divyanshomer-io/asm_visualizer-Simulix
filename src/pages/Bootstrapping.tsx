@@ -47,8 +47,7 @@ const Bootstrapping = () => {
     statistic: 'mean',
   });
 
-  const animationRef = useRef<number>();
-  const intervalRef = useRef<number>();
+  const intervalRef = useRef<number | undefined>();
 
   const generateBootstrapData = () => {
     const samples = generateBootstrapSamples(
@@ -70,7 +69,7 @@ const Bootstrapping = () => {
     if (state.isRunning) {
       // Stop animation
       if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+        window.clearInterval(intervalRef.current);
         intervalRef.current = undefined;
       }
       setState(prev => ({ ...prev, isRunning: false }));
@@ -83,15 +82,15 @@ const Bootstrapping = () => {
 
   const startAnimation = () => {
     if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+      window.clearInterval(intervalRef.current);
     }
 
-    intervalRef.current = setInterval(() => {
+    intervalRef.current = window.setInterval(() => {
       setState(prev => {
         if (prev.currentIteration >= params.numBootstrapSamples) {
           // Stop animation when we reach the target
           if (intervalRef.current) {
-            clearInterval(intervalRef.current);
+            window.clearInterval(intervalRef.current);
             intervalRef.current = undefined;
           }
           return { ...prev, isRunning: false };
@@ -116,7 +115,7 @@ const Bootstrapping = () => {
   useEffect(() => {
     if (state.currentIteration >= params.numBootstrapSamples && state.isRunning) {
       if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+        window.clearInterval(intervalRef.current);
         intervalRef.current = undefined;
       }
       setState(prev => ({ ...prev, isRunning: false }));
@@ -125,7 +124,7 @@ const Bootstrapping = () => {
 
   const handleReset = () => {
     if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+      window.clearInterval(intervalRef.current);
       intervalRef.current = undefined;
     }
     setState(prev => ({
@@ -151,7 +150,7 @@ const Bootstrapping = () => {
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+        window.clearInterval(intervalRef.current);
       }
     };
   }, []);

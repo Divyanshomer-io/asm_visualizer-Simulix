@@ -12,7 +12,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-  Area,
   ComposedChart,
 } from "recharts";
 import { BootstrapState, BootstrapParams } from "@/pages/Bootstrapping";
@@ -35,7 +34,6 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     const min = Math.min(...currentStats);
     const max = Math.max(...currentStats);
     
-    // Handle edge case where all values are the same
     if (min === max) {
       return [{
         x: min,
@@ -53,10 +51,9 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     }));
 
     currentStats.forEach(value => {
-      // Ensure binIndex is valid
       if (binWidth > 0) {
         const binIndex = Math.min(Math.floor((value - min) / binWidth), bins - 1);
-        if (binIndex >= 0 && binIndex < bins && histogram[binIndex]) {
+        if (binIndex >= 0 && binIndex < bins) {
           histogram[binIndex].count++;
         }
       }
@@ -82,7 +79,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     };
   };
 
-  // Generate normal distribution data for overlay
+  // Generate normal distribution data for overlay - following Python logic exactly
   const getNormalFitData = () => {
     const currentStats = state.currentStatValues.slice(0, state.currentIteration);
     if (currentStats.length < 10) return [];
@@ -93,14 +90,15 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
 
     const min = Math.min(...currentStats);
     const max = Math.max(...currentStats);
-    const range = max - min;
     
     const normalData = [];
     for (let i = 0; i <= 100; i++) {
-      const x = min - range * 0.2 + (range * 1.4 * i) / 100;
+      const x = min + ((max - min) * i) / 100;
+      // Normal PDF calculation
       const y = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / std, 2));
-      // Scale to match histogram
-      const scaledY = y * currentStats.length * (range / 20); // approximate bin width
+      // Scale to match histogram - bins[1] - bins[0] approximates bin width
+      const binWidth = (max - min) / 20; // 20 bins as in Python
+      const scaledY = y * currentStats.length * binWidth;
       normalData.push({ x, normalFit: scaledY });
     }
 
@@ -113,7 +111,6 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     const originalMin = Math.min(...state.originalData);
     const originalMax = Math.max(...state.originalData);
     
-    // Handle edge case where all original values are the same
     if (originalMin === originalMax) {
       return [{
         x: originalMin,
@@ -130,30 +127,27 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
       bootstrap: 0,
     }));
 
-    // Fill original data histogram
     state.originalData.forEach(value => {
       if (originalBinWidth > 0) {
         const binIndex = Math.min(Math.floor((value - originalMin) / originalBinWidth), originalBins - 1);
-        if (binIndex >= 0 && binIndex < originalBins && originalHistogram[binIndex]) {
+        if (binIndex >= 0 && binIndex < originalBins) {
           originalHistogram[binIndex].original++;
         }
       }
     });
 
-    // Fill bootstrap statistics histogram (scaled to same range)
     const currentStats = state.currentStatValues.slice(0, state.currentIteration);
     if (currentStats.length > 0) {
       currentStats.forEach(value => {
         if (originalBinWidth > 0) {
           const binIndex = Math.min(Math.floor((value - originalMin) / originalBinWidth), originalBins - 1);
-          if (binIndex >= 0 && binIndex < originalBins && originalHistogram[binIndex]) {
+          if (binIndex >= 0 && binIndex < originalBins) {
             originalHistogram[binIndex].bootstrap++;
           }
         }
       });
     }
 
-    // Normalize to density
     const originalTotal = state.originalData.length;
     const bootstrapTotal = currentStats.length;
 
@@ -236,19 +230,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     opacity={0.7}
                   />
                   
-                  {/* Normal Fit Line */}
-                  {state.showNormalFit && normalFitData.length > 0 && (
-                    <Line 
-                      dataKey="normalFit" 
-                      stroke="#9932CC" 
-                      strokeWidth={3}
-                      dot={false}
-                      data={normalFitData}
-                      type="monotone"
-                    />
-                  )}
-                  
-                  {/* Confidence Interval */}
+                  {/* Confidence Interval - following Python logic exactly */}
                   {state.showCI && confidenceInterval && (
                     <>
                       <ReferenceLine 
@@ -263,16 +245,37 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                         strokeWidth={2}
                         strokeDasharray="5 5"
                       />
-                      <ReferenceLine 
-                        x={confidenceInterval.mean} 
-                        stroke="#00ff00" 
-                        strokeWidth={2}
-                      />
                     </>
+                  )}
+                  
+                  {/* Bootstrap mean line - always show like in Python */}
+                  {confidenceInterval && (
+                    <ReferenceLine 
+                      x={confidenceInterval.mean} 
+                      stroke="#00ff00" 
+                      strokeWidth={2}
+                    />
                   )}
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
+            
+            {/* Add normal fit as separate line chart overlay */}
+            {state.showNormalFit && normalFitData.length > 0 && (
+              <div className="h-64 -mt-64 pointer-events-none">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={normalFitData}>
+                    <Line 
+                      dataKey="normalFit" 
+                      stroke="#9932CC" 
+                      strokeWidth={3}
+                      dot={false}
+                      type="monotone"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
             
             {confidenceInterval && (
               <div className="mt-2 text-xs space-y-1">
