@@ -82,6 +82,31 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     };
   };
 
+  // Generate normal distribution data for overlay
+  const getNormalFitData = () => {
+    const currentStats = state.currentStatValues.slice(0, state.currentIteration);
+    if (currentStats.length < 10) return [];
+
+    const mean = currentStats.reduce((a, b) => a + b, 0) / currentStats.length;
+    const variance = currentStats.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / currentStats.length;
+    const std = Math.sqrt(variance);
+
+    const min = Math.min(...currentStats);
+    const max = Math.max(...currentStats);
+    const range = max - min;
+    
+    const normalData = [];
+    for (let i = 0; i <= 100; i++) {
+      const x = min - range * 0.2 + (range * 1.4 * i) / 100;
+      const y = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / std, 2));
+      // Scale to match histogram
+      const scaledY = y * currentStats.length * (range / 20); // approximate bin width
+      normalData.push({ x, normalFit: scaledY });
+    }
+
+    return normalData;
+  };
+
   // Prepare data for original vs bootstrap comparison
   const getComparisonData = () => {
     const originalBins = 15;
@@ -168,6 +193,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
 
   const histogramData = getBootstrapHistogramData();
   const confidenceInterval = getConfidenceInterval();
+  const normalFitData = getNormalFitData();
   const comparisonData = getComparisonData();
   const convergenceData = getConvergenceData();
 
@@ -209,6 +235,18 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     strokeWidth={1}
                     opacity={0.7}
                   />
+                  
+                  {/* Normal Fit Line */}
+                  {state.showNormalFit && normalFitData.length > 0 && (
+                    <Line 
+                      dataKey="normalFit" 
+                      stroke="#9932CC" 
+                      strokeWidth={3}
+                      dot={false}
+                      data={normalFitData}
+                      type="monotone"
+                    />
+                  )}
                   
                   {/* Confidence Interval */}
                   {state.showCI && confidenceInterval && (

@@ -68,14 +68,14 @@ const BootstrapControls: React.FC<BootstrapControlsProps> = ({
             <Slider
               value={[state.animationSpeed]}
               min={0.5}
-              max={5}
+              max={20}
               step={0.5}
               onValueChange={([value]) => onStateChange({ animationSpeed: value })}
               className="py-2"
             />
             <div className="flex justify-between text-xs opacity-60 mt-1">
-              <span>Slow</span>
-              <span>Fast</span>
+              <span>Slow (0.5x)</span>
+              <span>Fast (20x)</span>
             </div>
           </div>
 

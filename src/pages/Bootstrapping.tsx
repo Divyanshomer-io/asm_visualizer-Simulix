@@ -48,6 +48,7 @@ const Bootstrapping = () => {
   });
 
   const animationRef = useRef<number>();
+  const intervalRef = useRef<number>();
 
   const generateBootstrapData = () => {
     const samples = generateBootstrapSamples(
@@ -67,20 +68,32 @@ const Bootstrapping = () => {
 
   const handleStartStop = () => {
     if (state.isRunning) {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      // Stop animation
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
       }
       setState(prev => ({ ...prev, isRunning: false }));
     } else {
+      // Start animation
       setState(prev => ({ ...prev, isRunning: true }));
-      animateBootstrap();
+      startAnimation();
     }
   };
 
-  const animateBootstrap = () => {
-    const animate = () => {
+  const startAnimation = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
       setState(prev => {
         if (prev.currentIteration >= params.numBootstrapSamples) {
+          // Stop animation when we reach the target
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = undefined;
+          }
           return { ...prev, isRunning: false };
         }
         
@@ -89,20 +102,31 @@ const Bootstrapping = () => {
           currentIteration: prev.currentIteration + 1,
         };
       });
-
-      if (state.currentIteration < params.numBootstrapSamples) {
-        animationRef.current = requestAnimationFrame(() => {
-          setTimeout(animate, 1000 / state.animationSpeed);
-        });
-      }
-    };
-    
-    animate();
+    }, 1000 / state.animationSpeed);
   };
 
+  // Update animation speed when it changes
+  useEffect(() => {
+    if (state.isRunning) {
+      startAnimation();
+    }
+  }, [state.animationSpeed]);
+
+  // Stop animation when currentIteration reaches the target
+  useEffect(() => {
+    if (state.currentIteration >= params.numBootstrapSamples && state.isRunning) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
+      }
+      setState(prev => ({ ...prev, isRunning: false }));
+    }
+  }, [state.currentIteration, params.numBootstrapSamples, state.isRunning]);
+
   const handleReset = () => {
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = undefined;
     }
     setState(prev => ({
       ...prev,
@@ -126,8 +150,8 @@ const Bootstrapping = () => {
 
   useEffect(() => {
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
     };
   }, []);
