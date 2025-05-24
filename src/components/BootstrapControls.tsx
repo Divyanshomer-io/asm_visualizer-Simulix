@@ -28,13 +28,13 @@ const BootstrapControls: React.FC<BootstrapControlsProps> = ({
   // Convert speed to relative scale (1-100)
   const getSpeedPercentage = (speed: number) => {
     const minSpeed = 0.5;
-    const maxSpeed = 20;
+    const maxSpeed = 200;
     return Math.round(((speed - minSpeed) / (maxSpeed - minSpeed)) * 100);
   };
 
   const getSpeedFromPercentage = (percentage: number) => {
     const minSpeed = 0.5;
-    const maxSpeed = 20;
+    const maxSpeed = 200;
     return minSpeed + (percentage / 100) * (maxSpeed - minSpeed);
   };
 
