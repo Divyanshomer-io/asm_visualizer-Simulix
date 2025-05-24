@@ -27,6 +27,14 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
   state,
   params,
 }) => {
+  // Safe number formatter
+  const formatNumber = (value: any, decimals: number = 2): string => {
+    if (typeof value === 'number' && !isNaN(value) && isFinite(value)) {
+      return value.toFixed(decimals);
+    }
+    return '0';
+  };
+
   // Prepare data for bootstrap distribution histogram - following Python logic exactly
   const getBootstrapHistogramData = () => {
     const currentStats = state.currentStatValues.slice(0, state.currentIteration);
@@ -214,7 +222,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                 <XAxis 
                   dataKey="x" 
                   stroke="#ffffff80"
-                  tickFormatter={(value) => value.toFixed(2)}
+                  tickFormatter={(value) => formatNumber(value, 2)}
                   domain={['dataMin', 'dataMax']}
                 />
                 <YAxis stroke="#ffffff80" />
@@ -226,10 +234,10 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     color: 'white'
                   }}
                   formatter={(value: number, name: string) => [
-                    name === 'normalFit' ? value.toFixed(3) : value,
+                    name === 'normalFit' ? formatNumber(value, 3) : value,
                     name === 'normalFit' ? 'Normal Fit' : 'Frequency'
                   ]}
-                  labelFormatter={(value) => `Value: ${Number(value).toFixed(3)}`}
+                  labelFormatter={(value) => `Value: ${formatNumber(value, 3)}`}
                 />
                 
                 {/* Confidence interval yellow area - following Python axvspan logic */}
@@ -296,13 +304,13 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
             <div className="mt-2 text-xs space-y-1">
               <div className="flex justify-between">
                 <span>Bootstrap Mean:</span>
-                <span className="font-mono">{confidenceInterval.mean.toFixed(3)}</span>
+                <span className="font-mono">{formatNumber(confidenceInterval.mean, 3)}</span>
               </div>
               {state.showCI && (
                 <div className="flex justify-between">
                   <span>{(params.confidenceLevel * 100).toFixed(0)}% CI:</span>
                   <span className="font-mono">
-                    [{confidenceInterval.lower.toFixed(3)}, {confidenceInterval.upper.toFixed(3)}]
+                    [{formatNumber(confidenceInterval.lower, 3)}, {formatNumber(confidenceInterval.upper, 3)}]
                   </span>
                 </div>
               )}
@@ -326,7 +334,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   <XAxis 
                     dataKey="x" 
                     stroke="#ffffff80"
-                    tickFormatter={(value) => value.toFixed(1)}
+                    tickFormatter={(value) => formatNumber(value, 1)}
                   />
                   <YAxis 
                     stroke="#ffffff80"
@@ -340,7 +348,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                       color: 'white'
                     }}
                     formatter={(value: number, name: string) => [
-                      value.toFixed(4),
+                      formatNumber(value, 4),
                       name === 'original' ? `Original Data (n=${state.originalData.length})` : `Bootstrap ${params.statistic}s (n=${state.currentIteration})`
                     ]}
                   />
@@ -404,7 +412,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                       borderRadius: '8px',
                       color: 'white'
                     }}
-                    formatter={(value: number, name: string) => [value.toFixed(4), name === 'bias' ? '|Bias|' : 'MSE']}
+                    formatter={(value: number, name: string) => [formatNumber(value, 4), name === 'bias' ? '|Bias|' : 'MSE']}
                   />
                   
                   <Line 
@@ -431,11 +439,11 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
               <div className="mt-2 text-xs flex justify-between">
                 <div>
                   <span className="inline-block w-3 h-3 bg-[#4169E1] rounded-full mr-1"></span>
-                  |Bias|: {convergenceData[convergenceData.length - 1]?.bias.toFixed(4)}
+                  |Bias|: {formatNumber(convergenceData[convergenceData.length - 1]?.bias, 4)}
                 </div>
                 <div>
                   <span className="inline-block w-3 h-3 bg-[#DC143C] rounded-full mr-1"></span>
-                  MSE: {convergenceData[convergenceData.length - 1]?.mse.toFixed(4)}
+                  MSE: {formatNumber(convergenceData[convergenceData.length - 1]?.mse, 4)}
                 </div>
               </div>
             )}
