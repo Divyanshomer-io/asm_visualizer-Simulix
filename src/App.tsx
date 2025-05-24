@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import Simulator from "./pages/Simulator";
 import SimulatedAnnealingToy from "./pages/SimulatedAnnealingToy";
 import AliasMethod from "./pages/AliasMethod";
+import Bootstrapping from "./pages/Bootstrapping";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/simulator" element={<Simulator />} />
           <Route path="/simulated-annealing-toy" element={<SimulatedAnnealingToy />} />
           <Route path="/alias-method" element={<AliasMethod />} />
+          <Route path="/bootstrapping" element={<Bootstrapping />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

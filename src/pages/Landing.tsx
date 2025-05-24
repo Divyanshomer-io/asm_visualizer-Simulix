@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3 } from "lucide-react";
 
 const Landing = () => {
   const visualizations = [
@@ -28,6 +27,14 @@ const Landing = () => {
       path: "/alias-method",
       icon: <Dices className="h-6 w-6" />,
       tags: ["Probability", "Sampling", "Algorithm"]
+    },
+    {
+      id: "bootstrapping",
+      title: "Bootstrapping",
+      description: "Understand statistical inference through resampling techniques and confidence interval construction.",
+      path: "/bootstrapping",
+      icon: <BarChart3 className="h-6 w-6" />,
+      tags: ["Statistics", "Resampling", "Inference"]
     },
     // More visualizations will be added later
   ];
