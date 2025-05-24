@@ -25,6 +25,19 @@ const BootstrapControls: React.FC<BootstrapControlsProps> = ({
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // Convert speed to relative scale (1-100)
+  const getSpeedPercentage = (speed: number) => {
+    const minSpeed = 0.5;
+    const maxSpeed = 20;
+    return Math.round(((speed - minSpeed) / (maxSpeed - minSpeed)) * 100);
+  };
+
+  const getSpeedFromPercentage = (percentage: number) => {
+    const minSpeed = 0.5;
+    const maxSpeed = 20;
+    return minSpeed + (percentage / 100) * (maxSpeed - minSpeed);
+  };
+
   return (
     <div className="space-y-4">
       {/* Main Controls */}
@@ -60,22 +73,22 @@ const BootstrapControls: React.FC<BootstrapControlsProps> = ({
             </Button>
           </div>
 
-          {/* Animation Speed */}
+          {/* Animation Speed - showing relative scale */}
           <div>
             <label className="text-sm opacity-80 mb-2 block">
-              Animation Speed: {state.animationSpeed}x
+              Animation Speed
             </label>
             <Slider
-              value={[state.animationSpeed]}
-              min={0.5}
-              max={20}
-              step={0.5}
-              onValueChange={([value]) => onStateChange({ animationSpeed: value })}
+              value={[getSpeedPercentage(state.animationSpeed)]}
+              min={0}
+              max={100}
+              step={5}
+              onValueChange={([value]) => onStateChange({ animationSpeed: getSpeedFromPercentage(value) })}
               className="py-2"
             />
             <div className="flex justify-between text-xs opacity-60 mt-1">
-              <span>Slow (0.5x)</span>
-              <span>Fast (20x)</span>
+              <span>Slow</span>
+              <span>Fast</span>
             </div>
           </div>
 
