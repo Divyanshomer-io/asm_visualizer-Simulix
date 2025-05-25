@@ -380,7 +380,7 @@ const Bootstrapping = () => {
                       <ul className="list-disc pl-6 text-sm space-y-1">
                         <li>Gray bars = distribution of original data points</li>
                         <li>Orange bars = distribution of bootstrap statistics</li>
-                        <li>Black dashed line = mean of original data</li>
+                        <li>Black line = mean of original data</li>
                         <li>Orange dashed line = mean of bootstrap statistics</li>
                       </ul>
                       <p className="text-sm opacity-80"><strong>Key insight:</strong> Bootstrap statistics are typically more concentrated than original data (less variability)</p>
