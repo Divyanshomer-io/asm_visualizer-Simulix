@@ -53,9 +53,9 @@ const Landing = () => {
       <header className="w-full glass-panel border-b border-white/5">
         <div className="container py-6 px-4 md:px-8">
           <h1 className="text-2xl md:text-3xl font-light tracking-tight">
-            Applied Statistical Mathematics
+            Simulix
             <span className="text-sm ml-3 opacity-70 font-normal">
-              Interactive Visualizations
+              Interactive Visualizations of Data Science Concepts
             </span>
           </h1>
         </div>
