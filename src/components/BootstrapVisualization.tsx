@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -199,7 +198,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
         <CardContent>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={histogramData} margin={{ top: 20, right: 30, left: 40, bottom: 60 }}>
+              <ComposedChart data={histogramData} margin={{ top: 20, right: 30, left: 60, bottom: 80 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
                 
                 {/* Confidence interval highlighting - FULL BACKGROUND area between bounds */}
@@ -207,8 +206,8 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   <ReferenceArea 
                     x1={confidenceInterval.lower} 
                     x2={confidenceInterval.upper} 
-                    fill="#ffff00" 
-                    fillOpacity={0.3}
+                    fill="#ff0000" 
+                    fillOpacity={0.2}
                     stroke="none"
                   />
                 )}
@@ -223,10 +222,10 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   type="number"
                   scale="linear"
                   label={{ 
-                    value: 'Value', 
+                    value: 'Bootstrap Statistic Value', 
                     position: 'insideBottom', 
-                    offset: -10, 
-                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
+                    offset: -20, 
+                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
                   }}
                 />
 
@@ -238,7 +237,8 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     value: 'Frequency', 
                     angle: -90, 
                     position: 'insideLeft', 
-                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
+                    offset: 10,
+                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
                   }}
                 />
                 <Tooltip
@@ -284,7 +284,8 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                       strokeDasharray="8 4"
                       label={{
                         value: `CI Lower: ${formatNumber(confidenceInterval.lower, 3)}`,
-                        position: "topLeft",
+                        position: "top",
+                        offset: 10,
                         style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
                       }}
                     />
@@ -296,7 +297,8 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                       strokeDasharray="8 4"
                       label={{
                         value: `CI Upper: ${formatNumber(confidenceInterval.upper, 3)}`,
-                        position: "topRight",
+                        position: "top",
+                        offset: 10,
                         style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
                       }}
                     />
@@ -311,7 +313,8 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     strokeWidth={2}
                     label={{
                       value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 3)}`,
-                      position: "top",
+                      position: "bottom",
+                      offset: 10,
                       style: { fill: "#00ff00", fontSize: "12px", fontWeight: "bold" }
                     }}
                   />
@@ -350,7 +353,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={comparisonData} margin={{ top: 20, right: 30, left: 40, bottom: 60 }}>
+                <ComposedChart data={comparisonData} margin={{ top: 20, right: 30, left: 60, bottom: 80 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
                   <XAxis 
                     dataKey="x" 
@@ -359,10 +362,10 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     fontWeight="bold"
                     tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 1) : '0'}
                     label={{ 
-                      value: 'Value', 
+                      value: 'Data Value', 
                       position: 'insideBottom', 
-                      offset: -10, 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
+                      offset: -20, 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
                     }}
                   />
                   <YAxis 
@@ -373,7 +376,8 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                       value: 'Density', 
                       angle: -90, 
                       position: 'insideLeft', 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
+                      offset: 10,
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
                     }}
                   />
                   <Tooltip
@@ -411,7 +415,8 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     strokeWidth={2}
                     label={{
                       value: `Original Mean: ${formatNumber(state.originalData.reduce((a, b) => a + b, 0) / state.originalData.length, 2)}`,
-                      position: "top",
+                      position: "bottom",
+                      offset: 10,
                       style: { fill: "#000000", fontSize: "10px", fontWeight: "bold" }
                     }}
                   />
@@ -424,6 +429,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                       label={{
                         value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 2)}`,
                         position: "top", 
+                        offset: 10,
                         style: { fill: "#ff8c00", fontSize: "10px", fontWeight: "bold" }
                       }}
                     />
@@ -442,7 +448,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={convergenceData} margin={{ top: 20, right: 30, left: 40, bottom: 60 }}>
+                <LineChart data={convergenceData} margin={{ top: 20, right: 30, left: 60, bottom: 80 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
                   <XAxis 
                     dataKey="samples" 
@@ -452,8 +458,8 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     label={{ 
                       value: 'Number of Bootstrap Samples', 
                       position: 'insideBottom', 
-                      offset: -10, 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
+                      offset: -20, 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
                     }}
                   />
                   <YAxis 
@@ -461,10 +467,11 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     fontSize={14}
                     fontWeight="bold"
                     label={{ 
-                      value: 'Value', 
+                      value: 'Error Value', 
                       angle: -90, 
                       position: 'insideLeft', 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
+                      offset: 10,
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
                     }}
                   />
                   <Tooltip
