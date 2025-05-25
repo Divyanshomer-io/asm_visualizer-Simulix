@@ -88,7 +88,7 @@ const Landing = () => {
       <section className="container px-4 md:px-8 py-16 md:py-24">
         <div className="max-w-4xl mx-auto space-y-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gradient-primary">
-            Explore Concepts of Data Science Through Interactive Visualizations
+            Explore Data Science Through Interactive Visualizations
           </h1>
           
           <p className="text-xl opacity-80 max-w-3xl">
