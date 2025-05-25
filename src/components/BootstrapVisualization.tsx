@@ -15,6 +15,7 @@ import {
   ComposedChart,
   Area,
   AreaChart,
+  ReferenceArea,
 } from "recharts";
 import { BootstrapState, BootstrapParams } from "@/pages/Bootstrapping";
 
@@ -188,18 +189,6 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
   const comparisonData = getComparisonData();
   const convergenceData = getConvergenceData();
 
-  // Prepare confidence interval area data for yellow shading
-  const getConfidenceIntervalArea = () => {
-    if (!state.showCI || !confidenceInterval || histogramData.length === 0) return [];
-    
-    return histogramData.map(bin => ({
-      x: bin.x,
-      count: (bin.x >= confidenceInterval.lower && bin.x <= confidenceInterval.upper) ? bin.count : 0,
-    }));
-  };
-
-  const ciAreaData = getConfidenceIntervalArea();
-
   return (
     <div className="space-y-6">
       {/* Top Row: Bootstrap Distribution - Full Width */}
@@ -214,11 +203,29 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                 <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
                 <XAxis 
                   dataKey="x" 
-                  stroke="#ffffff80"
+                  stroke="#ffffff"
+                  fontSize={12}
+                  fontWeight="bold"
                   tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 2) : '0'}
                   domain={['dataMin', 'dataMax']}
+                  label={{ 
+                    value: 'Value', 
+                    position: 'insideBottom', 
+                    offset: -5, 
+                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                  }}
                 />
-                <YAxis stroke="#ffffff80" />
+                <YAxis 
+                  stroke="#ffffff"
+                  fontSize={12}
+                  fontWeight="bold"
+                  label={{ 
+                    value: 'Frequency', 
+                    angle: -90, 
+                    position: 'insideLeft', 
+                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                  }}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'rgba(22, 22, 26, 0.95)',
@@ -233,14 +240,13 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   labelFormatter={(value) => `Value: ${typeof value === 'number' ? formatNumber(value, 3) : '0'}`}
                 />
                 
-                {/* Confidence interval yellow area - following Python axvspan logic */}
-                {state.showCI && ciAreaData.length > 0 && (
-                  <Area 
-                    dataKey="count" 
+                {/* Confidence interval highlighting - Full area between bounds */}
+                {state.showCI && confidenceInterval && (
+                  <ReferenceArea 
+                    x1={confidenceInterval.lower} 
+                    x2={confidenceInterval.upper} 
                     fill="#ffff00" 
                     fillOpacity={0.2}
-                    stroke="none"
-                    data={ciAreaData}
                   />
                 )}
                 
@@ -263,30 +269,30 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   />
                 )}
                 
-                {/* Confidence Interval vertical dotted lines */}
+                {/* Confidence Interval vertical red dotted lines */}
                 {state.showCI && confidenceInterval && (
                   <>
                     <ReferenceLine 
                       x={confidenceInterval.lower} 
                       stroke="#ff0000" 
-                      strokeWidth={2}
-                      strokeDasharray="5 5"
+                      strokeWidth={3}
+                      strokeDasharray="8 4"
                       label={{
                         value: "CI Lower",
                         position: "top",
-                        style: { fill: "#ff0000", fontSize: "10px" }
+                        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
                       }}
                     />
                    
                     <ReferenceLine 
                       x={confidenceInterval.upper} 
                       stroke="#ff0000" 
-                      strokeWidth={2}
-                      strokeDasharray="5 5"
+                      strokeWidth={3}
+                      strokeDasharray="8 4"
                       label={{
                         value: "CI Upper",
                         position: "top",
-                        style: { fill: "#ff0000", fontSize: "10px" }
+                        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
                       }}
                     />
                   </>
@@ -301,7 +307,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     label={{
                       value: "Bootstrap Mean",
                       position: "top",
-                      style: { fill: "#00ff00", fontSize: "10px" }
+                      style: { fill: "#00ff00", fontSize: "12px", fontWeight: "bold" }
                     }}
                   />
                 )}
@@ -342,12 +348,27 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
                   <XAxis 
                     dataKey="x" 
-                    stroke="#ffffff80"
+                    stroke="#ffffff"
+                    fontSize={12}
+                    fontWeight="bold"
                     tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 1) : '0'}
+                    label={{ 
+                      value: 'Value', 
+                      position: 'insideBottom', 
+                      offset: -5, 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                    }}
                   />
                   <YAxis 
-                    stroke="#ffffff80"
-                    label={{ value: 'Density', angle: -90, position: 'insideLeft', fill: '#ffffff80' }}
+                    stroke="#ffffff"
+                    fontSize={12}
+                    fontWeight="bold"
+                    label={{ 
+                      value: 'Density', 
+                      angle: -90, 
+                      position: 'insideLeft', 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                    }}
                   />
                   <Tooltip
                     contentStyle={{
@@ -385,7 +406,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     label={{
                       value: `Original Mean: ${formatNumber(state.originalData.reduce((a, b) => a + b, 0) / state.originalData.length, 2)}`,
                       position: "top",
-                      style: { fill: "#000000", fontSize: "10px" }
+                      style: { fill: "#000000", fontSize: "10px", fontWeight: "bold" }
                     }}
                   />
                   {confidenceInterval && (
@@ -397,7 +418,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                       label={{
                         value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 2)}`,
                         position: "top", 
-                        style: { fill: "#ff8c00", fontSize: "10px" }
+                        style: { fill: "#ff8c00", fontSize: "10px", fontWeight: "bold" }
                       }}
                     />
                   )}
@@ -419,12 +440,26 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
                   <XAxis 
                     dataKey="samples" 
-                    stroke="#ffffff80"
-                    label={{ value: 'Number of Bootstrap Samples', position: 'insideBottom', offset: -10, fill: '#ffffff80' }}
+                    stroke="#ffffff"
+                    fontSize={12}
+                    fontWeight="bold"
+                    label={{ 
+                      value: 'Number of Bootstrap Samples', 
+                      position: 'insideBottom', 
+                      offset: -5, 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                    }}
                   />
                   <YAxis 
-                    stroke="#ffffff80"
-                    label={{ value: 'Value', angle: -90, position: 'insideLeft', fill: '#ffffff80' }}
+                    stroke="#ffffff"
+                    fontSize={12}
+                    fontWeight="bold"
+                    label={{ 
+                      value: 'Value', 
+                      angle: -90, 
+                      position: 'insideLeft', 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                    }}
                   />
                   <Tooltip
                     contentStyle={{
