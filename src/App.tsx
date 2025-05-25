@@ -26,6 +26,7 @@ const App = () => (
           <Route path="/simulated-annealing-toy" element={<SimulatedAnnealingToy />} />
           <Route path="/alias-method" element={<AliasMethod />} />
           <Route path="/bootstrapping" element={<Bootstrapping />} />
+           <Route path="/huber-mean" element={<HuberMean />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
