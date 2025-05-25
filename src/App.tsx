@@ -9,6 +9,7 @@ import Simulator from "./pages/Simulator";
 import SimulatedAnnealingToy from "./pages/SimulatedAnnealingToy";
 import AliasMethod from "./pages/AliasMethod";
 import Bootstrapping from "./pages/Bootstrapping";
+import HuberMean from "./pages/HuberMean";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
