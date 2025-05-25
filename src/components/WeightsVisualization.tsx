@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip as ChartTooltip,
+  Tooltip as RechartsTooltip,
   Cell,
 } from 'recharts';
 
@@ -100,7 +100,7 @@ const WeightsVisualization: React.FC<WeightsVisualizationProps> = ({
                 }}
                 domain={[0, 1.1]}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <RechartsTooltip content={<CustomTooltip />} />
               <Bar dataKey="weight" name="Weight">
                 {formattedData.map((entry, index) => {
                   const residual = Math.abs(entry.value - currentEstimate);
