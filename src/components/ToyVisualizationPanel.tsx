@@ -15,7 +15,8 @@ interface ToyVisualizationPanelProps {
 }
 
 const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, params }) => {
-  const [binaryViewRange, setBinaryViewRange] = useState([0, Math.min(50, state.history.length)]);
+  const [binaryViewRange, setBinaryViewRange] = useState([0, maxIterationsToShow]);
+
   
   // Prepare data for charts
   const functionValueData = state.history.map(entry => ({
@@ -58,12 +59,12 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
       }))
     })) : [];
   
-  const handleBinaryRangeChange = (value: number[]) => {
-    const start = value[0];
-    const end = Math.min(start + maxIterationsToShow, totalIterations);
-    setBinaryViewRange([start, end]);
-  };
-  
+const handleBinaryRangeChange = (value: number[]) => {
+  const start = Math.max(0, value[0]);
+  const end = Math.min(start + maxIterationsToShow, totalIterations);
+  setBinaryViewRange([start, end]);
+};
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Function Value Evolution */}
