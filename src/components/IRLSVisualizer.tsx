@@ -134,8 +134,7 @@ const IRLSVisualizer: React.FC = () => {
   const simpleMean = calculateMean(data);
 
   return (
-    
-
+    <div>
       <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6 animate-fade-in">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left side - Visualizations */}
