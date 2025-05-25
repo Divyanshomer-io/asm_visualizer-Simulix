@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -8,7 +10,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as ChartTooltip,
   Cell,
 } from 'recharts';
 
@@ -58,7 +60,19 @@ const WeightsVisualization: React.FC<WeightsVisualizationProps> = ({
   return (
     <Card className="glass-panel">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Weights Visualization</CardTitle>
+        <CardTitle className="text-lg font-medium flex items-center gap-2">
+          Weights Visualization
+          <Tooltip>
+            <TooltipTrigger>
+              <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs text-xs">
+                Bar chart showing weights assigned to each data point. Lower weights (shorter bars) indicate outliers being downweighted.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[280px] w-full">
