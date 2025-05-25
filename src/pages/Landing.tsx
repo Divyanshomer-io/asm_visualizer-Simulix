@@ -36,6 +36,14 @@ const Landing = () => {
       icon: <BarChart3 className="h-6 w-6" />,
       tags: ["Statistics", "Resampling", "Inference"]
     },
+    {
+      id: "huber-mean",
+      title: "Huber Mean Visulization",
+      description: "Understand statistical inference through resampling techniques and confidence interval construction.",
+      path: "/huber-mean",
+      icon: <BarChart3 className="h-6 w-6" />,
+      tags: ["Statistics", "Resampling", "Inference"]
+    },
     // More visualizations will be added later
   ];
 
