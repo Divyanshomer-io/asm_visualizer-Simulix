@@ -52,12 +52,33 @@ const Landing = () => {
       {/* Header */}
       <header className="w-full glass-panel border-b border-white/5">
         <div className="container py-6 px-4 md:px-8">
-          <h1 className="text-2xl md:text-3xl font-light tracking-tight">
-            Simulix
-            <span className="text-sm ml-3 opacity-70 font-normal">
-              Interactive Visualizations of Data Science Concepts
-            </span>
-          </h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight flex items-center gap-3">
+  <span
+    className="simulix-logo transition-colors duration-200"
+    style={{
+      fontWeight: 800,
+      letterSpacing: '0.01em',
+      color: '#fff',
+      cursor: 'pointer',
+      fontFamily: 'inherit',
+      transition: 'text-shadow 0.2s, color 0.2s',
+    }}
+    onMouseOver={e => {
+      e.currentTarget.style.color = '#38bdf8'; // Accent color
+      e.currentTarget.style.textShadow = '0 2px 12px #38bdf855';
+    }}
+    onMouseOut={e => {
+      e.currentTarget.style.color = '#fff';
+      e.currentTarget.style.textShadow = 'none';
+    }}
+  >
+    Simulix
+  </span>
+  <span className="text-sm ml-3 opacity-70 font-normal">
+    Interactive Visualizations of Data Science Concepts
+  </span>
+</h1>
+
         </div>
       </header>
       
