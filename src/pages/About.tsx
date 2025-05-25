@@ -99,10 +99,7 @@ const About = () => {
                 <div className="w-8 h-8 bg-accent/30 rounded-lg flex items-center justify-center shrink-0 mt-1">
                   <Building className="h-4 w-4" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-medium">Course</h3>
-                  <p className="opacity-80">ASM Project - Algorithm Visualization</p>
-                </div>
+                
               </div>
             </div>
           </section>
