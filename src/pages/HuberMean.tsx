@@ -17,14 +17,12 @@ const HuberMean = () => {
                 </span>
               </h1>
               <p className="text-sm opacity-70">Iteratively Reweighted Least Squares (IRLS) Demo</p>
-            </div>
-            <Link 
-              href="/visualizations" // Update this to your actual visualizations route
-              className="control-btn flex items-center gap-2 text-sm hover:bg-white/5 px-4 py-2 rounded transition-colors"
-            >
-              Back to Visualizations
-            </Link>
-          </div>
+           </div>
+          <Link to="/" className="control-btn flex items-center gap-2 text-sm">
+            <Home className="h-4 w-4" />
+            Back to Visualizations
+          </Link>
+        </div>
         </header>
 
         {/* Main content */}
