@@ -11,7 +11,6 @@ import AliasMethod from "./pages/AliasMethod";
 import Bootstrapping from "./pages/Bootstrapping";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
-import { Analytics } from "@vercel/analytics/next"
 
 const queryClient = new QueryClient();
 
