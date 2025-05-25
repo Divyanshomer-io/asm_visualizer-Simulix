@@ -1,6 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -8,7 +9,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as ChartTooltip,
   Legend,
 } from 'recharts';
 
@@ -25,7 +26,19 @@ const ConvergenceChart: React.FC<ConvergenceChartProps> = ({ iterations }) => {
   return (
     <Card className="glass-panel">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Convergence Path</CardTitle>
+        <CardTitle className="text-lg font-medium flex items-center gap-2">
+          Convergence Path
+          <Tooltip>
+            <TooltipTrigger>
+              <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs text-xs">
+                Shows how the parameter estimate evolves over iterations. Horizontal convergence indicates successful estimation.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[280px] w-full">
