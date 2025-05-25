@@ -105,60 +105,54 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     };
   };
 
-  // Prepare data for original vs bootstrap comparison - following Python density logic
-  const getComparisonData = () => {
-    const currentStats = state.currentStatValues.slice(0, state.currentIteration);
-    if (currentStats.length === 0) return [];
+ // Prepare data for original vs bootstrap comparison - as density vs value (Python logic)
+const getComparisonData = () => {
+  const currentStats = state.currentStatValues.slice(0, state.currentIteration);
+  if (currentStats.length === 0) return [];
 
-    // Use same range for both original data and bootstrap stats
-    const allValues = [...state.originalData, ...currentStats];
-    const min = Math.min(...allValues);
-    const max = Math.max(...allValues);
-    
-    if (min === max) {
-      return [{
-        x: min,
-        original: 1,
-        bootstrap: 1,
-      }];
-    }
+  // Use same range for both original data and bootstrap stats
+  const allValues = [...state.originalData, ...currentStats];
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
 
-    const bins = 15; // Following Python code
-    const binWidth = (max - min) / bins;
+  if (min === max) {
+    return [{
+      x: min,
+      original: 1.0,
+      bootstrap: 1.0,
+    }];
+  }
 
-    const histogram = Array(bins).fill(0).map((_, i) => ({
-      x: min + (i + 0.5) * binWidth,
-      original: 0,
-      bootstrap: 0,
-    }));
+  const bins = 15;
+  const binWidth = (max - min) / bins;
+  const binEdges = Array.from({ length: bins + 1 }, (_, i) => min + i * binWidth);
 
-    // Count original data
-    state.originalData.forEach(value => {
+  // Helper to count in bins
+  function histogramDensity(data: number[]) {
+    const counts = Array(bins).fill(0);
+    data.forEach(value => {
       if (binWidth > 0) {
         const binIndex = Math.min(Math.floor((value - min) / binWidth), bins - 1);
-        if (binIndex >= 0 && binIndex < bins) {
-          histogram[binIndex].original++;
-        }
+        if (binIndex >= 0 && binIndex < bins) counts[binIndex]++;
       }
     });
+    // Convert counts to density (count / (n * binWidth))
+    return counts.map(count => count / (data.length * binWidth));
+  }
 
-    // Count bootstrap stats
-    currentStats.forEach(value => {
-      if (binWidth > 0) {
-        const binIndex = Math.min(Math.floor((value - min) / binWidth), bins - 1);
-        if (binIndex >= 0 && binIndex < bins) {
-          histogram[binIndex].bootstrap++;
-        }
-      }
-    });
+  const originalDensity = histogramDensity(state.originalData);
+  const bootstrapDensity = histogramDensity(currentStats);
 
-    // Convert to frequency (not density) following Python logic
-    return histogram.map(bin => ({
-      ...bin,
-      original: bin.original,
-      bootstrap: bin.bootstrap,
-    }));
-  };
+  // Bin centers
+  const binCenters = binEdges.slice(0, -1).map((edge, i) => edge + binWidth / 2);
+
+  // Prepare output
+  return binCenters.map((x, i) => ({
+    x,
+    original: originalDensity[i],
+    bootstrap: bootstrapDensity[i],
+  }));
+};
 
   // Calculate bias and MSE convergence
   const getConvergenceData = () => {
