@@ -95,12 +95,6 @@ const About = () => {
                 </div>
               </div>
               
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-accent/30 rounded-lg flex items-center justify-center shrink-0 mt-1">
-                  <Building className="h-4 w-4" />
-                </div>
-                
-              </div>
             </div>
           </section>
           
