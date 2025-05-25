@@ -194,42 +194,51 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
       {/* Top Row: Bootstrap Distribution - Full Width */}
       <Card className="glass-panel">
         <CardHeader>
-          <CardTitle className="text-lg">Bootstrap Distribution</CardTitle>
+          <CardTitle className="text-lg font-semibold text-white">Bootstrap Distribution</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={histogramData}>
+              <ComposedChart data={histogramData} margin={{ top: 20, right: 30, left: 40, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
-               <XAxis 
-  dataKey="x" 
-  stroke="#ffffff"
-  fontSize={12}
-  fontWeight="bold"
-  tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 2) : '0'}
-  domain={[
-    (dataMin) => confidenceInterval ? 
-      Math.min(dataMin, confidenceInterval.lower, confidenceInterval.mean) : dataMin,
-    (dataMax) => confidenceInterval ? 
-      Math.max(dataMax, confidenceInterval.upper, confidenceInterval.mean) : dataMax
-  ]}
-  label={{ 
-    value: 'Value', 
-    position: 'insideBottom', 
-    offset: -5, 
-    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-  }}
-/>
+                
+                {/* Confidence interval highlighting - FULL BACKGROUND area between bounds */}
+                {state.showCI && confidenceInterval && (
+                  <ReferenceArea 
+                    x1={confidenceInterval.lower} 
+                    x2={confidenceInterval.upper} 
+                    fill="#ffff00" 
+                    fillOpacity={0.3}
+                    stroke="none"
+                  />
+                )}
+                
+                <XAxis 
+                  dataKey="x" 
+                  stroke="#ffffff"
+                  fontSize={14}
+                  fontWeight="bold"
+                  tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 2) : '0'}
+                  domain={['dataMin', 'dataMax']}
+                  type="number"
+                  scale="linear"
+                  label={{ 
+                    value: 'Value', 
+                    position: 'insideBottom', 
+                    offset: -10, 
+                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
+                  }}
+                />
 
                 <YAxis 
                   stroke="#ffffff"
-                  fontSize={12}
+                  fontSize={14}
                   fontWeight="bold"
                   label={{ 
                     value: 'Frequency', 
                     angle: -90, 
                     position: 'insideLeft', 
-                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
                   }}
                 />
                 <Tooltip
@@ -245,16 +254,6 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   ]}
                   labelFormatter={(value) => `Value: ${typeof value === 'number' ? formatNumber(value, 3) : '0'}`}
                 />
-                
-                {/* Confidence interval highlighting - Full area between bounds */}
-                {state.showCI && confidenceInterval && (
-                  <ReferenceArea 
-                    x1={confidenceInterval.lower} 
-                    x2={confidenceInterval.upper} 
-                    fill="#ffff00" 
-                    fillOpacity={0.2}
-                  />
-                )}
                 
                 <Bar 
                   dataKey="count" 
@@ -275,58 +274,55 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   />
                 )}
                 
-              {/* Confidence Interval vertical red dotted lines */}
-{state.showCI && confidenceInterval && (
-  <>
-    <ReferenceLine 
-      x={confidenceInterval.lower} 
-      stroke="#ff0000" 
-      strokeWidth={3}
-      strokeDasharray="8 4"
-      ifOverflow="extendDomain"  // ✅ Add this
-      label={{
-        value: "CI Lower",
-        position: "top",
-        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
-      }}
-    />
-   
-    <ReferenceLine 
-      x={confidenceInterval.upper} 
-      stroke="#ff0000" 
-      strokeWidth={3}
-      strokeDasharray="8 4"
-      ifOverflow="extendDomain"  // ✅ Add this
-      label={{
-        value: "CI Upper",
-        position: "top",
-        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
-      }}
-    />
-  </>
-)}
+                {/* RED DOTTED Confidence Interval vertical lines - FIXED */}
+                {state.showCI && confidenceInterval && (
+                  <>
+                    <ReferenceLine 
+                      x={confidenceInterval.lower} 
+                      stroke="#ff0000" 
+                      strokeWidth={3}
+                      strokeDasharray="8 4"
+                      label={{
+                        value: `CI Lower: ${formatNumber(confidenceInterval.lower, 3)}`,
+                        position: "topLeft",
+                        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
+                      }}
+                    />
+                   
+                    <ReferenceLine 
+                      x={confidenceInterval.upper} 
+                      stroke="#ff0000" 
+                      strokeWidth={3}
+                      strokeDasharray="8 4"
+                      label={{
+                        value: `CI Upper: ${formatNumber(confidenceInterval.upper, 3)}`,
+                        position: "topRight",
+                        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
+                      }}
+                    />
+                  </>
+                )}
 
-{/* Bootstrap mean line */}
-{confidenceInterval && (
-  <ReferenceLine 
-    x={confidenceInterval.mean} 
-    stroke="#00ff00" 
-    strokeWidth={2}
-    ifOverflow="extendDomain"  // ✅ Add this
-    label={{
-      value: "Bootstrap Mean",
-      position: "top",
-      style: { fill: "#00ff00", fontSize: "12px", fontWeight: "bold" }
-    }}
-  />
-)}
+                {/* Bootstrap mean line */}
+                {confidenceInterval && (
+                  <ReferenceLine 
+                    x={confidenceInterval.mean} 
+                    stroke="#00ff00" 
+                    strokeWidth={2}
+                    label={{
+                      value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 3)}`,
+                      position: "top",
+                      style: { fill: "#00ff00", fontSize: "12px", fontWeight: "bold" }
+                    }}
+                  />
+                )}
 
               </ComposedChart>
             </ResponsiveContainer>
           </div>
           
           {confidenceInterval && (
-            <div className="mt-2 text-xs space-y-1">
+            <div className="mt-2 text-xs space-y-1 text-white">
               <div className="flex justify-between">
                 <span>Bootstrap Mean:</span>
                 <span className="font-mono">{formatNumber(confidenceInterval.mean, 3)}</span>
@@ -349,35 +345,35 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
         {/* Original vs Bootstrap Comparison */}
         <Card className="glass-panel">
           <CardHeader>
-            <CardTitle className="text-lg">Original vs Bootstrap</CardTitle>
+            <CardTitle className="text-lg font-semibold text-white">Original vs Bootstrap Comparison</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={comparisonData}>
+                <ComposedChart data={comparisonData} margin={{ top: 20, right: 30, left: 40, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
                   <XAxis 
                     dataKey="x" 
                     stroke="#ffffff"
-                    fontSize={12}
+                    fontSize={14}
                     fontWeight="bold"
                     tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 1) : '0'}
                     label={{ 
                       value: 'Value', 
                       position: 'insideBottom', 
-                      offset: -5, 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                      offset: -10, 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
                     }}
                   />
                   <YAxis 
                     stroke="#ffffff"
-                    fontSize={12}
+                    fontSize={14}
                     fontWeight="bold"
                     label={{ 
                       value: 'Density', 
                       angle: -90, 
                       position: 'insideLeft', 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
                     }}
                   />
                   <Tooltip
@@ -441,34 +437,34 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
         {/* Convergence Analysis */}
         <Card className="glass-panel">
           <CardHeader>
-            <CardTitle className="text-lg">Bias and MSE Convergence</CardTitle>
+            <CardTitle className="text-lg font-semibold text-white">Bias and MSE Convergence</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={convergenceData}>
+                <LineChart data={convergenceData} margin={{ top: 20, right: 30, left: 40, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
                   <XAxis 
                     dataKey="samples" 
                     stroke="#ffffff"
-                    fontSize={12}
+                    fontSize={14}
                     fontWeight="bold"
                     label={{ 
                       value: 'Number of Bootstrap Samples', 
                       position: 'insideBottom', 
-                      offset: -5, 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                      offset: -10, 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
                     }}
                   />
                   <YAxis 
                     stroke="#ffffff"
-                    fontSize={12}
+                    fontSize={14}
                     fontWeight="bold"
                     label={{ 
                       value: 'Value', 
                       angle: -90, 
                       position: 'insideLeft', 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '16px', fontWeight: 'bold' } 
                     }}
                   />
                   <Tooltip
@@ -502,7 +498,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
             </div>
             
             {convergenceData.length > 0 && (
-              <div className="mt-2 text-xs flex justify-between">
+              <div className="mt-2 text-xs flex justify-between text-white">
                 <div>
                   <span className="inline-block w-3 h-3 bg-[#4169E1] rounded-full mr-1"></span>
                   |Bias|: {formatNumber(convergenceData[convergenceData.length - 1]?.bias, 4)}
