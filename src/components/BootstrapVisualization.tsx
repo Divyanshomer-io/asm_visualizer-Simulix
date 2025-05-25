@@ -201,20 +201,26 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={histogramData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
-                <XAxis 
-                  dataKey="x" 
-                  stroke="#ffffff"
-                  fontSize={12}
-                  fontWeight="bold"
-                  tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 2) : '0'}
-                  domain={['dataMin', 'dataMax']}
-                  label={{ 
-                    value: 'Value', 
-                    position: 'insideBottom', 
-                    offset: -5, 
-                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-                  }}
-                />
+               <XAxis 
+  dataKey="x" 
+  stroke="#ffffff"
+  fontSize={12}
+  fontWeight="bold"
+  tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 2) : '0'}
+  domain={[
+    (dataMin) => confidenceInterval ? 
+      Math.min(dataMin, confidenceInterval.lower, confidenceInterval.mean) : dataMin,
+    (dataMax) => confidenceInterval ? 
+      Math.max(dataMax, confidenceInterval.upper, confidenceInterval.mean) : dataMax
+  ]}
+  label={{ 
+    value: 'Value', 
+    position: 'insideBottom', 
+    offset: -5, 
+    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+  }}
+/>
+
                 <YAxis 
                   stroke="#ffffff"
                   fontSize={12}
@@ -269,48 +275,52 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   />
                 )}
                 
-                {/* Confidence Interval vertical red dotted lines */}
-                {state.showCI && confidenceInterval && (
-                  <>
-                    <ReferenceLine 
-                      x={confidenceInterval.lower} 
-                      stroke="#ff0000" 
-                      strokeWidth={3}
-                      strokeDasharray="8 4"
-                      label={{
-                        value: "CI Lower",
-                        position: "top",
-                        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
-                      }}
-                    />
-                   
-                    <ReferenceLine 
-                      x={confidenceInterval.upper} 
-                      stroke="#ff0000" 
-                      strokeWidth={3}
-                      strokeDasharray="8 4"
-                      label={{
-                        value: "CI Upper",
-                        position: "top",
-                        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
-                      }}
-                    />
-                  </>
-                )}
-                
-                {/* Bootstrap mean line - always show like in Python */}
-                {confidenceInterval && (
-                  <ReferenceLine 
-                    x={confidenceInterval.mean} 
-                    stroke="#00ff00" 
-                    strokeWidth={2}
-                    label={{
-                      value: "Bootstrap Mean",
-                      position: "top",
-                      style: { fill: "#00ff00", fontSize: "12px", fontWeight: "bold" }
-                    }}
-                  />
-                )}
+              {/* Confidence Interval vertical red dotted lines */}
+{state.showCI && confidenceInterval && (
+  <>
+    <ReferenceLine 
+      x={confidenceInterval.lower} 
+      stroke="#ff0000" 
+      strokeWidth={3}
+      strokeDasharray="8 4"
+      ifOverflow="extendDomain"  // ✅ Add this
+      label={{
+        value: "CI Lower",
+        position: "top",
+        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
+      }}
+    />
+   
+    <ReferenceLine 
+      x={confidenceInterval.upper} 
+      stroke="#ff0000" 
+      strokeWidth={3}
+      strokeDasharray="8 4"
+      ifOverflow="extendDomain"  // ✅ Add this
+      label={{
+        value: "CI Upper",
+        position: "top",
+        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
+      }}
+    />
+  </>
+)}
+
+{/* Bootstrap mean line */}
+{confidenceInterval && (
+  <ReferenceLine 
+    x={confidenceInterval.mean} 
+    stroke="#00ff00" 
+    strokeWidth={2}
+    ifOverflow="extendDomain"  // ✅ Add this
+    label={{
+      value: "Bootstrap Mean",
+      position: "top",
+      style: { fill: "#00ff00", fontSize: "12px", fontWeight: "bold" }
+    }}
+  />
+)}
+
               </ComposedChart>
             </ResponsiveContainer>
           </div>
