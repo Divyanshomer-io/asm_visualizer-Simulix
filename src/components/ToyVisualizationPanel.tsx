@@ -155,99 +155,89 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
         </CardContent>
       </Card>
       
-      {/* Binary State Representation with Slider */}
-      <Card className="glass-panel border-white/10">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="h-4 w-4 opacity-70" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Visualizes how each bit in the solution changes over time. Dark = 0, Light = 1. Use slider to navigate through iterations.</p>
-              </TooltipContent>
-            </Tooltip>
-            Binary State Representation
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="h-[200px] w-full">
-              {state.history.length > 0 && params.r > 0 ? (
-                <div className="relative h-full w-full bg-secondary/20 rounded border border-white/10">
-                  <svg viewBox={`0 0 ${maxIterationsToShow} ${params.r}`} className="w-full h-full">
-                    {binaryHeatmapData.map((bit, bitIndex) => 
-                      bit.data.map((point, iterIndex) => (
-                        <rect
-                          key={`${bitIndex}-${iterIndex}`}
-                          x={iterIndex * blockWidth}
-                          y={bitIndex * blockHeight}
-                          width={blockWidth}
-                          height={blockHeight}
-                          fill={point.value === 1 ? "hsl(var(--accent))" : "hsl(var(--secondary))"}
-                          opacity={0.8}
-                          stroke="hsl(var(--border))"
-                          strokeWidth={0.1}
-                        />
-                      ))
-                    )}
-                  </svg>
-                  {/* Axes labels */}
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-6 text-sm font-bold opacity-90">
-                    Iteration →
-                  </div>
-                  <div className="absolute top-1/2 left-0 text-sm font-bold opacity-90 transform -rotate-90 origin-left -translate-x-6 -translate-y-1/2">
-                    ← Bit Index
-                  </div>
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground">
-                  <div className="relative w-full h-full bg-secondary/20 rounded border border-white/10">
-                    <svg viewBox={`0 0 ${maxIterationsToShow} ${Math.max(1, params.r)}`} className="w-full h-full">
-                      {/* Show empty grid structure */}
-                      {Array.from({ length: Math.max(1, params.r) }, (_, bitIndex) => 
-                        Array.from({ length: maxIterationsToShow }, (_, iterIndex) => (
-                          <rect
-                            key={`empty-${bitIndex}-${iterIndex}`}
-                            x={iterIndex}
-                            y={bitIndex}
-                            width={1}
-                            height={1}
-                            fill="hsl(var(--secondary))"
-                            opacity={0.3}
-                            stroke="hsl(var(--border))"
-                            strokeWidth={0.1}
-                          />
-                        ))
-                      )}
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground font-mono">
-                      Click start to begin visualization
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Slider for navigation - moved below the plot */}
-            {totalIterations > maxIterationsToShow && (
-              <div className="space-y-2">
-                <Label className="text-sm font-bold">
-                  Viewing iterations {startIndex} - {endIndex - 1} of {totalIterations - 1}
-                </Label>
-                <Slider
-                  value={[binaryViewRange[0]]}
-                  onValueChange={(value) => handleBinaryRangeChange(value)}
-                  min={0}
-                  max={Math.max(0, totalIterations - maxIterationsToShow)}
-                  step={1}
-                  className="w-full"
+    {/* Binary State Representation with Slider */}
+<Card className="glass-panel border-white/10">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-lg">
+      <Tooltip>
+        <TooltipTrigger>
+          <Info className="h-4 w-4 opacity-70" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Visualizes how each bit in the solution changes over time. Dark = 0, Light = 1. Use slider to navigate through iterations.</p>
+        </TooltipContent>
+      </Tooltip>
+      Binary State Representation
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="space-y-4">
+      <div className="h-[200px] w-full">
+        {/* Always render the grid when params.r > 0 */}
+        <div className="relative h-full w-full bg-secondary/20 rounded border border-white/10">
+          <svg viewBox={`0 0 ${maxIterationsToShow} ${params.r}`} className="w-full h-full">
+            {/* Render grid lines first */}
+            {Array.from({ length: params.r }).map((_, bitIndex) =>
+              Array.from({ length: maxIterationsToShow }).map((_, iterIndex) => (
+                <rect
+                  key={`grid-${bitIndex}-${iterIndex}`}
+                  x={iterIndex * blockWidth}
+                  y={bitIndex * blockHeight}
+                  width={blockWidth}
+                  height={blockHeight}
+                  fill="transparent"
+                  stroke="hsl(var(--border))"
+                  strokeWidth={0.1}
                 />
-              </div>
+              ))
             )}
+
+            {/* Overlay bit values */}
+            {binaryHeatmapData.map((bit, bitIndex) => 
+              bit.data.map((point, iterIndex) => (
+                <rect
+                  key={`bit-${bitIndex}-${iterIndex}`}
+                  x={iterIndex * blockWidth}
+                  y={bitIndex * blockHeight}
+                  width={blockWidth}
+                  height={blockHeight}
+                  fill={point.value === 1 ? "hsl(var(--accent))" : "hsl(var(--secondary))"}
+                  opacity={0.8}
+                />
+              ))
+            )}
+          </svg>
+          
+          {/* Axes labels */}
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-6 text-sm font-bold opacity-90">
+            Iteration →
           </div>
-        </CardContent>
-      </Card>
+          <div className="absolute top-1/2 left-0 text-sm font-bold opacity-90 transform -rotate-90 origin-left -translate-x-6 -translate-y-1/2">
+            ← Bit Index
+          </div>
+        </div>
+      </div>
+      
+      {/* Slider for navigation */}
+      {totalIterations > maxIterationsToShow && (
+        <div className="space-y-2">
+          <Label className="text-sm font-bold">
+            Viewing iterations {startIndex} - {endIndex - 1} of {totalIterations - 1}
+          </Label>
+          <Slider
+            value={[binaryViewRange[0]]}
+            onValueChange={(value) => handleBinaryRangeChange(value)}
+            min={0}
+            max={Math.max(0, totalIterations - maxIterationsToShow)}
+            step={1}
+            className="w-full"
+          />
+        </div>
+      )}
+    </div>
+  </CardContent>
+</Card>
+
       
       {/* Acceptance Probability */}
       <Card className="glass-panel border-white/10">
