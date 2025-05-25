@@ -1,18 +1,12 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Play, Pause, RotateCcw, ChevronRight } from "lucide-react";
 import { performIRLSIteration, calculateMean } from "@/utils/irlsUtils";
 import DataVisualization from "./DataVisualization";
 import WeightsVisualization from "./WeightsVisualization";
 import ConvergenceChart from "./ConvergenceChart";
+import HuberControls from "./HuberControls";
+import HuberEducationalPanels from "./HuberEducationalPanels";
 
 interface ConvergenceData {
   iteration: number;
@@ -140,191 +134,83 @@ const IRLSVisualizer: React.FC = () => {
   const simpleMean = calculateMean(data);
 
   return (
-    <div className="container max-w-5xl mx-auto px-4 py-6 space-y-6 animate-fade-in">
-      <Card className="glass-panel">
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold text-gradient">
-            Huber M-Estimator with IRLS
-          </CardTitle>
-          <p className="text-muted-foreground">
-            Visualizing the Iterative Reweighted Least Squares algorithm using the Huber function
-            to obtain robust estimates in the presence of outliers.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="data-input" className="text-sm font-medium">Data (comma separated)</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="data-input"
-                    value={dataInput}
-                    onChange={(e) => setDataInput(e.target.value)}
-                    placeholder="Enter numeric data separated by commas"
-                    className="flex-1 input-field"
-                  />
-                  <Button onClick={parseDataInput} className="control-btn">Update</Button>
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="initial-estimate" className="text-sm font-medium">Initial Estimate (μ₀)</Label>
-                <Input
-                  id="initial-estimate"
-                  type="number"
-                  value={initialEstimate}
-                  onChange={(e) => setInitialEstimate(parseFloat(e.target.value) || 0)}
-                  className="w-full input-field"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="k-value" className="text-sm font-medium">Tuning Constant (k)</Label>
-                <Input
-                  id="k-value"
-                  type="number"
-                  value={k}
-                  onChange={(e) => setK(parseFloat(e.target.value) || 1)}
-                  className="w-full input-field"
-                />
-              </div>
+    <div className="min-h-screen bg-background">
+      {/* Header matching the style from other visualizations */}
+      <header className="bg-slate-800 text-white px-6 py-4">
+        <div className="container max-w-7xl mx-auto flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">Huber M-Estimator</h1>
+            <p className="text-slate-300 text-sm">Interactive Polynomial Optimization</p>
+          </div>
+          <button className="text-slate-300 hover:text-white transition-colors text-sm flex items-center gap-2">
+            🏠 Back to Visualizations
+          </button>
+        </div>
+      </header>
 
-              <div>
-                <Label htmlFor="max-iterations" className="text-sm font-medium">Maximum Iterations</Label>
-                <Input
-                  id="max-iterations"
-                  type="number"
-                  value={maxIterations}
-                  onChange={(e) => setMaxIterations(parseInt(e.target.value) || 10)}
-                  className="w-full input-field"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="convergence-threshold" className="text-sm font-medium">Convergence Threshold</Label>
-                <Input
-                  id="convergence-threshold"
-                  type="number"
-                  value={convergenceThreshold}
-                  onChange={(e) => setConvergenceThreshold(parseFloat(e.target.value) || 0.001)}
-                  step="0.0001"
-                  className="w-full input-field"
-                />
-              </div>
-            </div>
+      <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left side - Visualizations */}
+          <div className="lg:col-span-2 space-y-6">
+            <ConvergenceChart iterations={convergenceHistory} />
             
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-medium mb-1">Auto Mode</h3>
-                  <p className="text-sm text-muted-foreground">Run iterations automatically</p>
-                </div>
-                <Switch checked={isAutoMode} onCheckedChange={toggleAutoMode} />
-              </div>
-              
-              {isAutoMode && (
-                <div>
-                  <Label htmlFor="iteration-speed" className="text-sm font-medium">Iteration Speed (ms)</Label>
-                  <div className="flex items-center gap-4">
-                    <Slider
-                      id="iteration-speed"
-                      min={200}
-                      max={2000}
-                      step={100}
-                      value={[iterationSpeed]}
-                      onValueChange={(value) => setIterationSpeed(value[0])}
-                      className="flex-1"
-                    />
-                    <span className="text-sm">{iterationSpeed}ms</span>
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex flex-wrap gap-2 mt-4">
-                <Button
-                  onClick={performIteration}
-                  disabled={isAutoMode || currentIteration >= maxIterations || hasConverged}
-                  className="control-btn-primary flex items-center gap-2"
-                >
-                  <ChevronRight size={18} />
-                  Next Iteration
-                </Button>
-                
-                <Button
-                  onClick={toggleAutoMode}
-                  variant={isAutoMode ? "destructive" : "default"}
-                  className="control-btn flex items-center gap-2"
-                  disabled={currentIteration >= maxIterations || hasConverged}
-                >
-                  {isAutoMode ? <Pause size={18} /> : <Play size={18} />}
-                  {isAutoMode ? "Pause" : "Auto Run"}
-                </Button>
-                
-                <Button
-                  onClick={resetSimulation}
-                  variant="outline"
-                  className="control-btn flex items-center gap-2"
-                >
-                  <RotateCcw size={18} />
-                  Reset
-                </Button>
-              </div>
-
-              <Separator className="my-4" />
-              
-              <div className="space-y-2 p-4 glass-panel rounded-lg">
-                <p className="text-sm"><strong>Iteration:</strong> {currentIteration} / {maxIterations}</p>
-                <p className="text-sm"><strong>Current Estimate (μ{currentIteration}):</strong> {currentEstimate.toFixed(4)}</p>
-                <p className="text-sm"><strong>Simple Mean:</strong> {simpleMean.toFixed(4)}</p>
-                <p className="text-sm"><strong>Status:</strong> {hasConverged ? "Converged ✓" : "Running..."}</p>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <DataVisualization
+                data={data}
+                weights={weights}
+                currentEstimate={currentEstimate}
+                iteration={currentIteration}
+                k={k}
+              />
+              <WeightsVisualization
+                data={data}
+                weights={weights}
+                currentEstimate={currentEstimate}
+                k={k}
+              />
             </div>
           </div>
-        </CardContent>
-      </Card>
-      
-      <ConvergenceChart iterations={convergenceHistory} />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <DataVisualization
-          data={data}
-          weights={weights}
-          currentEstimate={currentEstimate}
-          iteration={currentIteration}
-          k={k}
-        />
-        <WeightsVisualization
-          data={data}
-          weights={weights}
-          currentEstimate={currentEstimate}
-          k={k}
-        />
+
+          {/* Right side - Controls */}
+          <div className="lg:col-span-1">
+            <HuberControls
+              dataInput={dataInput}
+              setDataInput={setDataInput}
+              initialEstimate={initialEstimate}
+              setInitialEstimate={setInitialEstimate}
+              k={k}
+              setK={setK}
+              maxIterations={maxIterations}
+              setMaxIterations={setMaxIterations}
+              convergenceThreshold={convergenceThreshold}
+              setConvergenceThreshold={setConvergenceThreshold}
+              isAutoMode={isAutoMode}
+              setIsAutoMode={setIsAutoMode}
+              iterationSpeed={iterationSpeed}
+              setIterationSpeed={setIterationSpeed}
+              currentIteration={currentIteration}
+              currentEstimate={currentEstimate}
+              simpleMean={simpleMean}
+              hasConverged={hasConverged}
+              onParseData={parseDataInput}
+              onPerformIteration={performIteration}
+              onToggleAutoMode={toggleAutoMode}
+              onReset={resetSimulation}
+              isRunning={isRunning}
+            />
+          </div>
+        </div>
+
+        {/* Educational content panels */}
+        <HuberEducationalPanels />
       </div>
 
-      <Card className="glass-panel">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">About the IRLS Algorithm</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-4">
-            The Iterative Reweighted Least Squares (IRLS) algorithm is used to compute M-estimators, which are a class of robust estimators that are less sensitive to outliers.
-          </p>
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground"><strong>Huber Function (ρ):</strong> Combines the best properties of squared error for normally distributed data and absolute error for outliers.</p>
-            <div className="p-3 bg-secondary/20 rounded-md text-sm">
-              <p>ρ(x) = x² if |x| ≤ k</p>
-              <p>ρ(x) = 2k|x| - k² if |x| &gt; k</p>
-            </div>
-            <p className="text-sm text-muted-foreground mt-2"><strong>Weight Function (ψ/r):</strong> Determines how much influence each data point has on the final estimate.</p>
-            <div className="p-3 bg-secondary/20 rounded-md text-sm">
-              <p>ψ(r) = -2k if r &lt; -k</p>
-              <p>ψ(r) = 2r if |r| ≤ k</p>
-              <p>ψ(r) = 2k if r &gt; k</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Footer matching the style from second image */}
+      <footer className="bg-slate-800 text-center py-4 mt-8">
+        <p className="text-slate-300 text-sm">
+          Applied Statistical Mathematics • Interactive Visualizations • BITS Pilani, K.K. Birla Goa Campus
+        </p>
+      </footer>
     </div>
   );
 };
