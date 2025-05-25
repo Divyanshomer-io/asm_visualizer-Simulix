@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip as ChartTooltip,
+  Tooltip as RechartsTooltip,
   Legend,
 } from 'recharts';
 
@@ -65,7 +65,7 @@ const ConvergenceChart: React.FC<ConvergenceChartProps> = ({ iterations }) => {
                   style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
                 }}
               />
-              <Tooltip 
+              <RechartsTooltip  
                 formatter={(value: number) => value.toFixed(4)}
                 labelFormatter={(label) => `Iteration ${label}`}
                 contentStyle={{ 
