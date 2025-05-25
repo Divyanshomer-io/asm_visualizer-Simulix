@@ -170,7 +170,7 @@ const Bootstrapping = () => {
           </div>
           <Link to="/" className="control-btn flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to Home
+            Back to Visualizations
           </Link>
         </div>
       </header>
