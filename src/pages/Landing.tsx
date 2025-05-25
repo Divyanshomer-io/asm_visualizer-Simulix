@@ -257,7 +257,7 @@ const Landing = () => {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-6 py-3 glass-panel rounded-full mb-4">
   <Sparkles className="h-6 w-6 text-accent" />
-  <span className="text-lg font-semibold text-accent">Available Tools</span>
+  <span className="text-lg font-semibold text-accent">Platform Featuress</span>
 </div>
 
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Simulix</h2>
