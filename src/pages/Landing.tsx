@@ -38,13 +38,11 @@ const Landing = () => {
     },
  {
       id: "huber-mean",
-      title: "Huber Mean Visulization",
-       description: "Understand statistical inference through resampling techniques and confidence interval construction.",
+     
       title: "Huber M-Estimator",
       description: "Explore robust statistical estimation with the Huber M-estimator using IRLS. See how it handles outliers gracefully.",
       path: "/huber-mean",
-      icon: <BarChart3 className="h-6 w-6" />,
-      tags: ["Statistics", "Resampling", "Inference"]
+     
       icon: <Target className="h-6 w-6" />,
       tags: ["Robust Statistics", "M-Estimators", "IRLS"]
     },
