@@ -313,7 +313,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     strokeWidth={2}
                     label={{
                       value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 3)}`,
-                      position: "bottom",
+                      position: "top",
                       offset: 10,
                       style: { fill: "#00ff00", fontSize: "12px", fontWeight: "bold" }
                     }}
