@@ -1,7 +1,6 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import IRLSVisualizer from "@/components/IRLSVisualizer";
-import { Home } from "lucide-react";
-import Link from "next/link"; // Or "react-router-dom" if using that
+import Link from "next/link"; // Make sure this is properly imported
 
 const HuberMean = () => {
   return (
@@ -19,8 +18,10 @@ const HuberMean = () => {
               </h1>
               <p className="text-sm opacity-70">Iteratively Reweighted Least Squares (IRLS) Demo</p>
             </div>
-            <Link href="/" className="control-btn flex items-center gap-2 text-sm">
-              <Home className="h-4 w-4" />
+            <Link 
+              href="/visualizations" // Update this to your actual visualizations route
+              className="control-btn flex items-center gap-2 text-sm hover:bg-white/5 px-4 py-2 rounded transition-colors"
+            >
               Back to Visualizations
             </Link>
           </div>
