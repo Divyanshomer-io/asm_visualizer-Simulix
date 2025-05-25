@@ -11,7 +11,7 @@ import {
   YAxis,
   ZAxis,
   CartesianGrid,
-  Tooltip as ChartTooltip,
+   Tooltip as RechartsTooltip,
   ReferenceLine,
 } from 'recharts';
 
@@ -124,7 +124,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({
                 range={[50, 500]} 
                 name="Weight" 
               />
-              <Tooltip content={<CustomTooltip />} />
+               <RechartsTooltip content={<CustomTooltip />} />
               <ReferenceLine 
                 y={currentEstimate} 
                 stroke="#ef4444" 
