@@ -134,19 +134,7 @@ const IRLSVisualizer: React.FC = () => {
   const simpleMean = calculateMean(data);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header matching the style from other visualizations */}
-      <header className="bg-slate-800 text-white px-6 py-4">
-        <div className="container max-w-7xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">Huber M-Estimator</h1>
-            <p className="text-slate-300 text-sm">Interactive Polynomial Optimization</p>
-          </div>
-          <button className="text-slate-300 hover:text-white transition-colors text-sm flex items-center gap-2">
-            🏠 Back to Visualizations
-          </button>
-        </div>
-      </header>
+    
 
       <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6 animate-fade-in">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
