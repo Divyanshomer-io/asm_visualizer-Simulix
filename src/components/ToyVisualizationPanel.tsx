@@ -155,7 +155,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
         </CardContent>
       </Card>
       
-    {/* Binary State Representation with Slider */}
+{/* Binary State Representation with Slider */}
 <Card className="glass-panel border-white/10">
   <CardHeader className="pb-4">
     <CardTitle className="flex items-center gap-2 text-lg">
