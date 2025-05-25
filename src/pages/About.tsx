@@ -46,6 +46,12 @@ const About = () => {
                 <strong>Alias Method:</strong> A visualization of how to efficiently sample from 
                 discrete probability distributions with constant-time complexity.
               </li>
+               <li>
+                <strong>Bootstrapping- Interactive demonstration of resampling techniques to estimate confidence intervals for population parameters. Users can adjust sample size, bootstrap iterations, and confidence levels to see how distributions stabilize and intervals tighten.
+              </li>
+               <li>
+                <strong>Huber M-Estimator - Robust Regression- Interactive exploration of iteratively reweighted least squares (IRLS) for outlier-resistant regression. Adjust tuning constant k to see how weights downvote outliers while preserving efficiency for normal data.
+              </li>
             </ul>
             <p className="opacity-80 leading-relaxed">
               Each simulator allows users to customize parameters and observe in real-time how 
