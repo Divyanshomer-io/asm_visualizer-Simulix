@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import {
   ResponsiveContainer,
   ScatterChart,
@@ -9,7 +11,7 @@ import {
   YAxis,
   ZAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as ChartTooltip,
   ReferenceLine,
 } from 'recharts';
 
@@ -73,8 +75,18 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({
   return (
     <Card className="glass-panel">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">
+        <CardTitle className="text-lg font-medium flex items-center gap-2">
           Data Visualization - Iteration {iteration}
+          <Tooltip>
+            <TooltipTrigger>
+              <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs text-xs">
+                Scatter plot of your data with the fitted line. Red points indicate potential outliers identified by the algorithm.
+              </p>
+            </TooltipContent>
+          </Tooltip>
         </CardTitle>
       </CardHeader>
       <CardContent>
