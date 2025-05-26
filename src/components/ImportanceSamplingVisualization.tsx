@@ -518,7 +518,7 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(68,68,68,0.5)" />
                     <XAxis 
                       type="number"
-                      dataKey="originalX"
+                      dataKey="x"
                       domain={jitteredData.length > 0 ? [
                         Math.min(...jitteredData.map(d => d.originalX)) - 1,
                         Math.max(...jitteredData.map(d => d.originalX)) + 1
@@ -529,6 +529,7 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                     />
                     <YAxis 
                       type="number"
+                      dataKey="y"
                       domain={jitteredData.length > 0 ? [
                         0,
                         Math.max(...jitteredData.map(d => Math.max(d.yStd, d.yNorm))) * 1.1
