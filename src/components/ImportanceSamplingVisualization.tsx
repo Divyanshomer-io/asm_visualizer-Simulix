@@ -555,23 +555,26 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                     />
                   </ScatterChart>
                   {/* Custom legend box */}
-  <div
-    className="absolute top-4 right-6 z-10 flex flex-col items-start bg-white/80 dark:bg-background/80 rounded-md shadow px-4 py-2"
-    style={{
-      border: "1px solid #ddd",
-      backdropFilter: "blur(8px)",
-      minWidth: "170px"
-    }}
-  >
-    <div className="flex items-center mb-1">
-      <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ background: "#3b82f6" }}></span>
-      <span className="text-sm text-[#3b82f6] font-mono">Standard weights</span>
-    </div>
-    <div className="flex items-center">
-      <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ background: "#ef4444" }}></span>
-      <span className="text-sm text-[#ef4444] font-mono">Normalized weights (scaled)</span>
-    </div>
+ <div
+  className="absolute top-2 right-2 z-10 flex flex-col items-start bg-background/90 rounded-md px-3 py-1 shadow"
+  style={{
+    border: "1px solid #222C36",
+    minWidth: "140px",
+    pointerEvents: "none", // so it doesn't block tooltips
+    fontFamily: "monospace",
+    fontSize: "13px",
+  }}
+>
+  <div className="flex items-center mb-1">
+    <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#3b82f6" }} />
+    <span className="text-[#3b82f6]">Standard weights</span>
   </div>
+  <div className="flex items-center">
+    <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#ef4444" }} />
+    <span className="text-[#ef4444]">Normalized weights (scaled)</span>
+  </div>
+</div>
+
                 </ResponsiveContainer>
               </ChartContainer>
             )}
