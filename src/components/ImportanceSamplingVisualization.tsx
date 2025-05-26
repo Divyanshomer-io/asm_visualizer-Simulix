@@ -567,11 +567,11 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
 >
   <div className="flex items-center mb-1">
     <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#3b82f6" }} />
-    <span className="text-[#3b82f6]">Standard weights</span>
+    <span className="text-[#3b82f6]">Standard wts. </span>
   </div>
   <div className="flex items-center">
     <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#ef4444" }} />
-    <span className="text-[#ef4444]">Normalized weights (scaled)</span>
+    <span className="text-[#ef4444]">Normalized wts. </span>
   </div>
 </div>
 
