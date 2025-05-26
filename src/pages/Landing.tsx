@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X } from "lucide-react";
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
+  const [searchQuery, setSearchQuery] = useState("");
   const keywords = ["Optimization", "Inference", "Regression", "Statistics", "Algorithms", "Visualization"];
   
   useEffect(() => {
@@ -73,6 +74,22 @@ const Landing = () => {
       gradient: "from-indigo-500/20 to-teal-500/20"
     },
   ];
+
+  // Filter visualizations based on search query
+  const filteredVisualizations = useMemo(() => {
+    if (!searchQuery.trim()) return visualizations;
+    
+    const query = searchQuery.toLowerCase();
+    return visualizations.filter(viz => 
+      viz.title.toLowerCase().includes(query) ||
+      viz.description.toLowerCase().includes(query) ||
+      viz.tags.some(tag => tag.toLowerCase().includes(query))
+    );
+  }, [searchQuery]);
+
+  const clearSearch = () => {
+    setSearchQuery("");
+  };
 
   const features = [
     {
@@ -181,18 +198,59 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-6">
             <div className="inline-flex items-center gap-3 px-6 py-3 glass-panel rounded-full mb-4">
-  <ChartLine className="h-6 w-6 text-accent" />
-  <span className="text-lg font-semibold text-accent">Available Tools</span>
-</div>
+              <ChartLine className="h-6 w-6 text-accent" />
+              <span className="text-lg font-semibold text-accent">Available Tools</span>
+            </div>
 
             <h2 className="text-3xl md:text-4xl font-bold">Interactive Visualization Suite</h2>
             <p className="opacity-70 max-w-2xl mx-auto text-lg">
               Select any of the interactive modules below to explore different concepts and algorithms through hands-on simulations.
             </p>
           </div>
+
+          {/* Creative Search Bar */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-accent/20 via-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative glass-panel rounded-2xl p-1 border-2 border-white/10 group-hover:border-accent/30 transition-all duration-300">
+                <div className="relative flex items-center">
+                  <div className="absolute left-4 z-10">
+                    <Search className="h-5 w-5 text-accent/70 group-hover:text-accent transition-colors duration-300" />
+                  </div>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by title, description, or tags..."
+                    className="w-full bg-transparent pl-12 pr-12 py-4 text-lg placeholder:text-muted-foreground/60 focus:outline-none focus:placeholder:text-muted-foreground/40 transition-all duration-300"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={clearSearch}
+                      className="absolute right-4 z-10 p-1 rounded-full hover:bg-accent/20 transition-colors duration-200 group/clear"
+                    >
+                      <X className="h-4 w-4 text-muted-foreground group-hover/clear:text-accent transition-colors" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Search suggestions/results count */}
+              {searchQuery && (
+                <div className="mt-3 text-center">
+                  <span className="text-sm text-muted-foreground">
+                    {filteredVisualizations.length} visualization{filteredVisualizations.length !== 1 ? 's' : ''} found
+                    {filteredVisualizations.length === 0 && (
+                      <span className="block mt-1 text-accent">Try searching for "optimization", "statistics", or "sampling"</span>
+                    )}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visualizations.map((visualization, index) => (
+            {filteredVisualizations.map((visualization, index) => (
               <Link 
                 key={visualization.id}
                 to={visualization.path}
@@ -233,23 +291,25 @@ const Landing = () => {
               </Link>
             ))}
 
-            {/* Enhanced Coming Soon Card */}
-            <div className="glass-panel p-6 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center text-center space-y-4 min-h-[250px] group hover:border-accent/30 transition-all duration-500">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <ChartLine className="h-6 w-6 opacity-60 group-hover:opacity-100 transition-opacity" />
+            {/* Enhanced Coming Soon Card - only show when no search or search doesn't filter it out */}
+            {(!searchQuery || "coming soon more tools additional concepts algorithms".includes(searchQuery.toLowerCase())) && (
+              <div className="glass-panel p-6 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center text-center space-y-4 min-h-[250px] group hover:border-accent/30 transition-all duration-500">
+                <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ChartLine className="h-6 w-6 opacity-60 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <h3 className="text-xl font-semibold opacity-70 group-hover:opacity-90 transition-opacity">
+                  More Tools Coming Soon
+                </h3>
+                <p className="text-sm opacity-50 group-hover:opacity-70 transition-opacity">
+                  Additional concepts and algorithms will be added to expand the visualization suite
+                </p>
+                <div className="flex gap-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className={`w-2 h-2 rounded-full bg-accent/30 animate-pulse`} style={{ animationDelay: `${i * 200}ms` }}></div>
+                  ))}
+                </div>
               </div>
-              <h3 className="text-xl font-semibold opacity-70 group-hover:opacity-90 transition-opacity">
-                More Tools Coming Soon
-              </h3>
-              <p className="text-sm opacity-50 group-hover:opacity-70 transition-opacity">
-                Additional concepts and algorithms will be added to expand the visualization suite
-              </p>
-              <div className="flex gap-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className={`w-2 h-2 rounded-full bg-accent/30 animate-pulse`} style={{ animationDelay: `${i * 200}ms` }}></div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
@@ -264,9 +324,9 @@ const Landing = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-6 py-3 glass-panel rounded-full mb-4">
-  <Sparkles className="h-6 w-6 text-accent" />
-  <span className="text-lg font-semibold text-accent">Platform Featuress</span>
-</div>
+              <Sparkles className="h-6 w-6 text-accent" />
+              <span className="text-lg font-semibold text-accent">Platform Featuress</span>
+            </div>
 
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Simulix</h2>
           </div>
@@ -304,8 +364,7 @@ const Landing = () => {
         </div>
       </section>
       
-      
-       <footer className="w-full glass-panel border-t border-white/5 mt-16">
+      <footer className="w-full glass-panel border-t border-white/5 mt-16">
         <div className="container py-4 px-4 md:px-8 text-center opacity-70">
           <p className="text-sm">
             Data Science • Visualizing Algorithms • BITS Pilani, K.K. Birla Goa Campus
