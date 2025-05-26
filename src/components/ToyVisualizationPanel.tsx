@@ -13,6 +13,9 @@ interface ToyVisualizationPanelProps {
 }
 
 const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, params }) => {
+  // FIXED: Declare maxIterationsToShow before using it
+  const maxIterationsToShow = 50;
+  
   // Prepare data for charts
   const functionValueData = state.history.map(entry => ({
     iteration: entry.iteration,
@@ -74,18 +77,20 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
             className="h-[250px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={functionValueData}>
+              <LineChart data={functionValueData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="iteration" 
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   fontFamily="Inter, system-ui, sans-serif"
+                  label={{ value: 'Iteration', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                 />
                 <YAxis 
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   fontFamily="Inter, system-ui, sans-serif"
+                  label={{ value: 'Function Value', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line 
@@ -144,10 +149,10 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                   )}
                 </svg>
                 {/* Axes labels with improved font */}
-                <div className="absolute bottom-0 left-0 text-xs opacity-70 transform -translate-y-1 font-mono">
+                <div className="absolute bottom-0 left-0 text-xs opacity-70 transform -translate-y-1 font-mono font-bold">
                   Iteration →
                 </div>
-                <div className="absolute top-0 left-0 text-xs opacity-70 transform -rotate-90 origin-left translate-y-4 font-mono">
+                <div className="absolute top-0 left-0 text-xs opacity-70 transform -rotate-90 origin-left translate-y-4 font-mono font-bold">
                   Bit Index →
                 </div>
               </div>
@@ -186,19 +191,21 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
             className="h-[250px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={acceptanceProbData}>
+              <LineChart data={acceptanceProbData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="iteration" 
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   fontFamily="Inter, system-ui, sans-serif"
+                  label={{ value: 'Iteration', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                 />
                 <YAxis 
                   domain={[0, 1]}
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   fontFamily="Inter, system-ui, sans-serif"
+                  label={{ value: 'Probability', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line 
@@ -244,7 +251,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
             className="h-[250px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart>
+              <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   type="number"
@@ -253,6 +260,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   fontFamily="Inter, system-ui, sans-serif"
+                  label={{ value: 'State', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                 />
                 <YAxis 
                   type="number"
@@ -261,6 +269,7 @@ const ToyVisualizationPanel: React.FC<ToyVisualizationPanelProps> = ({ state, pa
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   fontFamily="Inter, system-ui, sans-serif"
+                  label={{ value: 'Function Value', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 
