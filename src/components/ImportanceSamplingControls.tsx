@@ -18,7 +18,7 @@ interface ImportanceSamplingControlsProps {
 const ImportanceSamplingControls: React.FC<ImportanceSamplingControlsProps> = ({
   params,
   onParamsChange,
-  onUpdate,
+  on,
   onReset,
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -189,14 +189,7 @@ const ImportanceSamplingControls: React.FC<ImportanceSamplingControlsProps> = ({
 
         {/* Control Buttons */}
         <div className="flex flex-col gap-3 pt-4">
-          <Button 
-            onClick={onUpdate}
-            className="w-full"
-            size="lg"
-          >
-            <Play className="w-4 h-4 mr-2" />
-            Update Visualizations
-          </Button>
+         
           
           <Button 
             onClick={onReset}
