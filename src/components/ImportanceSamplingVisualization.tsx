@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ScatterChart, Scatter, BarChart, Bar, ErrorBar, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ScatterChart, Scatter, BarChart, Bar, ErrorBar, ReferenceLine, Legend } from "recharts";
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
@@ -43,24 +43,32 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
     });
   };
 
-  // Generate sample data for standard IS histogram with vertical lines
+  // Generate sample data for standard IS histogram with exact Python specifications
   const generateSampleHistogramData = () => {
-    if (params.method !== 'standard') return { histogramData: [], mcEstimateValue: 0, isEstimateValue: 0 };
+    if (params.method !== 'standard') return { histogramData: [], mcEstimateValue: 0, isEstimateValue: 0, trueValue: 0, xMin: -5, xMax: 5 };
     
     // Generate samples exactly as in Python
     const fSamples = generateNormalSamples(params.nDemo, 0, 1);
     const gSamples = generateNormalSamples(params.nDemo, params.proposalT, 1);
     
+    // Data validation (critical as per requirements)
+    if (fSamples.length === 0 || gSamples.length === 0) {
+      console.error("Empty sample arrays");
+      return { histogramData: [], mcEstimateValue: 0, isEstimateValue: 0, trueValue: 0, xMin: -5, xMax: 5 };
+    }
+    
     // Calculate weights: f(g_samples) / g(g_samples, proposal_t)
-    const weights = gSamples.map(x => {
+    let weights = gSamples.map(x => {
       const numerator = f(x);
       const denominator = g(x, params.proposalT);
       return denominator > 1e-10 ? numerator / denominator : 0;
     });
     
     // Handle invalid weights (equivalent to np.nan_to_num)
-    const validWeights = weights.map(w => {
-      if (!isFinite(w) || isNaN(w)) return 0;
+    weights = weights.map(w => {
+      if (!isFinite(w) || isNaN(w)) return 0.0;
+      if (w === Infinity) return 0.0;
+      if (w === -Infinity) return 0.0;
       return Math.max(0, Math.min(w, 1e10));
     });
     
@@ -69,16 +77,20 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
     const mcEstimateValue = fSamples.reduce((sum, x) => sum + h(x, params.scaleH), 0) / fSamples.length;
     
     // IS estimate: np.mean(h(g_samples, scale_h) * weights)
-    const isEstimateValue = gSamples.reduce((sum, x, i) => sum + h(x, params.scaleH) * validWeights[i], 0) / gSamples.length;
+    const isEstimateValue = gSamples.reduce((sum, x, i) => sum + h(x, params.scaleH) * weights[i], 0) / gSamples.length;
     
-    // Create histogram bins (15 bins as specified)
-    const allSamples = [...fSamples, ...gSamples];
-    const minVal = Math.min(...allSamples) - 1;
-    const maxVal = Math.max(...allSamples) + 1;
-    const binWidth = (maxVal - minVal) / 15;
+    // True value calculation
+    const trueValue = calculateTrueValue(params.scaleH);
+    
+    // Axis scaling (dynamic calculation) - exact Python implementation
+    const xMin = Math.min(Math.min(...fSamples), Math.min(...gSamples)) - 1.0;
+    const xMax = Math.max(Math.max(...fSamples), Math.max(...gSamples)) + 1.0;
+    
+    // Create histogram bins (15 bins as specified) with density normalization
+    const binWidth = (xMax - xMin) / 15;
     
     const histogramData = Array.from({ length: 15 }, (_, i) => {
-      const binStart = minVal + i * binWidth;
+      const binStart = xMin + i * binWidth;
       const binEnd = binStart + binWidth;
       const binCenter = binStart + binWidth / 2;
       
@@ -86,21 +98,24 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
       const fCount = fSamples.filter(x => x >= binStart && x < binEnd).length;
       const gCount = gSamples.filter(x => x >= binStart && x < binEnd).length;
       
-      // Convert to density (count / (total * binWidth))
+      // Convert to density (count / (total * binWidth)) - exact Python density=True behavior
       const fDensity = fCount / (fSamples.length * binWidth);
       const gDensity = gCount / (gSamples.length * binWidth);
       
       return {
-        x: parseFloat(binCenter.toFixed(2)),
-        fDensity: parseFloat(fDensity.toFixed(4)),
-        gDensity: parseFloat(gDensity.toFixed(4))
+        x: parseFloat(binCenter.toFixed(3)),
+        fDensity: parseFloat(fDensity.toFixed(6)),
+        gDensity: parseFloat(gDensity.toFixed(6))
       };
     });
     
     return { 
       histogramData, 
-      mcEstimateValue: parseFloat(mcEstimateValue.toFixed(2)), 
-      isEstimateValue: parseFloat(isEstimateValue.toFixed(2)) 
+      mcEstimateValue: parseFloat(mcEstimateValue.toFixed(4)), 
+      isEstimateValue: parseFloat(isEstimateValue.toFixed(4)),
+      trueValue: parseFloat(trueValue.toFixed(4)),
+      xMin: parseFloat(xMin.toFixed(2)),
+      xMax: parseFloat(xMax.toFixed(2))
     };
   };
 
@@ -304,7 +319,7 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
   const varianceData = generateVarianceData();
   const trueValue = parseFloat(calculateTrueValue(params.scaleH).toFixed(2));
   const jitteredData = generateJitteredScatterData();
-  const { histogramData, mcEstimateValue, isEstimateValue } = generateSampleHistogramData();
+  const { histogramData, mcEstimateValue, isEstimateValue, trueValue: trueValueFromHist, xMin, xMax } = generateSampleHistogramData();
 
   return (
     <div className="space-y-6">
@@ -361,16 +376,16 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
           </CardContent>
         </Card>
 
-        {/* Sample Distribution / Weight Visualization */}
+        {/* Sample Distribution / Weight Visualization - EXACT PYTHON IMPLEMENTATION */}
         <Card className="glass-panel border-white/10">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
+            <CardTitle className="flex items-center gap-2 text-lg" style={{ fontFamily: 'monospace' }}>
               <Tooltip>
                 <TooltipTrigger>
                   <Info className="h-4 w-4 opacity-70" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{params.method === 'standard' ? 'Sample histograms with MC/IS estimates and true value' : 'Weight vs. Sample Value with jitter'}</p>
+                  <p>{params.method === 'standard' ? 'Sample Distribution - 15 bins, density normalized, with MC/IS/True estimates' : 'Weight vs. Sample Value with jitter'}</p>
                 </TooltipContent>
               </Tooltip>
               {params.method === 'standard' ? 'Sample Distribution' : 'Weight vs. Sample Value'}
@@ -382,53 +397,91 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                 config={{
                   fDensity: { label: "f samples", color: "#87CEEB" },
                   gDensity: { label: "g samples", color: "#FF6B6B" },
+                  mcEstimate: { label: "MC estimate", color: "#3b82f6" },
+                  isEstimate: { label: "IS estimate", color: "#ef4444" },
+                  trueValue: { label: `True: ${trueValueFromHist.toFixed(4)}`, color: "#10b981" },
                 }}
                 className="h-[250px] w-full"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={histogramData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(68,68,68,0.3)" />
+                  <BarChart 
+                    data={histogramData} 
+                    margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                  >
+                    {/* Grid: Hex #444444 with 0.3 alpha */}
+                    <CartesianGrid strokeDasharray="3 3" stroke="#444444" strokeOpacity={0.3} />
                     <XAxis 
                       dataKey="x" 
+                      domain={[xMin, xMax]}
+                      type="number"
+                      scale="linear"
                       stroke="hsl(var(--muted-foreground))"
                       fontSize={12}
-                      tickFormatter={(value) => parseFloat(value).toFixed(2)}
-                      label={{ value: 'x', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontWeight: 'bold' } }}
+                      tickFormatter={(value) => parseFloat(value).toFixed(1)}
+                      label={{ 
+                        value: 'x', 
+                        position: 'insideBottom', 
+                        offset: -10, 
+                        style: { textAnchor: 'middle', fontWeight: 'bold', fontFamily: 'monospace' } 
+                      }}
+                      style={{ fontFamily: 'monospace' }}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))"
                       fontSize={12}
                       tickFormatter={(value) => parseFloat(value).toFixed(2)}
-                      label={{ value: 'Density', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
+                      label={{ 
+                        value: 'Density', 
+                        angle: -90, 
+                        position: 'insideLeft', 
+                        style: { textAnchor: 'middle', fontWeight: 'bold', fontFamily: 'monospace' } 
+                      }}
+                      style={{ fontFamily: 'monospace' }}
                     />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="fDensity" fill="#87CEEB" fillOpacity={0.4} />
-                    <Bar dataKey="gDensity" fill="#FF6B6B" fillOpacity={0.4} />
                     
-                    {/* MC Estimate Line - Blue Dashed */}
+                    {/* Legend Box */}
+                    <Legend 
+                      verticalAlign="top" 
+                      height={36}
+                      wrapperStyle={{ 
+                        fontFamily: 'monospace', 
+                        fontSize: '12px',
+                        paddingBottom: '10px'
+                      }}
+                    />
+                    
+                    {/* Histograms: 15 bins, alpha=0.4, density normalization, exact hex colors */}
+                    <Bar dataKey="fDensity" fill="#87CEEB" fillOpacity={0.4} name="f samples" />
+                    <Bar dataKey="gDensity" fill="#FF6B6B" fillOpacity={0.4} name="g samples" />
+                    
+                    {/* MC Estimate Line - Blue Dashed, linewidth=2 */}
                     <ReferenceLine 
                       x={mcEstimateValue} 
                       stroke="#3b82f6" 
                       strokeWidth={2} 
                       strokeDasharray="5 5"
-                      label={{ value: `MC: ${mcEstimateValue}`, position: "top" }}
+                      name="MC estimate"  // 🚨 Add this
+  legendType="line"   // 🚨 And this
                     />
                     
-                    {/* IS Estimate Line - Red Dashed */}
+                    {/* IS Estimate Line - Red Dashed, linewidth=2 */}
                     <ReferenceLine 
                       x={isEstimateValue} 
                       stroke="#ef4444" 
                       strokeWidth={2} 
                       strokeDasharray="5 5"
-                      label={{ value: `IS: ${isEstimateValue}`, position: "top" }}
+                        name="IS estimate"  // 🚨 Add this
+  legendType="line"   // 🚨 And this
                     />
                     
-                    {/* True Value Line - Black Solid */}
+                    {/* True Value Line - Green Solid, linewidth=2 */}
                     <ReferenceLine 
-                      x={trueValue} 
-                      stroke="#2d2d2d" 
+                      x={trueValueFromHist} 
+                      stroke="#10b981" 
                       strokeWidth={2}
-                      label={{ value: `True: ${trueValue}`, position: "top" }}
+                       name={`True: ${trueValueFromHist.toFixed(4)}`}  // 🚨 Add this
+  legendType="line"  
                     />
                   </BarChart>
                 </ResponsiveContainer>
