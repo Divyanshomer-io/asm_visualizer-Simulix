@@ -12,7 +12,7 @@ import HuberMean from "./pages/HuberMean";
 import ImportanceSampling from "./pages/ImportanceSampling";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
-
+import { Analytics } from "@vercel/analytics/next"
 const queryClient = new QueryClient();
 
 const App = () => (
