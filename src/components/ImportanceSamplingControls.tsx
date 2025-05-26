@@ -1,11 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { RotateCcw, Play } from "lucide-react";
+import { RotateCcw, Play, ChevronDown, ChevronUp } from "lucide-react";
 import { ImportanceSamplingParams, DEFAULT_PARAMS } from "@/utils/importanceSampling";
 
 interface ImportanceSamplingControlsProps {
@@ -21,6 +21,8 @@ const ImportanceSamplingControls: React.FC<ImportanceSamplingControlsProps> = ({
   onUpdate,
   onReset,
 }) => {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   const handleSliderChange = (key: keyof ImportanceSamplingParams, value: number[]) => {
     onParamsChange({
       ...params,
@@ -114,59 +116,76 @@ const ImportanceSamplingControls: React.FC<ImportanceSamplingControlsProps> = ({
           </p>
         </div>
 
-        {/* Convergence Trials */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">
-            Convergence Trials: {params.nTrialsConv}
-          </Label>
-          <Slider
-            value={[params.nTrialsConv]}
-            onValueChange={(value) => handleSliderChange('nTrialsConv', value)}
-            min={50}
-            max={300}
-            step={50}
-            className="w-full"
-          />
-          <p className="text-xs text-muted-foreground">
-            Trials for convergence analysis
-          </p>
+        {/* Advanced Settings Toggle */}
+        <div className="pt-4 border-t border-white/10">
+          <Button
+            variant="ghost"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between text-sm"
+          >
+            <span>Advanced Settings</span>
+            {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
         </div>
 
-        {/* Variance Trials */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">
-            Variance Trials: {params.nTrialsVar}
-          </Label>
-          <Slider
-            value={[params.nTrialsVar]}
-            onValueChange={(value) => handleSliderChange('nTrialsVar', value)}
-            min={30}
-            max={150}
-            step={20}
-            className="w-full"
-          />
-          <p className="text-xs text-muted-foreground">
-            Trials for variance analysis
-          </p>
-        </div>
+        {/* Advanced Settings - Collapsible */}
+        {showAdvanced && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Convergence Trials */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">
+                Convergence Trials: {params.nTrialsConv}
+              </Label>
+              <Slider
+                value={[params.nTrialsConv]}
+                onValueChange={(value) => handleSliderChange('nTrialsConv', value)}
+                min={50}
+                max={300}
+                step={50}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Trials for convergence analysis
+              </p>
+            </div>
 
-        {/* Max Samples */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">
-            Max Samples: {params.maxSamples}
-          </Label>
-          <Slider
-            value={[params.maxSamples]}
-            onValueChange={(value) => handleSliderChange('maxSamples', value)}
-            min={1000}
-            max={10000}
-            step={1000}
-            className="w-full"
-          />
-          <p className="text-xs text-muted-foreground">
-            Maximum sample size for convergence
-          </p>
-        </div>
+            {/* Variance Trials */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">
+                Variance Trials: {params.nTrialsVar}
+              </Label>
+              <Slider
+                value={[params.nTrialsVar]}
+                onValueChange={(value) => handleSliderChange('nTrialsVar', value)}
+                min={30}
+                max={150}
+                step={20}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Trials for variance analysis
+              </p>
+            </div>
+
+            {/* Max Samples */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">
+                Max Samples: {params.maxSamples}
+              </Label>
+              <Slider
+                value={[params.maxSamples]}
+                onValueChange={(value) => handleSliderChange('maxSamples', value)}
+                min={1000}
+                max={10000}
+                step={1000}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Maximum sample size for convergence
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Control Buttons */}
         <div className="flex flex-col gap-3 pt-4">
@@ -201,8 +220,12 @@ const ImportanceSamplingControls: React.FC<ImportanceSamplingControlsProps> = ({
             </div>
             <div className="space-y-1">
               <div>Demo: {params.nDemo}</div>
-              <div>Conv: {params.nTrialsConv}</div>
-              <div>Var: {params.nTrialsVar}</div>
+              {showAdvanced && (
+                <>
+                  <div>Conv: {params.nTrialsConv}</div>
+                  <div>Var: {params.nTrialsVar}</div>
+                </>
+              )}
             </div>
           </div>
         </div>

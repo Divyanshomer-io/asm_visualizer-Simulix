@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ScatterChart, Scatter, BarChart, Bar } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ScatterChart, Scatter, BarChart, Bar, ErrorBar, ReferenceLine } from "recharts";
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
@@ -44,7 +44,7 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
     });
   };
 
-  // Generate sample data
+  // Generate sample data with proper jitter for normalized mode
   const generateSampleData = (): { fSamples: number[]; gSamples: SampleData[] } => {
     const fSamples = generateNormalSamples(params.nDemo, 0, 1);
     const gSamplesRaw = generateNormalSamples(params.nDemo, params.proposalT, 1);
@@ -58,7 +58,7 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
       };
     });
 
-    // Normalize weights
+    // Normalize weights for normalized IS
     const weightSum = gSamples.reduce((sum, sample) => sum + sample.weight, 0);
     gSamples.forEach(sample => {
       sample.normWeight = sample.weight / weightSum * params.nDemo;
@@ -67,25 +67,38 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
     return { fSamples, gSamples };
   };
 
-  // Generate convergence data
+  // Generate convergence data with proper error calculations
   const generateConvergenceData = (): ConvergenceData[] => {
     const sampleSizes = [10, 50, 100, 500, 1000, params.maxSamples];
     const trueVal = calculateTrueValue(params.scaleH);
     
     return sampleSizes.map(n => {
       if (params.method === 'standard') {
-        const mc = mcEstimate(n, params.scaleH);
-        const is = isEstimate(n, params.proposalT, params.scaleH);
+        // Standard IS - collect multiple trials for error bars
+        const mcTrials = [];
+        const isTrials = [];
+        
+        for (let trial = 0; trial < params.nTrialsConv; trial++) {
+          const mcResult = mcEstimate(n, params.scaleH);
+          const isResult = isEstimate(n, params.proposalT, params.scaleH);
+          mcTrials.push(mcResult.estimate);
+          isTrials.push(isResult.estimate);
+        }
+        
+        const mcMean = mcTrials.reduce((a, b) => a + b, 0) / mcTrials.length;
+        const isMean = isTrials.reduce((a, b) => a + b, 0) / isTrials.length;
+        const mcStdErr = Math.sqrt(mcTrials.reduce((a, b) => a + Math.pow(b - mcMean, 2), 0) / (mcTrials.length - 1)) / Math.sqrt(mcTrials.length);
+        const isStdErr = Math.sqrt(isTrials.reduce((a, b) => a + Math.pow(b - isMean, 2), 0) / (isTrials.length - 1)) / Math.sqrt(isTrials.length);
         
         return {
           sampleSize: n,
-          mcEstimate: mc.estimate,
-          mcError: mc.error,
-          isEstimate: is.estimate,
-          isError: is.error
+          mcEstimate: mcMean,
+          mcError: mcStdErr,
+          isEstimate: isMean,
+          isError: isStdErr
         };
       } else {
-        // Normalized mode - calculate errors over multiple trials
+        // Normalized mode - calculate mean absolute errors
         let stdErrors = 0;
         let normErrors = 0;
         
@@ -170,11 +183,28 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
     }
   };
 
+  // Generate jittered scatter data for normalized mode
+  const generateJitteredScatterData = () => {
+    if (params.method !== 'normalized') return [];
+    
+    const { gSamples } = generateSampleData();
+    return gSamples.map(sample => ({
+      // Standard weights with positive jitter
+      xStd: sample.x + 0.05 * (Math.random() - 0.5),
+      yStd: sample.weight,
+      // Normalized weights with negative jitter  
+      xNorm: sample.x - 0.05 * (Math.random() - 0.5),
+      yNorm: sample.normWeight,
+      originalX: sample.x
+    }));
+  };
+
   const distributionData = generateDistributionData();
   const { fSamples, gSamples } = generateSampleData();
   const convergenceData = generateConvergenceData();
   const varianceData = generateVarianceData();
   const trueValue = calculateTrueValue(params.scaleH);
+  const jitteredData = generateJitteredScatterData();
 
   // Prepare histogram data for standard mode
   const histogramData = params.method === 'standard' ? (() => {
@@ -202,9 +232,6 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
       gCount: gBins[i] / gSamples.length / binWidth
     }));
   })() : [];
-
-  const mcEst = params.method === 'standard' ? mcEstimate(params.nDemo, params.scaleH).estimate : 0;
-  const isEst = params.method === 'standard' ? isEstimate(params.nDemo, params.proposalT, params.scaleH).estimate : 0;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -235,7 +262,7 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={distributionData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(68,68,68,0.5)" />
                 <XAxis 
                   dataKey="x" 
                   stroke="hsl(var(--muted-foreground))"
@@ -248,8 +275,8 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                   label={{ value: 'Density', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Line type="monotone" dataKey="target" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="proposal" stroke="hsl(var(--destructive))" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="target" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="proposal" stroke="#ef4444" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="hScaled" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="area" stroke="hsl(var(--muted))" strokeWidth={2} fill="hsl(var(--muted))" fillOpacity={0.3} dot={false} />
               </LineChart>
@@ -267,7 +294,7 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                 <Info className="h-4 w-4 opacity-70" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>{params.method === 'standard' ? 'Sample histograms and estimates' : 'Weight visualization'}</p>
+                <p>{params.method === 'standard' ? 'Sample histograms and estimates' : 'Weight vs. Sample Value with jitter'}</p>
               </TooltipContent>
             </Tooltip>
             {params.method === 'standard' ? 'Sample Distribution' : 'Weight vs. Sample Value'}
@@ -277,14 +304,14 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
           {params.method === 'standard' ? (
             <ChartContainer
               config={{
-                fCount: { label: "f samples", color: "hsl(var(--primary))" },
-                gCount: { label: "g samples", color: "hsl(var(--destructive))" },
+                fCount: { label: "f samples", color: "#3b82f6" },
+                gCount: { label: "g samples", color: "#ef4444" },
               }}
               className="h-[250px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={histogramData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(68,68,68,0.5)" />
                   <XAxis 
                     dataKey="x" 
                     stroke="hsl(var(--muted-foreground))"
@@ -297,25 +324,26 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                     label={{ value: 'Density', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                   />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="fCount" fill="hsl(var(--primary))" fillOpacity={0.5} />
-                  <Bar dataKey="gCount" fill="hsl(var(--destructive))" fillOpacity={0.5} />
+                  <Bar dataKey="fCount" fill="#3b82f6" fillOpacity={0.5} />
+                  <Bar dataKey="gCount" fill="#ef4444" fillOpacity={0.5} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
           ) : (
             <ChartContainer
               config={{
-                standard: { label: "Standard weights", color: "hsl(var(--primary))" },
-                normalized: { label: "Normalized weights", color: "hsl(var(--destructive))" },
+                standard: { label: "Standard weights", color: "#3b82f6" },
+                normalized: { label: "Normalized weights (scaled)", color: "#ef4444" },
               }}
               className="h-[250px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(68,68,68,0.5)" />
                   <XAxis 
                     type="number"
-                    dataKey="x"
+                    dataKey="originalX"
+                    domain={[params.proposalT - 3, params.proposalT + 3]}
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                     label={{ value: 'x', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontWeight: 'bold' } }}
@@ -327,8 +355,20 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                     label={{ value: 'Weight', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                   />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Scatter data={gSamples.map(s => ({ x: s.x + 0.05 * (Math.random() - 0.5), y: s.weight }))} fill="hsl(var(--primary))" fillOpacity={0.6} r={3} />
-                  <Scatter data={gSamples.map(s => ({ x: s.x - 0.05 * (Math.random() - 0.5), y: s.normWeight }))} fill="hsl(var(--destructive))" fillOpacity={0.6} r={3} />
+                  <Scatter 
+                    data={jitteredData.map(d => ({ x: d.xStd, y: d.yStd }))} 
+                    fill="#3b82f6" 
+                    fillOpacity={0.6} 
+                    r={3}
+                    name="Standard weights"
+                  />
+                  <Scatter 
+                    data={jitteredData.map(d => ({ x: d.xNorm, y: d.yNorm }))} 
+                    fill="#ef4444" 
+                    fillOpacity={0.6} 
+                    r={3}
+                    name="Normalized weights (scaled)"
+                  />
                 </ScatterChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -345,50 +385,103 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                 <Info className="h-4 w-4 opacity-70" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Shows how estimates improve with more samples</p>
+                <p>{params.method === 'standard' ? 'Estimate convergence with error bars' : 'Mean absolute error on log-log scale'}</p>
               </TooltipContent>
             </Tooltip>
-            Convergence Analysis
+            {params.method === 'standard' ? 'Convergence Comparison' : 'Convergence Analysis (Normalized IS)'}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ChartContainer
             config={{
-              mc: { label: "Monte Carlo", color: "hsl(var(--primary))" },
-              is: { label: "Importance Sampling", color: "hsl(var(--destructive))" },
-              std: { label: "Standard IS", color: "hsl(var(--primary))" },
-              norm: { label: "Normalized IS", color: "hsl(var(--destructive))" },
-              reference: { label: "1/√n reference", color: "hsl(var(--muted-foreground))" },
+              mc: { label: "Monte Carlo", color: "#3b82f6" },
+              is: { label: "Importance Sampling", color: "#ef4444" },
+              std: { label: "Standard IS", color: "#3b82f6" },
+              norm: { label: "Normalized IS", color: "#ef4444" },
+              reference: { label: "1/√n reference", color: "#000000" },
+              trueValue: { label: "True Value", color: "#000000" },
             }}
             className="h-[250px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={convergenceData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <LineChart 
+                data={convergenceData} 
+                margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(68,68,68,0.5)" />
                 <XAxis 
                   dataKey="sampleSize" 
-                  scale={params.method === 'normalized' ? 'log' : 'linear'}
+                  scale={params.method === 'normalized' ? 'log' : 'log'}
+                  domain={params.method === 'normalized' ? [10, 10000] : [10, 5000]}
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
-                  label={{ value: 'Sample Size', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontWeight: 'bold' } }}
+                  label={{ value: 'Number of samples', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                 />
                 <YAxis 
                   scale={params.method === 'normalized' ? 'log' : 'linear'}
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
-                  label={{ value: params.method === 'standard' ? 'Estimate' : 'Mean Absolute Error', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
+                  label={{ value: params.method === 'standard' ? 'Estimate' : 'Mean Absolute Error (log scale)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 {params.method === 'standard' ? (
                   <>
-                    <Line type="monotone" dataKey="mcEstimate" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
-                    <Line type="monotone" dataKey="isEstimate" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4 }} />
-                    <Line type="monotone" dataKey={() => trueValue} stroke="hsl(var(--muted-foreground))" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="mcEstimate" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2} 
+                      dot={{ r: 6 }}
+                      name="Monte Carlo"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="isEstimate" 
+                      stroke="#ef4444" 
+                      strokeWidth={2} 
+                      dot={{ r: 6 }}
+                      name="Importance Sampling"
+                    />
+                    <ReferenceLine 
+                      y={trueValue} 
+                      stroke="#000000" 
+                      strokeWidth={2} 
+                      strokeDasharray="5 5"
+                      label={{ value: "True Value", position: "insideTopLeft" }}
+                    />
                   </>
                 ) : (
                   <>
-                    <Line type="monotone" dataKey="stdError" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
-                    <Line type="monotone" dataKey="normError" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4 }} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="stdError" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2} 
+                      dot={{ r: 6 }}
+                      name="Standard IS"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="normError" 
+                      stroke="#ef4444" 
+                      strokeWidth={2} 
+                      dot={{ r: 6 }}
+                      name="Normalized IS"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey={(entry) => {
+                        const firstNormError = convergenceData[0]?.normError || 1;
+                        const firstSampleSize = convergenceData[0]?.sampleSize || 10;
+                        const refScale = firstNormError * Math.sqrt(firstSampleSize);
+                        return refScale / Math.sqrt(entry.sampleSize);
+                      }}
+                      stroke="#000000" 
+                      strokeWidth={2} 
+                      strokeDasharray="5 5"
+                      dot={false}
+                      name="1/√n reference"
+                    />
                   </>
                 )}
               </LineChart>
@@ -417,13 +510,13 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
             config={{
               variance: { label: "Variance", color: "hsl(var(--accent))" },
               errorRatio: { label: "Error Ratio", color: "hsl(var(--accent))" },
-              reference: { label: "Equal performance", color: "hsl(var(--muted-foreground))" },
+              reference: { label: "Equal performance", color: "#000000" },
             }}
             className="h-[250px] w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={varianceData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(68,68,68,0.5)" />
                 <XAxis 
                   dataKey="parameter" 
                   stroke="hsl(var(--muted-foreground))"
@@ -441,7 +534,13 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                 ) : (
                   <>
                     <Line type="monotone" dataKey="errorRatio" stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 4 }} />
-                    <Line type="monotone" dataKey={() => 1.0} stroke="hsl(var(--muted-foreground))" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                    <ReferenceLine 
+                      y={1.0} 
+                      stroke="#000000" 
+                      strokeWidth={2} 
+                      strokeDasharray="5 5"
+                      label={{ value: "Equal performance", position: "insideTopLeft" }}
+                    />
                   </>
                 )}
               </LineChart>
