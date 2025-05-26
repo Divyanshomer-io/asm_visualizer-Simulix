@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp } from "lucide-react";
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
@@ -63,6 +62,15 @@ const Landing = () => {
       icon: <Target className="h-6 w-6" />,
       tags: ["Robust Statistics", "M-Estimators", "IRLS"],
       gradient: "from-cyan-500/20 to-blue-500/20"
+    },
+    {
+      id: "importance-sampling",
+      title: "Importance Sampling",
+      description: "Explore Standard and Normalized Importance Sampling techniques with interactive visualizations and parameter controls.",
+      path: "/importance-sampling",
+      icon: <TrendingUp className="h-6 w-6" />,
+      tags: ["Monte Carlo", "Sampling", "Statistics"],
+      gradient: "from-indigo-500/20 to-teal-500/20"
     },
   ];
 
