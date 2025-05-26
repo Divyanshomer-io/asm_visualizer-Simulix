@@ -69,7 +69,7 @@ const About = () => {
                   <User className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium">Student</h3>
+                  <h3 className="text-lg font-medium">Created by</h3>
                   <p className="opacity-80">Divyanshu Lila</p>
                   <p className="text-sm opacity-60">ID: 2022A3PS1056G</p>
                 </div>
