@@ -16,7 +16,7 @@ const ImportanceSamplingEducation: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Understanding Importance Sampling */}
       <Card className="glass-panel border-white/10">
         <Collapsible open={openSections.basics} onOpenChange={() => toggleSection('basics')}>
