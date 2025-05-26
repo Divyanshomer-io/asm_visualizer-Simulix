@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import SimulatedAnnealingToy from "./pages/SimulatedAnnealingToy";
 import AliasMethod from "./pages/AliasMethod";
 import Bootstrapping from "./pages/Bootstrapping";
 import HuberMean from "./pages/HuberMean";
+import ImportanceSampling from "./pages/ImportanceSampling";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
@@ -27,7 +27,8 @@ const App = () => (
           <Route path="/simulated-annealing-toy" element={<SimulatedAnnealingToy />} />
           <Route path="/alias-method" element={<AliasMethod />} />
           <Route path="/bootstrapping" element={<Bootstrapping />} />
-           <Route path="/huber-mean" element={<HuberMean />} />
+          <Route path="/huber-mean" element={<HuberMean />} />
+          <Route path="/importance-sampling" element={<ImportanceSampling />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
