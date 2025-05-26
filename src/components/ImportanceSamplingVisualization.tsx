@@ -484,6 +484,22 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
   legendType="line"  
                     />
                   </BarChart>
+                    {/* Custom Legend - absolutely positioned top right */}
+  <div className="absolute top-2 right-4 z-10 flex flex-col items-end space-y-1 bg-background/80 px-3 py-2 rounded-md shadow"
+       style={{ pointerEvents: 'none' }}>
+    <div className="flex items-center space-x-2">
+      <span className="inline-block w-6 h-0.5 rounded bg-[#3b82f6] border-t-2 border-dashed border-[#3b82f6]"></span>
+      <span className="text-xs text-[#3b82f6] font-mono">MC estimate</span>
+    </div>
+    <div className="flex items-center space-x-2">
+      <span className="inline-block w-6 h-0.5 rounded bg-[#ef4444] border-t-2 border-dashed border-[#ef4444]"></span>
+      <span className="text-xs text-[#ef4444] font-mono">IS estimate</span>
+    </div>
+    <div className="flex items-center space-x-2">
+      <span className="inline-block w-6 h-0.5 rounded bg-[#10b981] border-t-2 border-solid border-[#10b981]"></span>
+      <span className="text-xs text-[#10b981] font-mono">{`True: ${trueValueFromHist.toFixed(4)}`}</span>
+    </div>
+  </div>
                 </ResponsiveContainer>
               </ChartContainer>
             ) : (
