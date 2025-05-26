@@ -210,25 +210,7 @@ const ImportanceSamplingControls: React.FC<ImportanceSamplingControlsProps> = ({
         </div>
 
         {/* Current Estimates */}
-        <div className="pt-4 space-y-2 border-t border-white/10">
-          <h4 className="text-sm font-medium">Current Parameters</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="space-y-1">
-              <div>Method: {params.method}</div>
-              <div>Proposal t: {params.proposalT.toFixed(1)}</div>
-              <div>Scale: {params.scaleH.toFixed(1)}</div>
-            </div>
-            <div className="space-y-1">
-              <div>Demo: {params.nDemo}</div>
-              {showAdvanced && (
-                <>
-                  <div>Conv: {params.nTrialsConv}</div>
-                  <div>Var: {params.nTrialsVar}</div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        
       </CardContent>
     </Card>
   );
