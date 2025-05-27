@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -8,9 +7,23 @@ import NeuralNetworkControls from "@/components/NeuralNetworkControls";
 import NeuralNetworkEducation from "@/components/NeuralNetworkEducation";
 import { NeuralNetworkParams, DEFAULT_PARAMS } from "@/utils/neuralNetwork";
 
+// Default input values for different neuron counts
+const DEFAULT_INPUT_VALUES: Record<number, number[]> = {
+  1: [0.5],
+  2: [-1.2, 1.8],
+  3: [0.5, -1.2, 2.0],
+  4: [1.0, -0.5, 2.5, -2.0],
+  5: [0.0, -1.5, 2.2, -0.8, 1.0],
+  6: [0.3, -2.0, 1.5, -1.0, 2.5, -0.5],
+  7: [2.0, -1.8, 0.5, -2.5, 1.2, -0.2, 3.0],
+  8: [0.7, -1.0, 2.8, -0.3, 1.5, -2.2, 0.9, -1.5]
+};
+
 const NeuralNetwork: React.FC = () => {
   const [params, setParams] = useState<NeuralNetworkParams>(DEFAULT_PARAMS);
   const [visualizationKey, setVisualizationKey] = useState(0);
+  const [inputValues, setInputValues] = useState<number[]>(DEFAULT_INPUT_VALUES[DEFAULT_PARAMS.inputNeurons]);
+  const [hasInputErrors, setHasInputErrors] = useState(false);
 
   const handleUpdate = () => {
     setVisualizationKey(prev => prev + 1);
@@ -19,8 +32,14 @@ const NeuralNetwork: React.FC = () => {
 
   const handleReset = () => {
     setParams(DEFAULT_PARAMS);
+    setInputValues(DEFAULT_INPUT_VALUES[DEFAULT_PARAMS.inputNeurons]);
+    setHasInputErrors(false);
     setVisualizationKey(prev => prev + 1);
     toast.info("Parameters reset to default values");
+  };
+
+  const handleInputValuesChange = (values: number[]) => {
+    setInputValues(values);
   };
 
   return (
@@ -52,6 +71,8 @@ const NeuralNetwork: React.FC = () => {
             <NeuralNetworkVisualization 
               key={visualizationKey}
               params={params}
+              inputValues={inputValues}
+              hasInputErrors={hasInputErrors}
             />
           </div>
 
@@ -62,6 +83,9 @@ const NeuralNetwork: React.FC = () => {
               onParamsChange={setParams}
               onUpdate={handleUpdate}
               onReset={handleReset}
+              inputValues={inputValues}
+              onInputValuesChange={handleInputValuesChange}
+              hasInputErrors={hasInputErrors}
             />
           </div>
         </div>
