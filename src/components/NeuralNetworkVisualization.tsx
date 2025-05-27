@@ -329,61 +329,9 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
         )}
       </div>
 
-      {/* Training Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Loss Chart with Train/Val Curves */}
-        <div className="glass-panel p-6 rounded-xl">
-          <h3 className="text-lg font-semibold mb-4">
-            Loss Curves {trainingHistory && trainingHistory.earlyStopped && '(Early Stopped)'}
-          </h3>
-          <div className="h-64">
-            {trainingData.length > 0 ? (
-              <ChartContainer config={{ 
-                trainLoss: { label: "Training Loss", color: "#3b82f6" },
-                valLoss: { label: "Validation Loss", color: "#ef4444" }
-              }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={trainingData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="epoch" stroke="#9ca3af" label={{ value: 'Epoch', position: 'insideBottom', offset: -5 }} />
-                    <YAxis stroke="#9ca3af" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="trainLoss" 
-                      stroke="#3b82f6" 
-                      strokeWidth={2}
-                      dot={{ r: 2 }}
-                      name="Training Loss"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="valLoss" 
-                      stroke="#ef4444" 
-                      strokeWidth={2}
-                      dot={{ r: 2 }}
-                      name="Validation Loss"
-                    />
-                    {trainingHistory?.earlyStopped && (
-                      <ReferenceLine 
-                        x={trainingHistory.finalEpoch} 
-                        stroke="#10b981" 
-                        strokeDasharray="5 5"
-                        label={{ value: "Early Stop", position: "top" }}
-                      />
-                    )}
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                No training data yet
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Accuracy Chart with Train/Val Curves */}
+      {/* Training Metrics - Updated Layout */}
+      <div className="space-y-6">
+        {/* Accuracy Chart - Full Width */}
         <div className="glass-panel p-6 rounded-xl">
           <h3 className="text-lg font-semibold mb-4">
             Accuracy Curves
@@ -393,7 +341,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
               </span>
             )}
           </h3>
-          <div className="h-64">
+          <div className="h-80">
             {trainingData.length > 0 ? (
               <ChartContainer config={{ 
                 trainAccuracy: { label: "Training Accuracy", color: "#10b981" },
@@ -441,29 +389,84 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
           </div>
         </div>
 
-        {/* Weight Distribution */}
-        <div className="glass-panel p-6 rounded-xl">
-          <h3 className="text-lg font-semibold mb-4">
-            Weight Distribution
-          </h3>
-          <div className="h-64">
-            {weightData.length > 0 ? (
-              <ChartContainer config={{ count: { label: "Count", color: "#8b5cf6" } }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={weightData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="bin" stroke="#9ca3af" />
-                    <YAxis stroke="#9ca3af" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="count" fill="#8b5cf6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                No weights to display
-              </div>
-            )}
+        {/* Loss and Weight Distribution - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Loss Chart with Train/Val Curves */}
+          <div className="glass-panel p-6 rounded-xl">
+            <h3 className="text-lg font-semibold mb-4">
+              Loss Curves {trainingHistory && trainingHistory.earlyStopped && '(Early Stopped)'}
+            </h3>
+            <div className="h-80">
+              {trainingData.length > 0 ? (
+                <ChartContainer config={{ 
+                  trainLoss: { label: "Training Loss", color: "#3b82f6" },
+                  valLoss: { label: "Validation Loss", color: "#ef4444" }
+                }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trainingData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis dataKey="epoch" stroke="#9ca3af" label={{ value: 'Epoch', position: 'insideBottom', offset: -5 }} />
+                      <YAxis stroke="#9ca3af" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="trainLoss" 
+                        stroke="#3b82f6" 
+                        strokeWidth={2}
+                        dot={{ r: 2 }}
+                        name="Training Loss"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="valLoss" 
+                        stroke="#ef4444" 
+                        strokeWidth={2}
+                        dot={{ r: 2 }}
+                        name="Validation Loss"
+                      />
+                      {trainingHistory?.earlyStopped && (
+                        <ReferenceLine 
+                          x={trainingHistory.finalEpoch} 
+                          stroke="#10b981" 
+                          strokeDasharray="5 5"
+                          label={{ value: "Early Stop", position: "top" }}
+                        />
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  No training data yet
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Weight Distribution */}
+          <div className="glass-panel p-6 rounded-xl">
+            <h3 className="text-lg font-semibold mb-4">
+              Weight Distribution
+            </h3>
+            <div className="h-80">
+              {weightData.length > 0 ? (
+                <ChartContainer config={{ count: { label: "Count", color: "#8b5cf6" } }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={weightData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis dataKey="bin" stroke="#9ca3af" />
+                      <YAxis stroke="#9ca3af" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="count" fill="#8b5cf6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  No weights to display
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
