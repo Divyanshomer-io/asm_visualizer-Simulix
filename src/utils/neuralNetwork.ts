@@ -1,3 +1,4 @@
+
 import { 
   TrainingMetrics, 
   DatasetValidation, 
@@ -40,6 +41,7 @@ export interface TrainingHistory {
   qualityWarnings: string[];
   earlyStopped: boolean;
   finalEpoch: number;
+  stepTrainingMode: boolean;
 }
 
 export interface NetworkLayer {
@@ -103,7 +105,7 @@ export function generateClassificationDataset(
   return { X, y };
 }
 
-// Enhanced MLP with proper validation
+// Enhanced MLP with proper validation and step training support
 export class SimpleMLP {
   private weights: number[][][];
   private biases: number[][];
@@ -113,6 +115,9 @@ export class SimpleMLP {
   private alpha: number;
   private trainingHistory: TrainingHistory;
   private earlyStopping: EarlyStopping;
+  private stepTrainingData: { X: number[][], y: number[] } | null = null;
+  private stepTrainingValidation: { XVal: number[][], yVal: number[] } | null = null;
+  private currentEpoch: number = 0;
 
   constructor(
     layers: number[],
@@ -125,7 +130,7 @@ export class SimpleMLP {
     this.learningRate = learningRate;
     this.alpha = alpha;
     this.initializeWeights();
-    this.earlyStopping = new EarlyStopping(15, 0.001); // More patient early stopping
+    this.earlyStopping = new EarlyStopping(15, 0.001);
     this.trainingHistory = {
       metrics: [],
       datasetValidation: {
@@ -138,7 +143,8 @@ export class SimpleMLP {
       },
       qualityWarnings: [],
       earlyStopped: false,
-      finalEpoch: 0
+      finalEpoch: 0,
+      stepTrainingMode: false
     };
   }
 
@@ -166,6 +172,109 @@ export class SimpleMLP {
       this.weights.push(layerWeights);
       this.biases.push(layerBiases);
     }
+  }
+
+  // Initialize step training mode with dataset
+  public initializeStepTraining(X: number[][], y: number[]): void {
+    this.trainingHistory.stepTrainingMode = true;
+    this.trainingHistory.metrics = [];
+    this.currentEpoch = 0;
+    
+    // Create train/validation split for step training
+    const { XTrain, XVal, yTrain, yVal } = trainValidationSplit(X, y, 0.2, 42);
+    this.stepTrainingData = { X: XTrain, y: yTrain };
+    this.stepTrainingValidation = { XVal, yVal };
+    
+    // Validate dataset
+    this.trainingHistory.datasetValidation = validateDataset(XTrain, XVal, yTrain, yVal);
+    
+    console.log('Step training initialized with dataset validation:', this.trainingHistory.datasetValidation);
+  }
+
+  // Perform a single training step and return updated metrics
+  public trainSingleStep(): TrainingMetrics | null {
+    if (!this.stepTrainingData || !this.stepTrainingValidation) {
+      console.error('Step training not initialized. Call initializeStepTraining first.');
+      return null;
+    }
+
+    this.currentEpoch++;
+    const { X: XTrain, y: yTrain } = this.stepTrainingData;
+    const { XVal, yVal } = this.stepTrainingValidation;
+
+    // Training phase - one epoch
+    let trainLoss = 0;
+    let trainCorrect = 0;
+    
+    // Shuffle training data
+    const indices = Array.from({ length: XTrain.length }, (_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    
+    for (const idx of indices) {
+      const activations = this.forward(XTrain[idx]);
+      const prediction = activations[activations.length - 1][0];
+      const target = yTrain[idx];
+
+      // Calculate loss
+      const sampleLoss = -(target * Math.log(Math.max(prediction, 1e-15)) + 
+                          (1 - target) * Math.log(Math.max(1 - prediction, 1e-15)));
+      trainLoss += sampleLoss;
+
+      // Check accuracy
+      if ((prediction > 0.5 ? 1 : 0) === target) {
+        trainCorrect++;
+      }
+
+      // Backpropagation
+      this.backpropagate(activations, target);
+    }
+    
+    // Validation phase
+    let valLoss = 0;
+    let valCorrect = 0;
+    
+    for (let i = 0; i < XVal.length; i++) {
+      const activations = this.forward(XVal[i]);
+      const prediction = activations[activations.length - 1][0];
+      const target = yVal[i];
+      
+      const sampleLoss = -(target * Math.log(Math.max(prediction, 1e-15)) + 
+                          (1 - target) * Math.log(Math.max(1 - prediction, 1e-15)));
+      valLoss += sampleLoss;
+      
+      if ((prediction > 0.5 ? 1 : 0) === target) {
+        valCorrect++;
+      }
+    }
+    
+    // Calculate metrics
+    const metrics: TrainingMetrics = {
+      epoch: this.currentEpoch,
+      trainLoss: trainLoss / XTrain.length,
+      valLoss: valLoss / XVal.length,
+      trainAccuracy: trainCorrect / XTrain.length,
+      valAccuracy: valCorrect / XVal.length,
+      overfittingWarning: false,
+      earlyStopped: false
+    };
+    
+    // Check for overfitting
+    this.trainingHistory.metrics.push(metrics);
+    
+    if (this.trainingHistory.metrics.length > 5) {
+      metrics.overfittingWarning = detectOverfitting(
+        this.trainingHistory.metrics.map(m => m.valLoss)
+      );
+    }
+    
+    this.trainingHistory.finalEpoch = this.currentEpoch;
+    
+    console.log(`Step ${this.currentEpoch}: Train Acc: ${(metrics.trainAccuracy * 100).toFixed(1)}%, Val Acc: ${(metrics.valAccuracy * 100).toFixed(1)}%, Val Loss: ${metrics.valLoss.toFixed(4)}`);
+    
+    return metrics;
   }
 
   private applyActivation(x: number): number {
@@ -227,6 +336,7 @@ export class SimpleMLP {
     // Reset training state
     this.earlyStopping.reset();
     this.trainingHistory.metrics = [];
+    this.trainingHistory.stepTrainingMode = false;
     
     // Create train/validation split
     const { XTrain, XVal, yTrain, yVal } = trainValidationSplit(X, y, 0.2, 42);
@@ -404,5 +514,13 @@ export class SimpleMLP {
     const predictions = this.predict(X);
     const correct = predictions.reduce((acc, pred, i) => acc + (pred === y[i] ? 1 : 0), 0);
     return correct / y.length;
+  }
+
+  public resetStepTraining(): void {
+    this.stepTrainingData = null;
+    this.stepTrainingValidation = null;
+    this.currentEpoch = 0;
+    this.trainingHistory.stepTrainingMode = false;
+    this.trainingHistory.metrics = [];
   }
 }
