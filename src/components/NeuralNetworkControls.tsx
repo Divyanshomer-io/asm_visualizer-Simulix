@@ -1,11 +1,11 @@
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { NeuralNetworkParams, PARAM_LIMITS } from "@/utils/neuralNetwork";
-import { RotateCcw, Play, Info } from "lucide-react";
+import { RotateCcw, Play, Info, ChevronDown, ChevronUp } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NeuralNetworkControlsProps {
@@ -13,19 +13,151 @@ interface NeuralNetworkControlsProps {
   onParamsChange: (params: NeuralNetworkParams) => void;
   onUpdate: () => void;
   onReset: () => void;
+  inputValues: number[];
+  onInputValuesChange: (values: number[]) => void;
+  hasInputErrors: boolean;
+}
+
+// Default input values for different neuron counts
+const DEFAULT_INPUT_VALUES: Record<number, number[]> = {
+  1: [0.5],
+  2: [-1.2, 1.8],
+  3: [0.5, -1.2, 2.0],
+  4: [1.0, -0.5, 2.5, -2.0],
+  5: [0.0, -1.5, 2.2, -0.8, 1.0],
+  6: [0.3, -2.0, 1.5, -1.0, 2.5, -0.5],
+  7: [2.0, -1.8, 0.5, -2.5, 1.2, -0.2, 3.0],
+  8: [0.7, -1.0, 2.8, -0.3, 1.5, -2.2, 0.9, -1.5]
+};
+
+interface InputFieldState {
+  value: string;
+  isValid: boolean;
+  errorMessage: string;
 }
 
 const NeuralNetworkControls: React.FC<NeuralNetworkControlsProps> = ({
   params,
   onParamsChange,
   onUpdate,
-  onReset
+  onReset,
+  inputValues,
+  onInputValuesChange,
+  hasInputErrors
 }) => {
+  const [showInputConfig, setShowInputConfig] = useState(false);
+  const [inputFields, setInputFields] = useState<InputFieldState[]>([]);
+
   const updateParam = (key: keyof NeuralNetworkParams, value: any) => {
     onParamsChange({
       ...params,
       [key]: value
     });
+  };
+
+  // Initialize input fields when input neurons change or inputValues change
+  useEffect(() => {
+    const count = params.inputNeurons;
+    const currentValues = inputValues.length === count ? inputValues : DEFAULT_INPUT_VALUES[count] || [];
+    
+    const fields = currentValues.map((value, index) => ({
+      value: value.toString(),
+      isValid: true,
+      errorMessage: ""
+    }));
+    
+    setInputFields(fields);
+    
+    // Only update parent if values actually changed
+    if (inputValues.length !== count) {
+      onInputValuesChange([...currentValues]);
+    }
+  }, [params.inputNeurons]);
+
+  // Sync input fields when inputValues prop changes
+  useEffect(() => {
+    if (inputValues.length === params.inputNeurons) {
+      setInputFields(prev => 
+        inputValues.map((value, index) => ({
+          value: value.toString(),
+          isValid: prev[index]?.isValid ?? true,
+          errorMessage: prev[index]?.errorMessage ?? ""
+        }))
+      );
+    }
+  }, [inputValues, params.inputNeurons]);
+
+  // Validate input value
+  const validateInput = (value: string): { isValid: boolean; errorMessage: string; numericValue?: number } => {
+    if (value.trim() === "") {
+      return { isValid: false, errorMessage: "Value cannot be empty" };
+    }
+    
+    const numericValue = parseFloat(value);
+    
+    if (isNaN(numericValue)) {
+      return { isValid: false, errorMessage: "Invalid number" };
+    }
+    
+    if (numericValue < -3.0 || numericValue > 3.0) {
+      return { isValid: false, errorMessage: "Value must be between -3.0 and 3.0" };
+    }
+    
+    return { isValid: true, errorMessage: "", numericValue };
+  };
+
+  // Handle input field changes
+  const handleInputChange = (index: number, value: string) => {
+    const validation = validateInput(value);
+    
+    // Update the input field state immediately
+    const newFields = [...inputFields];
+    newFields[index] = {
+      value,
+      isValid: validation.isValid,
+      errorMessage: validation.errorMessage
+    };
+    
+    setInputFields(newFields);
+    
+    // Update parent with valid values immediately
+    if (validation.isValid && validation.numericValue !== undefined) {
+      const newValidValues = [...inputValues];
+      newValidValues[index] = validation.numericValue;
+      onInputValuesChange(newValidValues);
+    }
+  };
+
+  // Handle input blur (focus loss) - auto-correct invalid values
+  const handleInputBlur = (index: number) => {
+    const field = inputFields[index];
+    
+    if (!field.isValid) {
+      // Restore to last valid value or default
+      const defaultValue = DEFAULT_INPUT_VALUES[params.inputNeurons][index];
+      const restoredValue = inputValues[index] !== undefined ? inputValues[index] : defaultValue;
+      
+      const newFields = [...inputFields];
+      newFields[index] = {
+        value: restoredValue.toString(),
+        isValid: true,
+        errorMessage: ""
+      };
+      
+      setInputFields(newFields);
+      
+      // Update parent with restored value
+      const newValidValues = [...inputValues];
+      newValidValues[index] = restoredValue;
+      onInputValuesChange(newValidValues);
+    }
+  };
+
+  // Handle Enter key press - auto-correct invalid values
+  const handleInputKeyDown = (index: number, event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      handleInputBlur(index);
+    }
   };
 
   const InfoTooltip = ({ content }: { content: string }) => (
@@ -74,6 +206,61 @@ const NeuralNetworkControls: React.FC<NeuralNetworkControlsProps> = ({
               <span>{PARAM_LIMITS.maxInput}</span>
             </div>
           </div>
+
+          {/* Input Configuration - Collapsible */}
+          <Collapsible open={showInputConfig} onOpenChange={setShowInputConfig}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-2 h-auto">
+                <span className="text-sm font-medium">Input Configuration</span>
+                {showInputConfig ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4 mt-4">
+              <div className="bg-secondary/20 p-4 rounded-lg border border-white/10">
+                <h4 className="text-sm font-medium mb-3">Input Values (Range: -3.0 to 3.0)</h4>
+                <div className={`grid gap-3 ${params.inputNeurons <= 4 ? 'grid-cols-2' : 'grid-cols-2'}`}>
+                  {inputFields.map((field, index) => (
+                    <div key={index} className="space-y-1">
+                      <label className="block text-xs font-medium opacity-80">
+                        Input {index + 1}
+                      </label>
+                      <input
+                        type="number"
+                        min="-3.0"
+                        max="3.0"
+                        step="0.1"
+                        value={field.value}
+                        onChange={(e) => handleInputChange(index, e.target.value)}
+                        onBlur={() => handleInputBlur(index)}
+                        onKeyDown={(e) => handleInputKeyDown(index, e)}
+                        className={`w-full px-2 py-1 text-xs rounded border bg-secondary focus:outline-none focus:ring-1 transition-colors ${
+                          field.isValid 
+                            ? 'border-green-500/50 focus:ring-green-500' 
+                            : 'border-red-500 focus:ring-red-500'
+                        }`}
+                        placeholder="Enter value"
+                      />
+                      {!field.isValid && (
+                        <p className="text-red-400 text-xs">{field.errorMessage}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                {hasInputErrors && (
+                  <div className="bg-yellow-500/20 border border-yellow-500/30 rounded p-2 mt-3">
+                    <p className="text-yellow-300 text-xs">
+                      ⚠️ Some inputs have errors. Training will use the last valid values.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Hidden Layers */}
           <div className="space-y-3">
