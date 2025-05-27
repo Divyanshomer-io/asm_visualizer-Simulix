@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -8,9 +7,15 @@ import { NeuralNetworkParams, SimpleMLP, generateClassificationDataset, PARAM_LI
 
 interface NeuralNetworkVisualizationProps {
   params: NeuralNetworkParams;
+  inputValues: number[];
+  hasInputErrors: boolean;
 }
 
-const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({ params }) => {
+const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({ 
+  params, 
+  inputValues, 
+  hasInputErrors 
+}) => {
   const [model, setModel] = useState<SimpleMLP | null>(null);
   const [dataset, setDataset] = useState<{ X: number[][], y: number[] } | null>(null);
   const [activations, setActivations] = useState<number[][] | null>(null);
@@ -31,7 +36,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
       setErrorMessage(`Max exceeded: Input=${PARAM_LIMITS.maxInput}, Layers=${PARAM_LIMITS.maxHiddenLayers}, Neurons=${PARAM_LIMITS.maxNeurons}`);
     } else {
       setErrorMessage("");
-      // Generate more challenging dataset
+      // Generate dataset with current input count
       const newDataset = generateClassificationDataset(PARAM_LIMITS.maxSamples, params.inputNeurons);
       setDataset(newDataset);
       
@@ -42,7 +47,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
       setIsStepTrainingInitialized(false);
       setPlotsInitialized(false);
     }
-  }, [params]);
+  }, [params.inputNeurons, params.hiddenLayers, params.neuronsPerHidden]);
 
   // Initialize empty plots on component mount
   useEffect(() => {
@@ -79,7 +84,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Network structure
+    // Network structure with current input count
     const layers = [params.inputNeurons, ...Array(params.hiddenLayers).fill(params.neuronsPerHidden), 1];
     const maxNeurons = Math.max(...layers);
     
@@ -136,20 +141,32 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
       });
     }
 
-    // Draw neurons
+    // Draw neurons with user input highlighting
     positions.forEach((layerPositions, layerIndex) => {
       layerPositions.forEach((pos, neuronIndex) => {
         // Determine neuron appearance
         let color = '#64748b'; // Default gray
         let radius = 15;
         
-        if (activations && layerIndex < activations.length && neuronIndex < activations[layerIndex].length) {
+        if (layerIndex === 0) {
+          // Input layer - highlight based on user input values
+          const inputValue = inputValues[neuronIndex];
+          if (inputValue !== undefined) {
+            // Color gradient from blue (-3.0) to red (3.0)
+            const normalizedValue = (inputValue + 3.0) / 6.0; // Normalize to [0, 1]
+            const hue = (1 - normalizedValue) * 240; // Blue (240) to Red (0)
+            const saturation = 70 + Math.abs(inputValue) * 10; // Increase saturation with magnitude
+            const lightness = 50 + Math.abs(inputValue) * 5; // Increase lightness with magnitude
+            color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            radius = 12 + Math.abs(inputValue) * 3; // Size based on magnitude
+          } else {
+            color = '#3b82f6'; // Default blue
+          }
+        } else if (activations && layerIndex < activations.length && neuronIndex < activations[layerIndex].length) {
           const activation = activations[layerIndex][neuronIndex];
           const intensity = Math.min(1.0, Math.abs(activation));
           
-          if (layerIndex === 0) {
-            color = `hsl(217, ${50 + intensity * 50}%, ${60 + intensity * 20}%)`; // Blue
-          } else if (layerIndex === positions.length - 1) {
+          if (layerIndex === positions.length - 1) {
             color = `hsl(142, ${50 + intensity * 50}%, ${60 + intensity * 20}%)`; // Green
           } else {
             color = `hsl(38, ${50 + intensity * 50}%, ${60 + intensity * 20}%)`; // Orange
@@ -158,8 +175,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
           radius = 12 + intensity * 8;
         } else {
           // Default colors
-          if (layerIndex === 0) color = '#3b82f6'; // Blue
-          else if (layerIndex === positions.length - 1) color = '#10b981'; // Green
+          if (layerIndex === positions.length - 1) color = '#10b981'; // Green
           else color = '#f59e0b'; // Orange
         }
 
@@ -174,21 +190,38 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Draw activation value
-        if (activations && layerIndex < activations.length && neuronIndex < activations[layerIndex].length) {
-          const activation = activations[layerIndex][neuronIndex];
+        // Draw value text
+        let displayValue = '';
+        if (layerIndex === 0 && inputValues[neuronIndex] !== undefined) {
+          displayValue = inputValues[neuronIndex].toFixed(1);
+        } else if (activations && layerIndex < activations.length && neuronIndex < activations[layerIndex].length) {
+          displayValue = activations[layerIndex][neuronIndex].toFixed(1);
+        }
+        
+        if (displayValue) {
           ctx.fillStyle = '#fff';
           ctx.font = '10px Arial';
           ctx.textAlign = 'center';
-          ctx.fillText(activation.toFixed(1), pos.x, pos.y + 3);
+          ctx.fillText(displayValue, pos.x, pos.y + 3);
         }
       });
     });
 
-  }, [params, model, activations, errorMessage]);
+  }, [params, model, activations, errorMessage, inputValues]);
 
   const trainNetwork = async () => {
     if (!dataset || errorMessage) return;
+
+    if (hasInputErrors) {
+      // Pulse effect for button to indicate errors
+      const button = document.querySelector('.train-button');
+      if (button) {
+        button.classList.add('animate-pulse', 'bg-red-500');
+        setTimeout(() => {
+          button.classList.remove('animate-pulse', 'bg-red-500');
+        }, 1000);
+      }
+    }
 
     setIsTraining(true);
     try {
@@ -198,8 +231,9 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
       // Use new validation-aware training
       const history = newModel.trainWithValidation(dataset.X, dataset.y, 150);
       
-      // Get sample activations
-      const sampleActivations = newModel.forward(dataset.X[0]);
+      // Get sample activations using current valid input values
+      const sampleInput = inputValues.length === params.inputNeurons ? inputValues : dataset.X[0];
+      const sampleActivations = newModel.forward(sampleInput);
       
       setModel(newModel);
       setActivations(sampleActivations);
@@ -220,6 +254,17 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
 
   const stepTraining = async () => {
     if (!dataset || errorMessage) return;
+
+    if (hasInputErrors) {
+      // Pulse effect for button to indicate errors
+      const button = document.querySelector('.step-button');
+      if (button) {
+        button.classList.add('animate-pulse', 'bg-red-500');
+        setTimeout(() => {
+          button.classList.remove('animate-pulse', 'bg-red-500');
+        }, 1000);
+      }
+    }
 
     setIsTraining(true);
     try {
@@ -247,8 +292,9 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
         const updatedHistory = currentModel.getTrainingHistory();
         setTrainingHistory({ ...updatedHistory });
         
-        // Get sample activations for visualization
-        const sampleActivations = currentModel.forward(dataset.X[0]);
+        // Get sample activations using current valid input values
+        const sampleInput = inputValues.length === params.inputNeurons ? inputValues : dataset.X[0];
+        const sampleActivations = currentModel.forward(sampleInput);
         setActivations(sampleActivations);
         setModel(currentModel);
         
@@ -289,6 +335,14 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
     };
     setTrainingHistory(emptyHistory);
   };
+
+  // Update activations when user changes input values (if model exists)
+  useEffect(() => {
+    if (model && inputValues.length === params.inputNeurons) {
+      const newActivations = model.forward(inputValues);
+      setActivations(newActivations);
+    }
+  }, [inputValues, model, params.inputNeurons]);
 
   // Prepare training/validation chart data with single-point handling
   const trainingData = trainingHistory ? trainingHistory.metrics.map(metric => ({
@@ -368,14 +422,14 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
               <button
                 onClick={trainNetwork}
                 disabled={isTraining || !!errorMessage}
-                className="control-btn-primary disabled:opacity-50"
+                className="train-button control-btn-primary disabled:opacity-50 transition-all duration-300"
               >
                 {isTraining ? "Training..." : "Train with Validation"}
               </button>
               <button
                 onClick={stepTraining}
                 disabled={isTraining || !!errorMessage}
-                className="control-btn disabled:opacity-50"
+                className="step-button control-btn disabled:opacity-50 transition-all duration-300"
               >
                 {isStepTrainingInitialized ? "Next Step" : "Start Step Training"}
               </button>
