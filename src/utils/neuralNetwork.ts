@@ -1,3 +1,13 @@
+import { 
+  TrainingMetrics, 
+  DatasetValidation, 
+  EarlyStopping, 
+  trainValidationSplit, 
+  validateDataset, 
+  calculateCrossEntropyLoss, 
+  detectOverfitting,
+  validateModelQuality 
+} from './neuralNetworkValidation';
 
 export interface NeuralNetworkParams {
   inputNeurons: number;
@@ -25,9 +35,11 @@ export const PARAM_LIMITS = {
 };
 
 export interface TrainingHistory {
-  loss: number[];
-  accuracy: number[];
-  iteration: number[];
+  metrics: TrainingMetrics[];
+  datasetValidation: DatasetValidation;
+  qualityWarnings: string[];
+  earlyStopped: boolean;
+  finalEpoch: number;
 }
 
 export interface NetworkLayer {
@@ -51,13 +63,12 @@ export const activationFunctions = {
   tanh: (x: number) => Math.tanh(x)
 };
 
-// Dataset generation
+// Generate a more challenging dataset to prevent unrealistic accuracy
 export function generateClassificationDataset(
   numSamples: number,
   numFeatures: number,
   randomSeed: number = 42
 ): { X: number[][], y: number[] } {
-  // Simple seeded random number generator
   let seed = randomSeed;
   const random = () => {
     const x = Math.sin(seed++) * 10000;
@@ -70,19 +81,29 @@ export function generateClassificationDataset(
   for (let i = 0; i < numSamples; i++) {
     const sample: number[] = [];
     for (let j = 0; j < numFeatures; j++) {
-      sample.push((random() - 0.5) * 4); // Range [-2, 2]
+      sample.push((random() - 0.5) * 6); // Wider range for more complexity
     }
     X.push(sample);
     
-    // Simple classification rule: sum of features > 0
-    const sum = sample.reduce((acc, val) => acc + val, 0);
-    y.push(sum > 0 ? 1 : 0);
+    // More complex classification rule to prevent easy separation
+    const weightedSum = sample.reduce((acc, val, idx) => {
+      const weight = Math.sin(idx + 1) * 0.7; // Non-uniform weights
+      return acc + val * weight;
+    }, 0);
+    
+    // Add noise to make classification more challenging
+    const noise = (random() - 0.5) * 2;
+    const decision = weightedSum + noise;
+    
+    // Non-linear decision boundary
+    const threshold = Math.sin(sample[0] * 0.3) * 0.5;
+    y.push(decision > threshold ? 1 : 0);
   }
 
   return { X, y };
 }
 
-// Simple MLP implementation
+// Enhanced MLP with proper validation
 export class SimpleMLP {
   private weights: number[][][];
   private biases: number[][];
@@ -90,9 +111,8 @@ export class SimpleMLP {
   private activation: string;
   private learningRate: number;
   private alpha: number;
-  public loss: number = 0;
-  public trainingHistory: TrainingHistory = { loss: [], accuracy: [], iteration: [] };
-  private iteration: number = 0;
+  private trainingHistory: TrainingHistory;
+  private earlyStopping: EarlyStopping;
 
   constructor(
     layers: number[],
@@ -105,6 +125,21 @@ export class SimpleMLP {
     this.learningRate = learningRate;
     this.alpha = alpha;
     this.initializeWeights();
+    this.earlyStopping = new EarlyStopping(15, 0.001); // More patient early stopping
+    this.trainingHistory = {
+      metrics: [],
+      datasetValidation: {
+        duplicatesFound: 0,
+        trainClassDistribution: [],
+        valClassDistribution: [],
+        datasetTooSimple: false,
+        simpleModelAccuracy: 0,
+        warnings: []
+      },
+      qualityWarnings: [],
+      earlyStopped: false,
+      finalEpoch: 0
+    };
   }
 
   private initializeWeights() {
@@ -118,11 +153,14 @@ export class SimpleMLP {
       for (let j = 0; j < this.layers[i + 1]; j++) {
         const neuronWeights: number[] = [];
         for (let k = 0; k < this.layers[i]; k++) {
-          // Xavier initialization
-          neuronWeights.push((Math.random() - 0.5) * 2 / Math.sqrt(this.layers[i]));
+          // He initialization for ReLU, Xavier for others
+          const scale = this.activation === 'relu' ? 
+            Math.sqrt(2.0 / this.layers[i]) : 
+            Math.sqrt(1.0 / this.layers[i]);
+          neuronWeights.push((Math.random() * 2 - 1) * scale);
         }
         layerWeights.push(neuronWeights);
-        layerBiases.push(0);
+        layerBiases.push((Math.random() - 0.5) * 0.1); // Small random bias
       }
       
       this.weights.push(layerWeights);
@@ -172,10 +210,8 @@ export class SimpleMLP {
         }
         
         if (i === this.weights.length - 1) {
-          // Output layer - use sigmoid
           nextActivation.push(activationFunctions.sigmoid(sum));
         } else {
-          // Hidden layers - use specified activation
           nextActivation.push(this.applyActivation(sum));
         }
       }
@@ -187,37 +223,124 @@ export class SimpleMLP {
     return activations;
   }
 
-  public train(X: number[][], y: number[], epochs: number = 1): void {
-    for (let epoch = 0; epoch < epochs; epoch++) {
-      let totalLoss = 0;
-      let correct = 0;
-
-      for (let i = 0; i < X.length; i++) {
-        const activations = this.forward(X[i]);
+  public trainWithValidation(X: number[][], y: number[], maxEpochs: number = 100): TrainingHistory {
+    // Reset training state
+    this.earlyStopping.reset();
+    this.trainingHistory.metrics = [];
+    
+    // Create train/validation split
+    const { XTrain, XVal, yTrain, yVal } = trainValidationSplit(X, y, 0.2, 42);
+    
+    // Validate dataset
+    this.trainingHistory.datasetValidation = validateDataset(XTrain, XVal, yTrain, yVal);
+    
+    console.log('Dataset Validation Results:', this.trainingHistory.datasetValidation);
+    
+    // Training loop with validation monitoring
+    for (let epoch = 0; epoch < maxEpochs; epoch++) {
+      // Training phase
+      let trainLoss = 0;
+      let trainCorrect = 0;
+      
+      // Shuffle training data
+      const indices = Array.from({ length: XTrain.length }, (_, i) => i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      
+      for (const idx of indices) {
+        const activations = this.forward(XTrain[idx]);
         const prediction = activations[activations.length - 1][0];
-        const target = y[i];
+        const target = yTrain[idx];
 
-        // Calculate loss (binary cross-entropy)
-        const loss = -(target * Math.log(Math.max(prediction, 1e-15)) + 
-                       (1 - target) * Math.log(Math.max(1 - prediction, 1e-15)));
-        totalLoss += loss;
+        // Calculate loss
+        const sampleLoss = -(target * Math.log(Math.max(prediction, 1e-15)) + 
+                            (1 - target) * Math.log(Math.max(1 - prediction, 1e-15)));
+        trainLoss += sampleLoss;
 
         // Check accuracy
         if ((prediction > 0.5 ? 1 : 0) === target) {
-          correct++;
+          trainCorrect++;
         }
 
         // Backpropagation
         this.backpropagate(activations, target);
       }
-
-      this.loss = totalLoss / X.length;
-      const accuracy = correct / X.length;
       
-      this.iteration++;
-      this.trainingHistory.loss.push(this.loss);
-      this.trainingHistory.accuracy.push(accuracy);
-      this.trainingHistory.iteration.push(this.iteration);
+      // Validation phase
+      let valLoss = 0;
+      let valCorrect = 0;
+      const valPredictions: number[] = [];
+      
+      for (let i = 0; i < XVal.length; i++) {
+        const activations = this.forward(XVal[i]);
+        const prediction = activations[activations.length - 1][0];
+        const target = yVal[i];
+        
+        valPredictions.push(prediction);
+        
+        const sampleLoss = -(target * Math.log(Math.max(prediction, 1e-15)) + 
+                            (1 - target) * Math.log(Math.max(1 - prediction, 1e-15)));
+        valLoss += sampleLoss;
+        
+        if ((prediction > 0.5 ? 1 : 0) === target) {
+          valCorrect++;
+        }
+      }
+      
+      // Calculate metrics
+      const metrics: TrainingMetrics = {
+        epoch: epoch + 1,
+        trainLoss: trainLoss / XTrain.length,
+        valLoss: valLoss / XVal.length,
+        trainAccuracy: trainCorrect / XTrain.length,
+        valAccuracy: valCorrect / XVal.length,
+        overfittingWarning: false,
+        earlyStopped: false
+      };
+      
+      // Check for overfitting
+      this.trainingHistory.metrics.push(metrics);
+      
+      if (this.trainingHistory.metrics.length > 5) {
+        metrics.overfittingWarning = detectOverfitting(
+          this.trainingHistory.metrics.map(m => m.valLoss)
+        );
+      }
+      
+      // Early stopping check
+      if (this.earlyStopping.check(metrics.valLoss)) {
+        metrics.earlyStopped = true;
+        this.trainingHistory.earlyStopped = true;
+        this.trainingHistory.finalEpoch = epoch + 1;
+        console.log(`Early stopping triggered at epoch ${epoch + 1}`);
+        break;
+      }
+      
+      this.trainingHistory.finalEpoch = epoch + 1;
+      
+      // Log progress every 10 epochs
+      if ((epoch + 1) % 10 === 0) {
+        console.log(`Epoch ${epoch + 1}: Train Acc: ${(metrics.trainAccuracy * 100).toFixed(1)}%, Val Acc: ${(metrics.valAccuracy * 100).toFixed(1)}%, Val Loss: ${metrics.valLoss.toFixed(4)}`);
+      }
+    }
+    
+    // Final quality validation
+    this.trainingHistory.qualityWarnings = validateModelQuality(this.trainingHistory.metrics);
+    
+    return this.trainingHistory;
+  }
+
+  // Keep existing train method for backward compatibility
+  public train(X: number[][], y: number[], epochs: number = 1): void {
+    for (let epoch = 0; epoch < epochs; epoch++) {
+      for (let i = 0; i < X.length; i++) {
+        const activations = this.forward(X[i]);
+        const prediction = activations[activations.length - 1][0];
+        const target = y[i];
+        this.backpropagate(activations, target);
+      }
     }
   }
 
@@ -264,6 +387,10 @@ export class SimpleMLP {
 
   public getBiases(): number[][] {
     return this.biases;
+  }
+
+  public getTrainingHistory(): TrainingHistory {
+    return this.trainingHistory;
   }
 
   public predict(X: number[][]): number[] {

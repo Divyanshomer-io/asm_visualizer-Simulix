@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { NeuralNetworkParams, SimpleMLP, generateClassificationDataset, PARAM_LIMITS } from "@/utils/neuralNetwork";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, ReferenceLine, ErrorBar } from "recharts";
+import { NeuralNetworkParams, SimpleMLP, generateClassificationDataset, PARAM_LIMITS, TrainingHistory } from "@/utils/neuralNetwork";
 
 interface NeuralNetworkVisualizationProps {
   params: NeuralNetworkParams;
@@ -12,6 +11,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
   const [model, setModel] = useState<SimpleMLP | null>(null);
   const [dataset, setDataset] = useState<{ X: number[][], y: number[] } | null>(null);
   const [activations, setActivations] = useState<number[][] | null>(null);
+  const [trainingHistory, setTrainingHistory] = useState<TrainingHistory | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,13 +24,14 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
       setErrorMessage(`Max exceeded: Input=${PARAM_LIMITS.maxInput}, Layers=${PARAM_LIMITS.maxHiddenLayers}, Neurons=${PARAM_LIMITS.maxNeurons}`);
     } else {
       setErrorMessage("");
-      // Generate new dataset
+      // Generate more challenging dataset
       const newDataset = generateClassificationDataset(PARAM_LIMITS.maxSamples, params.inputNeurons);
       setDataset(newDataset);
       
-      // Reset model
+      // Reset model and training history
       setModel(null);
       setActivations(null);
+      setTrainingHistory(null);
     }
   }, [params]);
 
@@ -161,13 +162,21 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
       const layers = [params.inputNeurons, ...Array(params.hiddenLayers).fill(params.neuronsPerHidden), 1];
       const newModel = new SimpleMLP(layers, params.activation, params.learningRate, params.alpha);
       
-      newModel.train(dataset.X, dataset.y, 100);
+      // Use new validation-aware training
+      const history = newModel.trainWithValidation(dataset.X, dataset.y, 150); // More epochs for realistic training
       
       // Get sample activations
       const sampleActivations = newModel.forward(dataset.X[0]);
       
       setModel(newModel);
       setActivations(sampleActivations);
+      setTrainingHistory(history);
+      
+      // Log quality warnings
+      if (history.qualityWarnings.length > 0) {
+        console.warn('Training Quality Warnings:', history.qualityWarnings);
+      }
+      
     } catch (error) {
       setErrorMessage(`Training error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
@@ -186,6 +195,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
         currentModel = new SimpleMLP(layers, params.activation, params.learningRate, params.alpha);
       }
       
+      // Single epoch training
       currentModel.train(dataset.X, dataset.y, 1);
       
       // Get sample activations
@@ -203,20 +213,21 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
   const resetNetwork = () => {
     setModel(null);
     setActivations(null);
+    setTrainingHistory(null);
     setErrorMessage("");
   };
 
-  // Prepare chart data
-  const lossData = model ? model.trainingHistory.iteration.map((iter, i) => ({
-    iteration: iter,
-    loss: model.trainingHistory.loss[i]
+  // Prepare training/validation chart data
+  const trainingData = trainingHistory ? trainingHistory.metrics.map(metric => ({
+    epoch: metric.epoch,
+    trainLoss: parseFloat(metric.trainLoss.toFixed(4)),
+    valLoss: parseFloat(metric.valLoss.toFixed(4)),
+    trainAccuracy: parseFloat((metric.trainAccuracy * 100).toFixed(2)),
+    valAccuracy: parseFloat((metric.valAccuracy * 100).toFixed(2)),
+    overfitting: metric.overfittingWarning
   })) : [];
 
-  const accuracyData = model ? model.trainingHistory.iteration.map((iter, i) => ({
-    iteration: iter,
-    accuracy: model.trainingHistory.accuracy[i] * 100
-  })) : [];
-
+  // Weight distribution data
   const weightData = model ? (() => {
     const weights = model.getWeights();
     const allWeights = weights.flat().flat();
@@ -243,10 +254,14 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
     let title = `Network: ${params.inputNeurons}-`;
     title += Array(params.hiddenLayers).fill(params.neuronsPerHidden).join('-') + '-1\n';
     title += `Activation: ${activationDisplay}`;
-    if (model) {
-      title += `, Iteration: ${model.trainingHistory.iteration.length}`;
-      if (model.loss) {
-        title += `, Loss: ${model.loss.toFixed(4)}`;
+    if (trainingHistory) {
+      title += `, Epochs: ${trainingHistory.finalEpoch}`;
+      if (trainingHistory.earlyStopped) {
+        title += ' (Early Stopped)';
+      }
+      const finalMetrics = trainingHistory.metrics[trainingHistory.metrics.length - 1];
+      if (finalMetrics) {
+        title += `, Val Acc: ${(finalMetrics.valAccuracy * 100).toFixed(1)}%`;
       }
     }
     return title;
@@ -264,7 +279,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
               disabled={isTraining || !!errorMessage}
               className="control-btn-primary disabled:opacity-50"
             >
-              {isTraining ? "Training..." : "Train Network"}
+              {isTraining ? "Training..." : "Train with Validation"}
             </button>
             <button
               onClick={stepTraining}
@@ -295,33 +310,68 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
               height={400}
               className="w-full bg-secondary/20 rounded-lg border border-white/10"
             />
+            
+            {/* Quality Warnings */}
+            {trainingHistory && (trainingHistory.qualityWarnings.length > 0 || trainingHistory.datasetValidation.warnings.length > 0) && (
+              <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4">
+                <h4 className="font-semibold text-yellow-300 mb-2">Training Quality Warnings:</h4>
+                <ul className="text-sm text-yellow-200 space-y-1">
+                  {trainingHistory.qualityWarnings.map((warning, i) => (
+                    <li key={i}>• {warning}</li>
+                  ))}
+                  {trainingHistory.datasetValidation.warnings.map((warning, i) => (
+                    <li key={`dataset-${i}`}>• {warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {/* Training Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Loss Chart */}
+        {/* Loss Chart with Train/Val Curves */}
         <div className="glass-panel p-6 rounded-xl">
           <h3 className="text-lg font-semibold mb-4">
-            Loss: {model && model.loss ? model.loss.toFixed(4) : "Not trained yet"}
+            Loss Curves {trainingHistory && trainingHistory.earlyStopped && '(Early Stopped)'}
           </h3>
           <div className="h-64">
-            {lossData.length > 0 ? (
-              <ChartContainer config={{ loss: { label: "Loss", color: "#3b82f6" } }}>
+            {trainingData.length > 0 ? (
+              <ChartContainer config={{ 
+                trainLoss: { label: "Training Loss", color: "#3b82f6" },
+                valLoss: { label: "Validation Loss", color: "#ef4444" }
+              }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={lossData}>
+                  <LineChart data={trainingData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="iteration" stroke="#9ca3af" />
+                    <XAxis dataKey="epoch" stroke="#9ca3af" label={{ value: 'Epoch', position: 'insideBottom', offset: -5 }} />
                     <YAxis stroke="#9ca3af" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Line 
                       type="monotone" 
-                      dataKey="loss" 
+                      dataKey="trainLoss" 
                       stroke="#3b82f6" 
                       strokeWidth={2}
-                      dot={false}
+                      dot={{ r: 2 }}
+                      name="Training Loss"
                     />
+                    <Line 
+                      type="monotone" 
+                      dataKey="valLoss" 
+                      stroke="#ef4444" 
+                      strokeWidth={2}
+                      dot={{ r: 2 }}
+                      name="Validation Loss"
+                    />
+                    {trainingHistory?.earlyStopped && (
+                      <ReferenceLine 
+                        x={trainingHistory.finalEpoch} 
+                        stroke="#10b981" 
+                        strokeDasharray="5 5"
+                        label={{ value: "Early Stop", position: "top" }}
+                      />
+                    )}
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -333,29 +383,53 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
           </div>
         </div>
 
-        {/* Accuracy Chart */}
+        {/* Accuracy Chart with Train/Val Curves */}
         <div className="glass-panel p-6 rounded-xl">
           <h3 className="text-lg font-semibold mb-4">
-            Accuracy: {model && model.trainingHistory.accuracy.length > 0 ? 
-              `${(model.trainingHistory.accuracy[model.trainingHistory.accuracy.length - 1] * 100).toFixed(1)}%` : 
-              "Not trained yet"}
+            Accuracy Curves
+            {trainingHistory && trainingHistory.metrics.length > 0 && (
+              <span className="text-sm font-normal opacity-70 ml-2">
+                (Final: {(trainingHistory.metrics[trainingHistory.metrics.length - 1].valAccuracy * 100).toFixed(1)}%)
+              </span>
+            )}
           </h3>
           <div className="h-64">
-            {accuracyData.length > 0 ? (
-              <ChartContainer config={{ accuracy: { label: "Accuracy", color: "#10b981" } }}>
+            {trainingData.length > 0 ? (
+              <ChartContainer config={{ 
+                trainAccuracy: { label: "Training Accuracy", color: "#10b981" },
+                valAccuracy: { label: "Validation Accuracy", color: "#f59e0b" }
+              }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={accuracyData}>
+                  <LineChart data={trainingData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="iteration" stroke="#9ca3af" />
+                    <XAxis dataKey="epoch" stroke="#9ca3af" label={{ value: 'Epoch', position: 'insideBottom', offset: -5 }} />
                     <YAxis stroke="#9ca3af" domain={[0, 100]} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Line 
                       type="monotone" 
-                      dataKey="accuracy" 
+                      dataKey="trainAccuracy" 
                       stroke="#10b981" 
                       strokeWidth={2}
-                      dot={false}
+                      dot={{ r: 2 }}
+                      name="Training Accuracy"
                     />
+                    <Line 
+                      type="monotone" 
+                      dataKey="valAccuracy" 
+                      stroke="#f59e0b" 
+                      strokeWidth={2}
+                      dot={{ r: 2 }}
+                      name="Validation Accuracy"
+                    />
+                    {/* Overfitting warning markers */}
+                    {trainingData.some(d => d.overfitting) && (
+                      <ReferenceLine 
+                        y={95} 
+                        stroke="#ef4444" 
+                        strokeDasharray="3 3"
+                        label={{ value: "Overfitting Zone", position: "insideTopRight" }}
+                      />
+                    )}
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -393,6 +467,33 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Dataset Validation Summary */}
+      {trainingHistory?.datasetValidation && (
+        <div className="glass-panel p-6 rounded-xl">
+          <h3 className="text-lg font-semibold mb-4">Dataset Validation Summary</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Duplicates Found</p>
+              <p className="font-medium">{trainingHistory.datasetValidation.duplicatesFound}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Simple Model Accuracy</p>
+              <p className="font-medium">{(trainingHistory.datasetValidation.simpleModelAccuracy * 100).toFixed(1)}%</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Train Class Distribution</p>
+              <p className="font-medium">{trainingHistory.datasetValidation.trainClassDistribution.join(' / ')}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Dataset Quality</p>
+              <p className={`font-medium ${trainingHistory.datasetValidation.datasetTooSimple ? 'text-yellow-400' : 'text-green-400'}`}>
+                {trainingHistory.datasetValidation.datasetTooSimple ? 'Too Simple' : 'Appropriate'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
