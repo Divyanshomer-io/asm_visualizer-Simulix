@@ -334,7 +334,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
 
         {/* Training Metrics - Updated Layout */}
         <div className="space-y-6">
-          {/* Accuracy Chart - Full Width with proper containment */}
+          {/* Accuracy Chart - Full Width with increased height */}
           <div className="glass-panel p-6 rounded-xl">
             <div className="flex items-center gap-2 mb-4">
               <h3 className="text-lg font-semibold">
@@ -356,14 +356,14 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                 </TooltipContent>
               </Tooltip>
             </div>
-            <div className="h-80 w-full overflow-hidden">
+            <div className="h-96 w-full overflow-hidden">
               {trainingData.length > 0 ? (
                 <ChartContainer config={{ 
                   trainAccuracy: { label: "Training Accuracy", color: "#10b981" },
                   valAccuracy: { label: "Validation Accuracy", color: "#f59e0b" }
                 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={trainingData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                    <LineChart data={trainingData} margin={{ top: 10, right: 10, bottom: 40, left: 40 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                       <XAxis 
                         dataKey="epoch" 
@@ -422,7 +422,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
             </div>
           </div>
 
-          {/* Loss and Weight Distribution - Side by Side */}
+          {/* Loss and Weight Distribution - Side by Side with increased heights */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Loss Chart with Train/Val Curves */}
             <div className="glass-panel p-6 rounded-xl">
@@ -441,14 +441,14 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <div className="h-80">
+              <div className="h-96">
                 {trainingData.length > 0 ? (
                   <ChartContainer config={{ 
                     trainLoss: { label: "Training Loss", color: "#3b82f6" },
                     valLoss: { label: "Validation Loss", color: "#ef4444" }
                   }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={trainingData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                      <LineChart data={trainingData} margin={{ top: 10, right: 10, bottom: 40, left: 40 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
                           dataKey="epoch" 
@@ -522,11 +522,11 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <div className="h-80">
+              <div className="h-96">
                 {weightData.length > 0 ? (
                   <ChartContainer config={{ count: { label: "Count", color: "#8b5cf6" } }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={weightData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                      <BarChart data={weightData} margin={{ top: 10, right: 10, bottom: 40, left: 40 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
                           dataKey="bin" 
