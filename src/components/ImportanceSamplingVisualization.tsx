@@ -403,98 +403,100 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                 }}
                 className="h-[250px] w-full"
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    data={histogramData} 
-                    margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
-                  >
-                    {/* Grid: Hex #444444 with 0.3 alpha */}
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444444" strokeOpacity={0.3} />
-                    <XAxis 
-                      dataKey="x" 
-                      domain={[xMin, xMax]}
-                      type="number"
-                      scale="linear"
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
-                      tickFormatter={(value) => parseFloat(value).toFixed(1)}
-                      label={{ 
-                        value: 'x', 
-                        position: 'insideBottom', 
-                        offset: -10, 
-                        style: { textAnchor: 'middle', fontWeight: 'bold', fontFamily: 'monospace' } 
-                      }}
-                      style={{ fontFamily: 'monospace' }}
-                    />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
-                      tickFormatter={(value) => parseFloat(value).toFixed(2)}
-                      label={{ 
-                        value: 'Density', 
-                        angle: -90, 
-                        position: 'insideLeft', 
-                        style: { textAnchor: 'middle', fontWeight: 'bold', fontFamily: 'monospace' } 
-                      }}
-                      style={{ fontFamily: 'monospace' }}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    
-                    {/* Legend Box */}
-                    <Legend 
-                      verticalAlign="top" 
-                      height={36}
-                      wrapperStyle={{ 
-                        fontFamily: 'monospace', 
-                        fontSize: '12px',
-                        paddingBottom: '10px'
-                      }}
-                    />
-                    
-                    {/* Histograms: 15 bins, alpha=0.4, density normalization, exact hex colors */}
-                    <Bar dataKey="fDensity" fill="#87CEEB" fillOpacity={0.4} name="f samples" />
-                    <Bar dataKey="gDensity" fill="#FF6B6B" fillOpacity={0.4} name="g samples" />
-                    
-                    {/* MC Estimate Line - Blue Dashed, linewidth=2 */}
-                    <ReferenceLine 
-                      x={mcEstimateValue} 
-                      stroke="#3b82f6" 
-                      strokeWidth={2} 
-                      strokeDasharray="5 5"
-                    />
-                    
-                    {/* IS Estimate Line - Red Dashed, linewidth=2 */}
-                    <ReferenceLine 
-                      x={isEstimateValue} 
-                      stroke="#ef4444" 
-                      strokeWidth={2} 
-                      strokeDasharray="5 5"
-                    />
-                    
-                    {/* True Value Line - Green Solid, linewidth=2 */}
-                    <ReferenceLine 
-                      x={trueValueFromHist} 
-                      stroke="#10b981" 
-                      strokeWidth={2}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-                {/* Custom Legend - absolutely positioned top right */}
-                <div className="absolute top-2 right-4 z-10 flex flex-col items-end space-y-1 bg-background/80 px-3 py-2 rounded-md shadow"
-                     style={{ pointerEvents: 'none' }}>
-                  <div className="flex items-center space-x-2">
-                    <span className="inline-block w-6 h-0.5 rounded bg-[#3b82f6] border-t-2 border-dashed border-[#3b82f6]"></span>
-                    <span className="text-xs text-[#3b82f6] font-mono">MC estimate</span>
+                <>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart 
+                      data={histogramData} 
+                      margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                    >
+                      {/* Grid: Hex #444444 with 0.3 alpha */}
+                      <CartesianGrid strokeDasharray="3 3" stroke="#444444" strokeOpacity={0.3} />
+                      <XAxis 
+                        dataKey="x" 
+                        domain={[xMin, xMax]}
+                        type="number"
+                        scale="linear"
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={12}
+                        tickFormatter={(value) => parseFloat(value).toFixed(1)}
+                        label={{ 
+                          value: 'x', 
+                          position: 'insideBottom', 
+                          offset: -10, 
+                          style: { textAnchor: 'middle', fontWeight: 'bold', fontFamily: 'monospace' } 
+                        }}
+                        style={{ fontFamily: 'monospace' }}
+                      />
+                      <YAxis 
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={12}
+                        tickFormatter={(value) => parseFloat(value).toFixed(2)}
+                        label={{ 
+                          value: 'Density', 
+                          angle: -90, 
+                          position: 'insideLeft', 
+                          style: { textAnchor: 'middle', fontWeight: 'bold', fontFamily: 'monospace' } 
+                        }}
+                        style={{ fontFamily: 'monospace' }}
+                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      
+                      {/* Legend Box */}
+                      <Legend 
+                        verticalAlign="top" 
+                        height={36}
+                        wrapperStyle={{ 
+                          fontFamily: 'monospace', 
+                          fontSize: '12px',
+                          paddingBottom: '10px'
+                        }}
+                      />
+                      
+                      {/* Histograms: 15 bins, alpha=0.4, density normalization, exact hex colors */}
+                      <Bar dataKey="fDensity" fill="#87CEEB" fillOpacity={0.4} name="f samples" />
+                      <Bar dataKey="gDensity" fill="#FF6B6B" fillOpacity={0.4} name="g samples" />
+                      
+                      {/* MC Estimate Line - Blue Dashed, linewidth=2 */}
+                      <ReferenceLine 
+                        x={mcEstimateValue} 
+                        stroke="#3b82f6" 
+                        strokeWidth={2} 
+                        strokeDasharray="5 5"
+                      />
+                      
+                      {/* IS Estimate Line - Red Dashed, linewidth=2 */}
+                      <ReferenceLine 
+                        x={isEstimateValue} 
+                        stroke="#ef4444" 
+                        strokeWidth={2} 
+                        strokeDasharray="5 5"
+                      />
+                      
+                      {/* True Value Line - Green Solid, linewidth=2 */}
+                      <ReferenceLine 
+                        x={trueValueFromHist} 
+                        stroke="#10b981" 
+                        strokeWidth={2}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  {/* Custom Legend - absolutely positioned top right */}
+                  <div className="absolute top-2 right-4 z-10 flex flex-col items-end space-y-1 bg-background/80 px-3 py-2 rounded-md shadow"
+                       style={{ pointerEvents: 'none' }}>
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-block w-6 h-0.5 rounded bg-[#3b82f6] border-t-2 border-dashed border-[#3b82f6]"></span>
+                      <span className="text-xs text-[#3b82f6] font-mono">MC estimate</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-block w-6 h-0.5 rounded bg-[#ef4444] border-t-2 border-dashed border-[#ef4444]"></span>
+                      <span className="text-xs text-[#ef4444] font-mono">IS estimate</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-block w-6 h-0.5 rounded bg-[#10b981] border-t-2 border-solid border-[#10b981]"></span>
+                      <span className="text-xs text-[#10b981] font-mono">{`True: ${trueValueFromHist.toFixed(4)}`}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="inline-block w-6 h-0.5 rounded bg-[#ef4444] border-t-2 border-dashed border-[#ef4444]"></span>
-                    <span className="text-xs text-[#ef4444] font-mono">IS estimate</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="inline-block w-6 h-0.5 rounded bg-[#10b981] border-t-2 border-solid border-[#10b981]"></span>
-                    <span className="text-xs text-[#10b981] font-mono">{`True: ${trueValueFromHist.toFixed(4)}`}</span>
-                  </div>
-                </div>
+                </>
               </ChartContainer>
             ) : (
               <ChartContainer
@@ -504,71 +506,73 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                 }}
                 className="h-[250px] w-full"
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <ScatterChart 
-                    data={jitteredData} 
-                    margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                <>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ScatterChart 
+                      data={jitteredData} 
+                      margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(68,68,68,0.5)" />
+                      <XAxis 
+                        type="number"
+                        dataKey="x"
+                        domain={jitteredData.length > 0 ? [
+                          Math.min(...jitteredData.map(d => d.originalX)) - 1,
+                          Math.max(...jitteredData.map(d => d.originalX)) + 1
+                        ] : [-3, 3]}
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={12}
+                        label={{ value: 'x', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontWeight: 'bold' } }}
+                      />
+                      <YAxis 
+                        type="number"
+                        dataKey="y"
+                        domain={jitteredData.length > 0 ? [
+                          0,
+                          Math.max(...jitteredData.map(d => Math.max(d.yStd, d.yNorm))) * 1.1
+                        ] : [0, 1]}
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={12}
+                        label={{ value: 'Weight', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
+                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Scatter 
+                        data={jitteredData.map(d => ({ x: d.xStd, y: d.yStd }))} 
+                        fill="#3b82f6" 
+                        fillOpacity={0.6} 
+                        r={3}
+                        name="Standard weights"
+                      />
+                      <Scatter 
+                        data={jitteredData.map(d => ({ x: d.xNorm, y: d.yNorm }))} 
+                        fill="#ef4444" 
+                        fillOpacity={0.6} 
+                        r={3}
+                        name="Normalized weights (scaled)"
+                      />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                  {/* Custom legend box */}
+                  <div
+                    className="absolute top-2 right-2 z-10 flex flex-col items-start bg-background/90 rounded-md px-3 py-1 shadow"
+                    style={{
+                      border: "1px solid #222C36",
+                      minWidth: "140px",
+                      pointerEvents: "none", // so it doesn't block tooltips
+                      fontFamily: "monospace",
+                      fontSize: "13px",
+                    }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(68,68,68,0.5)" />
-                    <XAxis 
-                      type="number"
-                      dataKey="x"
-                      domain={jitteredData.length > 0 ? [
-                        Math.min(...jitteredData.map(d => d.originalX)) - 1,
-                        Math.max(...jitteredData.map(d => d.originalX)) + 1
-                      ] : [-3, 3]}
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
-                      label={{ value: 'x', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fontWeight: 'bold' } }}
-                    />
-                    <YAxis 
-                      type="number"
-                      dataKey="y"
-                      domain={jitteredData.length > 0 ? [
-                        0,
-                        Math.max(...jitteredData.map(d => Math.max(d.yStd, d.yNorm))) * 1.1
-                      ] : [0, 1]}
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
-                      label={{ value: 'Weight', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontWeight: 'bold' } }}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Scatter 
-                      data={jitteredData.map(d => ({ x: d.xStd, y: d.yStd }))} 
-                      fill="#3b82f6" 
-                      fillOpacity={0.6} 
-                      r={3}
-                      name="Standard weights"
-                    />
-                    <Scatter 
-                      data={jitteredData.map(d => ({ x: d.xNorm, y: d.yNorm }))} 
-                      fill="#ef4444" 
-                      fillOpacity={0.6} 
-                      r={3}
-                      name="Normalized weights (scaled)"
-                    />
-                  </ScatterChart>
-                </ResponsiveContainer>
-                {/* Custom legend box */}
-                <div
-                  className="absolute top-2 right-2 z-10 flex flex-col items-start bg-background/90 rounded-md px-3 py-1 shadow"
-                  style={{
-                    border: "1px solid #222C36",
-                    minWidth: "140px",
-                    pointerEvents: "none", // so it doesn't block tooltips
-                    fontFamily: "monospace",
-                    fontSize: "13px",
-                  }}
-                >
-                  <div className="flex items-center mb-1">
-                    <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#3b82f6" }} />
-                    <span className="text-[#3b82f6]">Standard wts. </span>
+                    <div className="flex items-center mb-1">
+                      <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#3b82f6" }} />
+                      <span className="text-[#3b82f6]">Standard wts. </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#ef4444" }} />
+                      <span className="text-[#ef4444]">Normalized wts. </span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#ef4444" }} />
-                    <span className="text-[#ef4444]">Normalized wts. </span>
-                  </div>
-                </div>
+                </>
               </ChartContainer>
             )}
           </CardContent>
