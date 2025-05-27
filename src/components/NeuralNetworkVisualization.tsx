@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, ReferenceLine, ErrorBar } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, ReferenceLine } from "recharts";
 import { Info } from "lucide-react";
 import { NeuralNetworkParams, SimpleMLP, generateClassificationDataset, PARAM_LIMITS, TrainingHistory } from "@/utils/neuralNetwork";
 
@@ -16,7 +17,11 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
   const [trainingHistory, setTrainingHistory] = useState<TrainingHistory | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isStepTrainingInitialized, setIsStepTrainingInitialized] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Initialize empty training history for plot initialization
+  const [plotsInitialized, setPlotsInitialized] = useState(false);
 
   // Validate parameters
   useEffect(() => {
@@ -34,8 +39,34 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
       setModel(null);
       setActivations(null);
       setTrainingHistory(null);
+      setIsStepTrainingInitialized(false);
+      setPlotsInitialized(false);
     }
   }, [params]);
+
+  // Initialize empty plots on component mount
+  useEffect(() => {
+    if (!errorMessage && !plotsInitialized) {
+      // Initialize empty training history for plot display
+      const emptyHistory: TrainingHistory = {
+        metrics: [],
+        datasetValidation: {
+          duplicatesFound: 0,
+          trainClassDistribution: [],
+          valClassDistribution: [],
+          datasetTooSimple: false,
+          simpleModelAccuracy: 0,
+          warnings: []
+        },
+        qualityWarnings: [],
+        earlyStopped: false,
+        finalEpoch: 0,
+        stepTrainingMode: false
+      };
+      setTrainingHistory(emptyHistory);
+      setPlotsInitialized(true);
+    }
+  }, [errorMessage, plotsInitialized]);
 
   // Draw network visualization
   useEffect(() => {
@@ -165,7 +196,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
       const newModel = new SimpleMLP(layers, params.activation, params.learningRate, params.alpha);
       
       // Use new validation-aware training
-      const history = newModel.trainWithValidation(dataset.X, dataset.y, 150); // More epochs for realistic training
+      const history = newModel.trainWithValidation(dataset.X, dataset.y, 150);
       
       // Get sample activations
       const sampleActivations = newModel.forward(dataset.X[0]);
@@ -173,6 +204,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
       setModel(newModel);
       setActivations(sampleActivations);
       setTrainingHistory(history);
+      setIsStepTrainingInitialized(false);
       
       // Log quality warnings
       if (history.qualityWarnings.length > 0) {
@@ -192,19 +224,37 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
     setIsTraining(true);
     try {
       let currentModel = model;
-      if (!currentModel) {
+      
+      // Initialize model and step training if not already done
+      if (!currentModel || !isStepTrainingInitialized) {
         const layers = [params.inputNeurons, ...Array(params.hiddenLayers).fill(params.neuronsPerHidden), 1];
         currentModel = new SimpleMLP(layers, params.activation, params.learningRate, params.alpha);
+        
+        // Initialize step training with dataset
+        currentModel.initializeStepTraining(dataset.X, dataset.y);
+        setIsStepTrainingInitialized(true);
+        
+        // Initialize training history for first step
+        const initialHistory = currentModel.getTrainingHistory();
+        setTrainingHistory(initialHistory);
       }
       
-      // Single epoch training
-      currentModel.train(dataset.X, dataset.y, 1);
+      // Perform single training step
+      const stepMetrics = currentModel.trainSingleStep();
       
-      // Get sample activations
-      const sampleActivations = currentModel.forward(dataset.X[0]);
+      if (stepMetrics) {
+        // Update training history with new step
+        const updatedHistory = currentModel.getTrainingHistory();
+        setTrainingHistory({ ...updatedHistory });
+        
+        // Get sample activations for visualization
+        const sampleActivations = currentModel.forward(dataset.X[0]);
+        setActivations(sampleActivations);
+        setModel(currentModel);
+        
+        console.log('Step training completed:', stepMetrics);
+      }
       
-      setModel(currentModel);
-      setActivations(sampleActivations);
     } catch (error) {
       setErrorMessage(`Training error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
@@ -213,13 +263,34 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
   };
 
   const resetNetwork = () => {
+    if (model) {
+      model.resetStepTraining();
+    }
     setModel(null);
     setActivations(null);
-    setTrainingHistory(null);
+    setIsStepTrainingInitialized(false);
     setErrorMessage("");
+    
+    // Reset to empty training history to maintain plot structure
+    const emptyHistory: TrainingHistory = {
+      metrics: [],
+      datasetValidation: {
+        duplicatesFound: 0,
+        trainClassDistribution: [],
+        valClassDistribution: [],
+        datasetTooSimple: false,
+        simpleModelAccuracy: 0,
+        warnings: []
+      },
+      qualityWarnings: [],
+      earlyStopped: false,
+      finalEpoch: 0,
+      stepTrainingMode: false
+    };
+    setTrainingHistory(emptyHistory);
   };
 
-  // Prepare training/validation chart data
+  // Prepare training/validation chart data with single-point handling
   const trainingData = trainingHistory ? trainingHistory.metrics.map(metric => ({
     epoch: metric.epoch,
     trainLoss: parseFloat(metric.trainLoss.toFixed(4)),
@@ -256,10 +327,13 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
     let title = `Network: ${params.inputNeurons}-`;
     title += Array(params.hiddenLayers).fill(params.neuronsPerHidden).join('-') + '-1\n';
     title += `Activation: ${activationDisplay}`;
-    if (trainingHistory) {
-      title += `, Epochs: ${trainingHistory.finalEpoch}`;
+    if (trainingHistory && trainingHistory.metrics.length > 0) {
+      title += `, Epochs: ${trainingHistory.finalEpoch || trainingHistory.metrics.length}`;
       if (trainingHistory.earlyStopped) {
         title += ' (Early Stopped)';
+      }
+      if (trainingHistory.stepTrainingMode) {
+        title += ' (Step Mode)';
       }
       const finalMetrics = trainingHistory.metrics[trainingHistory.metrics.length - 1];
       if (finalMetrics) {
@@ -268,6 +342,20 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
     }
     return title;
   };
+
+  // Create placeholder data for empty plots
+  const getPlaceholderData = () => [{
+    epoch: 0,
+    trainLoss: 0,
+    valLoss: 0,
+    trainAccuracy: 0,
+    valAccuracy: 0,
+    overfitting: false
+  }];
+
+  // Determine if we should show placeholder data
+  const displayData = trainingData.length > 0 ? trainingData : getPlaceholderData();
+  const isEmptyPlot = trainingData.length === 0;
 
   return (
     <TooltipProvider>
@@ -289,7 +377,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                 disabled={isTraining || !!errorMessage}
                 className="control-btn disabled:opacity-50"
               >
-                Step Training
+                {isStepTrainingInitialized ? "Next Step" : "Start Step Training"}
               </button>
               <button
                 onClick={resetNetwork}
@@ -334,7 +422,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
 
         {/* Training Metrics - Updated Layout */}
         <div className="space-y-6">
-          {/* Accuracy Chart - Full Width with proper containment */}
+          {/* Accuracy Chart - Full Width with proper single-point handling */}
           <div className="glass-panel p-6 rounded-xl">
             <div className="flex items-center gap-2 mb-4">
               <h3 className="text-lg font-semibold">
@@ -357,66 +445,76 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
               </Tooltip>
             </div>
             <div className="h-80 w-full overflow-hidden">
-              {trainingData.length > 0 ? (
-                <ChartContainer config={{ 
-                  trainAccuracy: { label: "Training Accuracy", color: "#10b981" },
-                  valAccuracy: { label: "Validation Accuracy", color: "#f59e0b" }
-                }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={trainingData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis 
-                        dataKey="epoch" 
-                        stroke="#9ca3af" 
-                        label={{ 
-                          value: 'Epoch', 
-                          position: 'insideBottom', 
-                          offset: -10,
-                          style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
-                        }} 
-                      />
-                      <YAxis 
-                        stroke="#9ca3af" 
-                        domain={[0, 100]} 
-                        label={{ 
-                          value: 'Accuracy (%)', 
-                          angle: -90, 
-                          position: 'insideLeft',
-                          style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
-                        }}
-                      />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="trainAccuracy" 
-                        stroke="#10b981" 
-                        strokeWidth={2}
-                        dot={{ r: 2 }}
-                        name="Training Accuracy"
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="valAccuracy" 
-                        stroke="#f59e0b" 
-                        strokeWidth={2}
-                        dot={{ r: 2 }}
-                        name="Validation Accuracy"
-                      />
-                      {/* Overfitting warning markers */}
-                      {trainingData.some(d => d.overfitting) && (
-                        <ReferenceLine 
-                          y={95} 
-                          stroke="#ef4444" 
-                          strokeDasharray="3 3"
-                          label={{ value: "Overfitting Zone", position: "insideTopRight" }}
+              <ChartContainer config={{ 
+                trainAccuracy: { label: "Training Accuracy", color: "#10b981" },
+                valAccuracy: { label: "Validation Accuracy", color: "#f59e0b" }
+              }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={displayData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis 
+                      dataKey="epoch" 
+                      stroke="#9ca3af" 
+                      domain={isEmptyPlot ? [0, 10] : ['dataMin', 'dataMax']}
+                      type="number"
+                      label={{ 
+                        value: 'Epoch', 
+                        position: 'insideBottom', 
+                        offset: -10,
+                        style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                      }} 
+                    />
+                    <YAxis 
+                      stroke="#9ca3af" 
+                      domain={[0, 100]} 
+                      label={{ 
+                        value: 'Accuracy (%)', 
+                        angle: -90, 
+                        position: 'insideLeft',
+                        style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                      }}
+                    />
+                    <ChartTooltip content={isEmptyPlot ? undefined : <ChartTooltipContent />} />
+                    {!isEmptyPlot && (
+                      <>
+                        <Line 
+                          type="monotone" 
+                          dataKey="trainAccuracy" 
+                          stroke="#10b981" 
+                          strokeWidth={2}
+                          dot={{ r: trainingData.length === 1 ? 6 : 2 }}
+                          name="Training Accuracy"
+                          connectNulls={false}
                         />
-                      )}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
-                  No training data yet
+                        <Line 
+                          type="monotone" 
+                          dataKey="valAccuracy" 
+                          stroke="#f59e0b" 
+                          strokeWidth={2}
+                          dot={{ r: trainingData.length === 1 ? 6 : 2 }}
+                          name="Validation Accuracy"
+                          connectNulls={false}
+                        />
+                      </>
+                    )}
+                    {/* Overfitting warning markers */}
+                    {!isEmptyPlot && trainingData.some(d => d.overfitting) && (
+                      <ReferenceLine 
+                        y={95} 
+                        stroke="#ef4444" 
+                        strokeDasharray="3 3"
+                        label={{ value: "Overfitting Zone", position: "insideTopRight" }}
+                      />
+                    )}
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+              {isEmptyPlot && (
+                <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-secondary/10">
+                  <div className="text-center">
+                    <p className="text-lg font-medium">No Training Data Yet</p>
+                    <p className="text-sm mt-2">Start training to see accuracy curves</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -424,7 +522,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
 
           {/* Loss and Weight Distribution - Side by Side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Loss Chart with Train/Val Curves */}
+            {/* Loss Chart with Train/Val Curves and single-point handling */}
             <div className="glass-panel p-6 rounded-xl">
               <div className="flex items-center gap-2 mb-4">
                 <h3 className="text-lg font-semibold">
@@ -441,65 +539,75 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <div className="h-80">
-                {trainingData.length > 0 ? (
-                  <ChartContainer config={{ 
-                    trainLoss: { label: "Training Loss", color: "#3b82f6" },
-                    valLoss: { label: "Validation Loss", color: "#ef4444" }
-                  }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={trainingData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis 
-                          dataKey="epoch" 
-                          stroke="#9ca3af" 
-                          label={{ 
-                            value: 'Epoch', 
-                            position: 'insideBottom', 
-                            offset: -10,
-                            style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
-                          }} 
-                        />
-                        <YAxis 
-                          stroke="#9ca3af" 
-                          label={{ 
-                            value: 'Loss', 
-                            angle: -90, 
-                            position: 'insideLeft',
-                            style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
-                          }}
-                        />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Line 
-                          type="monotone" 
-                          dataKey="trainLoss" 
-                          stroke="#3b82f6" 
-                          strokeWidth={2}
-                          dot={{ r: 2 }}
-                          name="Training Loss"
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="valLoss" 
-                          stroke="#ef4444" 
-                          strokeWidth={2}
-                          dot={{ r: 2 }}
-                          name="Validation Loss"
-                        />
-                        {trainingHistory?.earlyStopped && (
-                          <ReferenceLine 
-                            x={trainingHistory.finalEpoch} 
-                            stroke="#10b981" 
-                            strokeDasharray="5 5"
-                            label={{ value: "Early Stop", position: "top" }}
+              <div className="h-80 relative">
+                <ChartContainer config={{ 
+                  trainLoss: { label: "Training Loss", color: "#3b82f6" },
+                  valLoss: { label: "Validation Loss", color: "#ef4444" }
+                }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={displayData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis 
+                        dataKey="epoch" 
+                        stroke="#9ca3af" 
+                        domain={isEmptyPlot ? [0, 10] : ['dataMin', 'dataMax']}
+                        type="number"
+                        label={{ 
+                          value: 'Epoch', 
+                          position: 'insideBottom', 
+                          offset: -10,
+                          style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                        }} 
+                      />
+                      <YAxis 
+                        stroke="#9ca3af" 
+                        label={{ 
+                          value: 'Loss', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                        }}
+                      />
+                      <ChartTooltip content={isEmptyPlot ? undefined : <ChartTooltipContent />} />
+                      {!isEmptyPlot && (
+                        <>
+                          <Line 
+                            type="monotone" 
+                            dataKey="trainLoss" 
+                            stroke="#3b82f6" 
+                            strokeWidth={2}
+                            dot={{ r: trainingData.length === 1 ? 6 : 2 }}
+                            name="Training Loss"
+                            connectNulls={false}
                           />
-                        )}
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    No training data yet
+                          <Line 
+                            type="monotone" 
+                            dataKey="valLoss" 
+                            stroke="#ef4444" 
+                            strokeWidth={2}
+                            dot={{ r: trainingData.length === 1 ? 6 : 2 }}
+                            name="Validation Loss"
+                            connectNulls={false}
+                          />
+                        </>
+                      )}
+                      {trainingHistory?.earlyStopped && !isEmptyPlot && (
+                        <ReferenceLine 
+                          x={trainingHistory.finalEpoch} 
+                          stroke="#10b981" 
+                          strokeDasharray="5 5"
+                          label={{ value: "Early Stop", position: "top" }}
+                        />
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+                {isEmptyPlot && (
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-secondary/10">
+                    <div className="text-center">
+                      <p className="text-lg font-medium">No Training Data Yet</p>
+                      <p className="text-sm mt-2">Start training to see loss curves</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -522,7 +630,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <div className="h-80">
+              <div className="h-80 relative">
                 {weightData.length > 0 ? (
                   <ChartContainer config={{ count: { label: "Count", color: "#8b5cf6" } }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -553,8 +661,11 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                     </ResponsiveContainer>
                   </ChartContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    No weights to display
+                  <div className="flex items-center justify-center h-full text-muted-foreground bg-secondary/10">
+                    <div className="text-center">
+                      <p className="text-lg font-medium">No Weights to Display</p>
+                      <p className="text-sm mt-2">Initialize network to see weight distribution</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -563,7 +674,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
         </div>
 
         {/* Dataset Validation Summary */}
-        {trainingHistory?.datasetValidation && (
+        {trainingHistory?.datasetValidation && trainingHistory.metrics.length > 0 && (
           <div className="glass-panel p-6 rounded-xl">
             <h3 className="text-lg font-semibold mb-4">Dataset Validation Summary</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
