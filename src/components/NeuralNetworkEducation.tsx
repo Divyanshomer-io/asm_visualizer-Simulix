@@ -413,7 +413,7 @@ const NeuralNetworkEducation: React.FC = () => {
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="text-red-400 mt-1">✗</span>
-                      <span>Don't use very high learning rates (>0.1)</span>
+                      <span>Don't use very high learning rates ({'>'}0.1)</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="text-red-400 mt-1">✗</span>
