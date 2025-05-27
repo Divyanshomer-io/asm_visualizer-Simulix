@@ -461,8 +461,6 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                       stroke="#3b82f6" 
                       strokeWidth={2} 
                       strokeDasharray="5 5"
-                      name="MC estimate"  // 🚨 Add this
-  legendType="line"   // 🚨 And this
                     />
                     
                     {/* IS Estimate Line - Red Dashed, linewidth=2 */}
@@ -471,8 +469,6 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                       stroke="#ef4444" 
                       strokeWidth={2} 
                       strokeDasharray="5 5"
-                        name="IS estimate"  // 🚨 Add this
-  legendType="line"   // 🚨 And this
                     />
                     
                     {/* True Value Line - Green Solid, linewidth=2 */}
@@ -480,27 +476,25 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                       x={trueValueFromHist} 
                       stroke="#10b981" 
                       strokeWidth={2}
-                       name={`True: ${trueValueFromHist.toFixed(4)}`}  // 🚨 Add this
-  legendType="line"  
                     />
                   </BarChart>
-                    {/* Custom Legend - absolutely positioned top right */}
-  <div className="absolute top-2 right-4 z-10 flex flex-col items-end space-y-1 bg-background/80 px-3 py-2 rounded-md shadow"
-       style={{ pointerEvents: 'none' }}>
-    <div className="flex items-center space-x-2">
-      <span className="inline-block w-6 h-0.5 rounded bg-[#3b82f6] border-t-2 border-dashed border-[#3b82f6]"></span>
-      <span className="text-xs text-[#3b82f6] font-mono">MC estimate</span>
-    </div>
-    <div className="flex items-center space-x-2">
-      <span className="inline-block w-6 h-0.5 rounded bg-[#ef4444] border-t-2 border-dashed border-[#ef4444]"></span>
-      <span className="text-xs text-[#ef4444] font-mono">IS estimate</span>
-    </div>
-    <div className="flex items-center space-x-2">
-      <span className="inline-block w-6 h-0.5 rounded bg-[#10b981] border-t-2 border-solid border-[#10b981]"></span>
-      <span className="text-xs text-[#10b981] font-mono">{`True: ${trueValueFromHist.toFixed(4)}`}</span>
-    </div>
-  </div>
                 </ResponsiveContainer>
+                {/* Custom Legend - absolutely positioned top right */}
+                <div className="absolute top-2 right-4 z-10 flex flex-col items-end space-y-1 bg-background/80 px-3 py-2 rounded-md shadow"
+                     style={{ pointerEvents: 'none' }}>
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-block w-6 h-0.5 rounded bg-[#3b82f6] border-t-2 border-dashed border-[#3b82f6]"></span>
+                    <span className="text-xs text-[#3b82f6] font-mono">MC estimate</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-block w-6 h-0.5 rounded bg-[#ef4444] border-t-2 border-dashed border-[#ef4444]"></span>
+                    <span className="text-xs text-[#ef4444] font-mono">IS estimate</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-block w-6 h-0.5 rounded bg-[#10b981] border-t-2 border-solid border-[#10b981]"></span>
+                    <span className="text-xs text-[#10b981] font-mono">{`True: ${trueValueFromHist.toFixed(4)}`}</span>
+                  </div>
+                </div>
               </ChartContainer>
             ) : (
               <ChartContainer
@@ -554,28 +548,27 @@ const ImportanceSamplingVisualization: React.FC<ImportanceSamplingVisualizationP
                       name="Normalized weights (scaled)"
                     />
                   </ScatterChart>
-                  {/* Custom legend box */}
- <div
-  className="absolute top-2 right-2 z-10 flex flex-col items-start bg-background/90 rounded-md px-3 py-1 shadow"
-  style={{
-    border: "1px solid #222C36",
-    minWidth: "140px",
-    pointerEvents: "none", // so it doesn't block tooltips
-    fontFamily: "monospace",
-    fontSize: "13px",
-  }}
->
-  <div className="flex items-center mb-1">
-    <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#3b82f6" }} />
-    <span className="text-[#3b82f6]">Standard wts. </span>
-  </div>
-  <div className="flex items-center">
-    <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#ef4444" }} />
-    <span className="text-[#ef4444]">Normalized wts. </span>
-  </div>
-</div>
-
                 </ResponsiveContainer>
+                {/* Custom legend box */}
+                <div
+                  className="absolute top-2 right-2 z-10 flex flex-col items-start bg-background/90 rounded-md px-3 py-1 shadow"
+                  style={{
+                    border: "1px solid #222C36",
+                    minWidth: "140px",
+                    pointerEvents: "none", // so it doesn't block tooltips
+                    fontFamily: "monospace",
+                    fontSize: "13px",
+                  }}
+                >
+                  <div className="flex items-center mb-1">
+                    <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#3b82f6" }} />
+                    <span className="text-[#3b82f6]">Standard wts. </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="inline-block w-2.5 h-2.5 rounded-full mr-2" style={{ background: "#ef4444" }} />
+                    <span className="text-[#ef4444]">Normalized wts. </span>
+                  </div>
+                </div>
               </ChartContainer>
             )}
           </CardContent>

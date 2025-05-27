@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,7 @@ interface ImportanceSamplingControlsProps {
 const ImportanceSamplingControls: React.FC<ImportanceSamplingControlsProps> = ({
   params,
   onParamsChange,
-  on,
+  onUpdate,
   onReset,
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -189,8 +188,6 @@ const ImportanceSamplingControls: React.FC<ImportanceSamplingControlsProps> = ({
 
         {/* Control Buttons */}
         <div className="flex flex-col gap-3 pt-4">
-         
-          
           <Button 
             onClick={onReset}
             variant="destructive"
