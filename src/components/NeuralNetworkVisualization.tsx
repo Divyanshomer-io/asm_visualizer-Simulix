@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, ReferenceLine, ErrorBar } from "recharts";
+import { Info } from "lucide-react";
 import { NeuralNetworkParams, SimpleMLP, generateClassificationDataset, PARAM_LIMITS, TrainingHistory } from "@/utils/neuralNetwork";
 
 interface NeuralNetworkVisualizationProps {
@@ -268,168 +270,145 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Network Visualization */}
-      <div className="glass-panel p-6 rounded-xl">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold">Network Architecture</h3>
-          <div className="flex gap-2">
-            <button
-              onClick={trainNetwork}
-              disabled={isTraining || !!errorMessage}
-              className="control-btn-primary disabled:opacity-50"
-            >
-              {isTraining ? "Training..." : "Train with Validation"}
-            </button>
-            <button
-              onClick={stepTraining}
-              disabled={isTraining || !!errorMessage}
-              className="control-btn disabled:opacity-50"
-            >
-              Step Training
-            </button>
-            <button
-              onClick={resetNetwork}
-              className="control-btn-secondary"
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-        
-        {errorMessage ? (
-          <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 text-center">
-            <p className="text-red-300">{errorMessage}</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-sm opacity-70 text-center">{getTitle()}</p>
-            <canvas
-              ref={canvasRef}
-              width={800}
-              height={400}
-              className="w-full bg-secondary/20 rounded-lg border border-white/10"
-            />
-            
-            {/* Quality Warnings */}
-            {trainingHistory && (trainingHistory.qualityWarnings.length > 0 || trainingHistory.datasetValidation.warnings.length > 0) && (
-              <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4">
-                <h4 className="font-semibold text-yellow-300 mb-2">Training Quality Warnings:</h4>
-                <ul className="text-sm text-yellow-200 space-y-1">
-                  {trainingHistory.qualityWarnings.map((warning, i) => (
-                    <li key={i}>• {warning}</li>
-                  ))}
-                  {trainingHistory.datasetValidation.warnings.map((warning, i) => (
-                    <li key={`dataset-${i}`}>• {warning}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Training Metrics - Updated Layout */}
+    <TooltipProvider>
       <div className="space-y-6">
-        {/* Accuracy Chart - Full Width */}
+        {/* Network Visualization */}
         <div className="glass-panel p-6 rounded-xl">
-          <h3 className="text-lg font-semibold mb-4">
-            Accuracy Curves
-            {trainingHistory && trainingHistory.metrics.length > 0 && (
-              <span className="text-sm font-normal opacity-70 ml-2">
-                (Final: {(trainingHistory.metrics[trainingHistory.metrics.length - 1].valAccuracy * 100).toFixed(1)}%)
-              </span>
-            )}
-          </h3>
-          <div className="h-80">
-            {trainingData.length > 0 ? (
-              <ChartContainer config={{ 
-                trainAccuracy: { label: "Training Accuracy", color: "#10b981" },
-                valAccuracy: { label: "Validation Accuracy", color: "#f59e0b" }
-              }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={trainingData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="epoch" stroke="#9ca3af" label={{ value: 'Epoch', position: 'insideBottom', offset: -5 }} />
-                    <YAxis stroke="#9ca3af" domain={[0, 100]} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="trainAccuracy" 
-                      stroke="#10b981" 
-                      strokeWidth={2}
-                      dot={{ r: 2 }}
-                      name="Training Accuracy"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="valAccuracy" 
-                      stroke="#f59e0b" 
-                      strokeWidth={2}
-                      dot={{ r: 2 }}
-                      name="Validation Accuracy"
-                    />
-                    {/* Overfitting warning markers */}
-                    {trainingData.some(d => d.overfitting) && (
-                      <ReferenceLine 
-                        y={95} 
-                        stroke="#ef4444" 
-                        strokeDasharray="3 3"
-                        label={{ value: "Overfitting Zone", position: "insideTopRight" }}
-                      />
-                    )}
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                No training data yet
-              </div>
-            )}
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Network Architecture</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={trainNetwork}
+                disabled={isTraining || !!errorMessage}
+                className="control-btn-primary disabled:opacity-50"
+              >
+                {isTraining ? "Training..." : "Train with Validation"}
+              </button>
+              <button
+                onClick={stepTraining}
+                disabled={isTraining || !!errorMessage}
+                className="control-btn disabled:opacity-50"
+              >
+                Step Training
+              </button>
+              <button
+                onClick={resetNetwork}
+                className="control-btn-secondary"
+              >
+                Reset
+              </button>
+            </div>
           </div>
+          
+          {errorMessage ? (
+            <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 text-center">
+              <p className="text-red-300">{errorMessage}</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm opacity-70 text-center">{getTitle()}</p>
+              <canvas
+                ref={canvasRef}
+                width={800}
+                height={400}
+                className="w-full bg-secondary/20 rounded-lg border border-white/10"
+              />
+              
+              {/* Quality Warnings */}
+              {trainingHistory && (trainingHistory.qualityWarnings.length > 0 || trainingHistory.datasetValidation.warnings.length > 0) && (
+                <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4">
+                  <h4 className="font-semibold text-yellow-300 mb-2">Training Quality Warnings:</h4>
+                  <ul className="text-sm text-yellow-200 space-y-1">
+                    {trainingHistory.qualityWarnings.map((warning, i) => (
+                      <li key={i}>• {warning}</li>
+                    ))}
+                    {trainingHistory.datasetValidation.warnings.map((warning, i) => (
+                      <li key={`dataset-${i}`}>• {warning}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Loss and Weight Distribution - Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Loss Chart with Train/Val Curves */}
+        {/* Training Metrics - Updated Layout */}
+        <div className="space-y-6">
+          {/* Accuracy Chart - Full Width with proper containment */}
           <div className="glass-panel p-6 rounded-xl">
-            <h3 className="text-lg font-semibold mb-4">
-              Loss Curves {trainingHistory && trainingHistory.earlyStopped && '(Early Stopped)'}
-            </h3>
-            <div className="h-80">
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-semibold">
+                Accuracy Curves
+                {trainingHistory && trainingHistory.metrics.length > 0 && (
+                  <span className="text-sm font-normal opacity-70 ml-2">
+                    (Final: {(trainingHistory.metrics[trainingHistory.metrics.length - 1].valAccuracy * 100).toFixed(1)}%)
+                  </span>
+                )}
+              </h3>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-xs">
+                    Graph showing how the model's accuracy improves over training iterations, reflecting the model's performance on the training or validation data.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <div className="h-80 w-full overflow-hidden">
               {trainingData.length > 0 ? (
                 <ChartContainer config={{ 
-                  trainLoss: { label: "Training Loss", color: "#3b82f6" },
-                  valLoss: { label: "Validation Loss", color: "#ef4444" }
+                  trainAccuracy: { label: "Training Accuracy", color: "#10b981" },
+                  valAccuracy: { label: "Validation Accuracy", color: "#f59e0b" }
                 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={trainingData}>
+                    <LineChart data={trainingData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="epoch" stroke="#9ca3af" label={{ value: 'Epoch', position: 'insideBottom', offset: -5 }} />
-                      <YAxis stroke="#9ca3af" />
+                      <XAxis 
+                        dataKey="epoch" 
+                        stroke="#9ca3af" 
+                        label={{ 
+                          value: 'Epoch', 
+                          position: 'insideBottom', 
+                          offset: -10,
+                          style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                        }} 
+                      />
+                      <YAxis 
+                        stroke="#9ca3af" 
+                        domain={[0, 100]} 
+                        label={{ 
+                          value: 'Accuracy (%)', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                        }}
+                      />
                       <ChartTooltip content={<ChartTooltipContent />} />
                       <Line 
                         type="monotone" 
-                        dataKey="trainLoss" 
-                        stroke="#3b82f6" 
+                        dataKey="trainAccuracy" 
+                        stroke="#10b981" 
                         strokeWidth={2}
                         dot={{ r: 2 }}
-                        name="Training Loss"
+                        name="Training Accuracy"
                       />
                       <Line 
                         type="monotone" 
-                        dataKey="valLoss" 
-                        stroke="#ef4444" 
+                        dataKey="valAccuracy" 
+                        stroke="#f59e0b" 
                         strokeWidth={2}
                         dot={{ r: 2 }}
-                        name="Validation Loss"
+                        name="Validation Accuracy"
                       />
-                      {trainingHistory?.earlyStopped && (
+                      {/* Overfitting warning markers */}
+                      {trainingData.some(d => d.overfitting) && (
                         <ReferenceLine 
-                          x={trainingHistory.finalEpoch} 
-                          stroke="#10b981" 
-                          strokeDasharray="5 5"
-                          label={{ value: "Early Stop", position: "top" }}
+                          y={95} 
+                          stroke="#ef4444" 
+                          strokeDasharray="3 3"
+                          label={{ value: "Overfitting Zone", position: "insideTopRight" }}
                         />
                       )}
                     </LineChart>
@@ -443,61 +422,174 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
             </div>
           </div>
 
-          {/* Weight Distribution */}
-          <div className="glass-panel p-6 rounded-xl">
-            <h3 className="text-lg font-semibold mb-4">
-              Weight Distribution
-            </h3>
-            <div className="h-80">
-              {weightData.length > 0 ? (
-                <ChartContainer config={{ count: { label: "Count", color: "#8b5cf6" } }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={weightData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="bin" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="count" fill="#8b5cf6" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
-                  No weights to display
-                </div>
-              )}
+          {/* Loss and Weight Distribution - Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Loss Chart with Train/Val Curves */}
+            <div className="glass-panel p-6 rounded-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-semibold">
+                  Loss Curves {trainingHistory && trainingHistory.earlyStopped && '(Early Stopped)'}
+                </h3>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs text-xs">
+                      Graph showing how the training loss decreases over iterations, indicating how well the model is minimizing error.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="h-80">
+                {trainingData.length > 0 ? (
+                  <ChartContainer config={{ 
+                    trainLoss: { label: "Training Loss", color: "#3b82f6" },
+                    valLoss: { label: "Validation Loss", color: "#ef4444" }
+                  }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={trainingData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="epoch" 
+                          stroke="#9ca3af" 
+                          label={{ 
+                            value: 'Epoch', 
+                            position: 'insideBottom', 
+                            offset: -10,
+                            style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                          }} 
+                        />
+                        <YAxis 
+                          stroke="#9ca3af" 
+                          label={{ 
+                            value: 'Loss', 
+                            angle: -90, 
+                            position: 'insideLeft',
+                            style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                          }}
+                        />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line 
+                          type="monotone" 
+                          dataKey="trainLoss" 
+                          stroke="#3b82f6" 
+                          strokeWidth={2}
+                          dot={{ r: 2 }}
+                          name="Training Loss"
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="valLoss" 
+                          stroke="#ef4444" 
+                          strokeWidth={2}
+                          dot={{ r: 2 }}
+                          name="Validation Loss"
+                        />
+                        {trainingHistory?.earlyStopped && (
+                          <ReferenceLine 
+                            x={trainingHistory.finalEpoch} 
+                            stroke="#10b981" 
+                            strokeDasharray="5 5"
+                            label={{ value: "Early Stop", position: "top" }}
+                          />
+                        )}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    No training data yet
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Dataset Validation Summary */}
-      {trainingHistory?.datasetValidation && (
-        <div className="glass-panel p-6 rounded-xl">
-          <h3 className="text-lg font-semibold mb-4">Dataset Validation Summary</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">Duplicates Found</p>
-              <p className="font-medium">{trainingHistory.datasetValidation.duplicatesFound}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Simple Model Accuracy</p>
-              <p className="font-medium">{(trainingHistory.datasetValidation.simpleModelAccuracy * 100).toFixed(1)}%</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Train Class Distribution</p>
-              <p className="font-medium">{trainingHistory.datasetValidation.trainClassDistribution.join(' / ')}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Dataset Quality</p>
-              <p className={`font-medium ${trainingHistory.datasetValidation.datasetTooSimple ? 'text-yellow-400' : 'text-green-400'}`}>
-                {trainingHistory.datasetValidation.datasetTooSimple ? 'Too Simple' : 'Appropriate'}
-              </p>
+            {/* Weight Distribution */}
+            <div className="glass-panel p-6 rounded-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-semibold">
+                  Weight Distribution
+                </h3>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs text-xs">
+                      Histogram displaying the distribution of all connection weights in the network, showing how weights are spread and updated during training.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="h-80">
+                {weightData.length > 0 ? (
+                  <ChartContainer config={{ count: { label: "Count", color: "#8b5cf6" } }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={weightData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="bin" 
+                          stroke="#9ca3af" 
+                          label={{ 
+                            value: 'Weight Value', 
+                            position: 'insideBottom', 
+                            offset: -10,
+                            style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                          }}
+                        />
+                        <YAxis 
+                          stroke="#9ca3af" 
+                          label={{ 
+                            value: 'Frequency', 
+                            angle: -90, 
+                            position: 'insideLeft',
+                            style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                          }}
+                        />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="count" fill="#8b5cf6" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    No weights to display
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      )}
-    </div>
+
+        {/* Dataset Validation Summary */}
+        {trainingHistory?.datasetValidation && (
+          <div className="glass-panel p-6 rounded-xl">
+            <h3 className="text-lg font-semibold mb-4">Dataset Validation Summary</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Duplicates Found</p>
+                <p className="font-medium">{trainingHistory.datasetValidation.duplicatesFound}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Simple Model Accuracy</p>
+                <p className="font-medium">{(trainingHistory.datasetValidation.simpleModelAccuracy * 100).toFixed(1)}%</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Train Class Distribution</p>
+                <p className="font-medium">{trainingHistory.datasetValidation.trainClassDistribution.join(' / ')}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Dataset Quality</p>
+                <p className={`font-medium ${trainingHistory.datasetValidation.datasetTooSimple ? 'text-yellow-400' : 'text-green-400'}`}>
+                  {trainingHistory.datasetValidation.datasetTooSimple ? 'Too Simple' : 'Appropriate'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </TooltipProvider>
   );
 };
 
