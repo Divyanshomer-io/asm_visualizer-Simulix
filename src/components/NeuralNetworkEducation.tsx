@@ -343,7 +343,7 @@ const NeuralNetworkEducation: React.FC = () => {
                     the underlying patterns.
                   </p>
                   <div className="bg-green-500/10 p-3 rounded-lg text-xs">
-                    <div>Target: >80% for simple problems</div>
+                    <div>Target: {'>'}80% for simple problems</div>
                     <div>Watch: Sudden drops indicate issues</div>
                   </div>
                 </div>
