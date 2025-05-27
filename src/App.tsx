@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +11,7 @@ import AliasMethod from "./pages/AliasMethod";
 import Bootstrapping from "./pages/Bootstrapping";
 import HuberMean from "./pages/HuberMean";
 import ImportanceSampling from "./pages/ImportanceSampling";
+import NeuralNetwork from "./pages/NeuralNetwork";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { Analytics } from "@vercel/analytics/next"
@@ -29,6 +31,7 @@ const App = () => (
           <Route path="/bootstrapping" element={<Bootstrapping />} />
           <Route path="/huber-mean" element={<HuberMean />} />
           <Route path="/importance-sampling" element={<ImportanceSampling />} />
+          <Route path="/neural-network" element={<NeuralNetwork />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

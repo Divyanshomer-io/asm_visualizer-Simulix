@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network } from "lucide-react";
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
@@ -72,6 +73,15 @@ const Landing = () => {
       icon: <TrendingUp className="h-6 w-6" />,
       tags: ["Monte Carlo", "Sampling", "Statistics"],
       gradient: "from-indigo-500/20 to-teal-500/20"
+    },
+    {
+      id: "neural-network",
+      title: "Neural Network Visualizer",
+      description: "Interactive Multi-Layer Perceptron training with real-time weight visualization, activation functions, and performance metrics.",
+      path: "/neural-network",
+      icon: <Network className="h-6 w-6" />,
+      tags: ["Machine Learning", "Deep Learning", "Neural Networks"],
+      gradient: "from-violet-500/20 to-fuchsia-500/20"
     },
   ];
 
