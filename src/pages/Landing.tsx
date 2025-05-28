@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, Layers } from "lucide-react";
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
@@ -82,6 +82,15 @@ const Landing = () => {
       icon: <Network className="h-6 w-6" />,
       tags: ["Machine Learning", "Deep Learning", "Neural Networks"],
       gradient: "from-violet-500/20 to-fuchsia-500/20"
+    },
+    {
+      id: "em-clustering",
+      title: "EM Clustering Visualization",
+      description: "Explore Expectation-Maximization algorithm for Gaussian mixture models with 3D distributions and 2D convergence visualization.",
+      path: "/em-clustering",
+      icon: <Layers className="h-6 w-6" />,
+      tags: ["Clustering", "EM Algorithm", "Gaussian Mixtures"],
+      gradient: "from-emerald-500/20 to-teal-500/20"
     },
   ];
 
