@@ -47,20 +47,29 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
     );
   }
 
-  const handlePrevTree = () => {
+  // Fixed event handlers with proper event handling
+  const handlePrevTree = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log('Previous tree clicked', treeData.tree_index);
     const newIndex = Math.max(0, treeData.tree_index - 1);
     onTreeIndexChange(newIndex);
   };
 
-  const handleNextTree = () => {
+  const handleNextTree = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log('Next tree clicked', treeData.tree_index);
     const newIndex = Math.min(totalTrees - 1, treeData.tree_index + 1);
     onTreeIndexChange(newIndex);
   };
 
-  const handleFinalPrediction = () => {
-    // Simulate navigating to final prediction or showing prediction details
+  const handleFinalPrediction = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     console.log('Final prediction clicked for tree', treeData.tree_index);
-    // You can add toast notification or modal here
+    // Add visual feedback
+    alert(`Final prediction reached for Tree #${treeData.tree_index}`);
   };
 
   return (
@@ -73,27 +82,30 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
           </CardTitle>
           
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
+            {/* Fixed navigation buttons with explicit styling and event handling */}
+            <button
               onClick={handlePrevTree}
               disabled={treeData.tree_index === 0}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 flex items-center justify-center border border-white/20 rounded bg-transparent hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-all duration-200"
+              style={{ pointerEvents: 'auto', zIndex: 10 }}
+              type="button"
             >
               <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm text-muted-foreground px-2">
+            </button>
+            
+            <span className="text-sm text-muted-foreground px-2 select-none">
               {treeData.tree_index + 1} / {totalTrees}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
+            
+            <button
               onClick={handleNextTree}
               disabled={treeData.tree_index === totalTrees - 1}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 flex items-center justify-center border border-white/20 rounded bg-transparent hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-all duration-200"
+              style={{ pointerEvents: 'auto', zIndex: 10 }}
+              type="button"
             >
               <ChevronRight className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
         </div>
       </CardHeader>
@@ -180,13 +192,14 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
             ))}
             
             {treeData.decision_path.length > 0 && (
-              <Button
+              <button
                 onClick={handleFinalPrediction}
-                className="w-full bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20"
-                variant="outline"
+                className="w-full bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 rounded-lg p-3 transition-all duration-200 cursor-pointer"
+                style={{ pointerEvents: 'auto', zIndex: 10 }}
+                type="button"
               >
                 → Final Prediction
-              </Button>
+              </button>
             )}
           </div>
         </div>
