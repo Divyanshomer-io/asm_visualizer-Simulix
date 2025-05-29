@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, TreePine, BarChart3, Target } from 'lucide-react';
+import {
+  TreePine,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+  Target,
+  Zap,
+  Info
+} from 'lucide-react';
 
 interface TreeData {
   tree_index: number;
@@ -16,225 +24,192 @@ interface TreeData {
   }>;
   tree_accuracy: number;
   training_samples: number;
-  feature_names: string[];
+  feature_importances?: number[];
+  oob_score?: number;
+  max_features?: string;
 }
 
-interface DetailedTreeVisualizationProps {
+interface RandomForestEducationProps {
   treeData: TreeData | null;
   totalTrees: number;
+  currentTreeIndex: number;
   onTreeIndexChange: (index: number) => void;
-  maxDepth: number;
-  maxFeatures: string;
+  finalPrediction?: string;
 }
 
-const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
+const RandomForestEducation: React.FC<RandomForestEducationProps> = ({
   treeData,
   totalTrees,
+  currentTreeIndex,
   onTreeIndexChange,
-  maxDepth,
-  maxFeatures
+  finalPrediction = "Not Available"
 }) => {
+  const [showFinalPrediction, setShowFinalPrediction] = useState(false);
+
+  const handlePreviousTree = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const newIndex = Math.max(0, currentTreeIndex - 1);
+    onTreeIndexChange(newIndex);
+  };
+
+  const handleNextTree = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const newIndex = Math.min(totalTrees - 1, currentTreeIndex + 1);
+    onTreeIndexChange(newIndex);
+  };
+
+  const handleFinalPrediction = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowFinalPrediction(!showFinalPrediction);
+  };
+
   if (!treeData) {
     return (
-      <Card className="glass-panel border-white/10">
+      <Card className="glass-panel border border-white/5">
         <CardContent className="p-6">
-          <div className="animate-pulse">
-            <div className="h-4 bg-secondary/30 rounded w-3/4 mb-4"></div>
-            <div className="h-32 bg-secondary/20 rounded"></div>
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-700 rounded w-1/4"></div>
+            <div className="h-32 bg-gray-800 rounded"></div>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  // Fixed event handlers with proper event handling
-  const handlePrevTree = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    console.log('Previous tree clicked', treeData.tree_index);
-    const newIndex = Math.max(0, treeData.tree_index - 1);
-    onTreeIndexChange(newIndex);
-  };
-
-  const handleNextTree = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    console.log('Next tree clicked', treeData.tree_index);
-    const newIndex = Math.min(totalTrees - 1, treeData.tree_index + 1);
-    onTreeIndexChange(newIndex);
-  };
-
-  const handleFinalPrediction = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    console.log('Final prediction clicked for tree', treeData.tree_index);
-    // Add visual feedback
-    alert(`Final prediction reached for Tree #${treeData.tree_index}`);
-  };
-
   return (
-    <Card className="glass-panel border-white/10">
-      <CardHeader className="pb-4">
+    <Card className="glass-panel border border-white/5">
+      <CardHeader className="border-b border-white/5">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <TreePine className="h-5 w-5 text-green-400" />
-            Decision Tree #{treeData.tree_index} Analysis
+            <TreePine className="h-6 w-6 text-green-400" />
+            <span>Random Forest Analysis</span>
           </CardTitle>
-          
           <div className="flex items-center gap-2">
-            {/* Fixed navigation buttons with explicit styling and event handling */}
-            <button
-              onClick={handlePrevTree}
-              disabled={treeData.tree_index === 0}
-              className="h-8 w-8 p-0 flex items-center justify-center border border-white/20 rounded bg-transparent hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-all duration-200"
-              style={{ pointerEvents: 'auto', zIndex: 10 }}
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePreviousTree}
+              disabled={currentTreeIndex === 0}
+              aria-label="Previous tree"
+              className="hover:bg-white/10"
             >
               <ChevronLeft className="h-4 w-4" />
-            </button>
-            
-            <span className="text-sm text-muted-foreground px-2 select-none">
-              {treeData.tree_index + 1} / {totalTrees}
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Tree {currentTreeIndex + 1} of {totalTrees}
             </span>
-            
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleNextTree}
-              disabled={treeData.tree_index === totalTrees - 1}
-              className="h-8 w-8 p-0 flex items-center justify-center border border-white/20 rounded bg-transparent hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-all duration-200"
-              style={{ pointerEvents: 'auto', zIndex: 10 }}
-              type="button"
+              disabled={currentTreeIndex === totalTrees - 1}
+              aria-label="Next tree"
+              className="hover:bg-white/10"
             >
               <ChevronRight className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
       </CardHeader>
-      
-      <CardContent className="space-y-6">
+
+      <CardContent className="pt-6 space-y-6">
         {/* Tree Statistics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-blue-400 mb-1">
+          <div className="bg-blue-500/10 p-3 rounded-lg border border-blue-500/20">
+            <div className="text-2xl font-bold text-blue-400">
               {treeData.decision_nodes + treeData.leaf_nodes}
             </div>
             <div className="text-xs text-muted-foreground">Total Nodes</div>
           </div>
-          
-          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-green-400 mb-1">
+          <div className="bg-green-500/10 p-3 rounded-lg border border-green-500/20">
+            <div className="text-2xl font-bold text-green-400">
               {treeData.decision_nodes}
             </div>
             <div className="text-xs text-muted-foreground">Decision Nodes</div>
           </div>
-          
-          <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-purple-400 mb-1">
+          <div className="bg-purple-500/10 p-3 rounded-lg border border-purple-500/20">
+            <div className="text-2xl font-bold text-purple-400">
               {treeData.leaf_nodes}
             </div>
             <div className="text-xs text-muted-foreground">Leaf Nodes</div>
           </div>
-          
-          <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-orange-400 mb-1">
+          <div className="bg-orange-500/10 p-3 rounded-lg border border-orange-500/20">
+            <div className="text-2xl font-bold text-orange-400">
               {treeData.actual_depth}
             </div>
             <div className="text-xs text-muted-foreground">Max Depth</div>
           </div>
-          
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-red-400 mb-1">
+          <div className="bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+            <div className="text-2xl font-bold text-red-400">
               {(treeData.tree_accuracy * 100).toFixed(1)}%
             </div>
             <div className="text-xs text-muted-foreground">Tree Accuracy</div>
           </div>
         </div>
 
-        {/* Sample Decision Path */}
+        {/* Decision Path */}
         <div>
-          <h4 className="text-blue-400 text-lg font-semibold mb-4 flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Sample Decision Path
-          </h4>
-          
+          <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
+            <Target className="h-5 w-5 text-blue-400" />
+            Decision Path Analysis
+          </h3>
           <div className="space-y-3">
-            {treeData.decision_path.map((step, index) => (
-              <div key={step.step}>
-                <div className="bg-secondary/30 border border-white/10 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
-                        {step.step}
-                      </div>
-                      <div>
-                        <div className="text-white font-medium">
-                          {step.feature}
-                        </div>
-                        <div className="text-blue-400 text-sm">
-                          {step.condition}
-                        </div>
+            {treeData.decision_path.map((step) => (
+              <div 
+                key={step.step}
+                className="bg-gray-800/50 p-4 rounded-lg border border-white/10"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-500/10 px-2 py-1 rounded-full text-sm font-medium text-blue-400">
+                      Step {step.step}
+                    </div>
+                    <div>
+                      <div className="font-medium">{step.feature}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {step.condition}
                       </div>
                     </div>
-                    
-                    <div className="text-right">
-                      <div className="text-muted-foreground text-sm">
-                        Threshold: <span className="text-orange-400 font-semibold">{step.threshold}</span>
-                      </div>
-                    </div>
+                  </div>
+                  <div className="text-sm text-orange-400">
+                    Threshold: {step.threshold.toFixed(2)}
                   </div>
                 </div>
-                
-                {index < treeData.decision_path.length - 1 && (
-                  <div className="flex justify-center py-1">
-                    <div className="text-blue-400 text-lg">↓</div>
-                  </div>
-                )}
               </div>
             ))}
-            
-            {treeData.decision_path.length > 0 && (
-              <button
-                onClick={handleFinalPrediction}
-                className="w-full bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 rounded-lg p-3 transition-all duration-200 cursor-pointer"
-                style={{ pointerEvents: 'auto', zIndex: 10 }}
-                type="button"
-              >
-                → Final Prediction
-              </button>
-            )}
           </div>
         </div>
 
-        {/* Performance Metrics */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 text-center">
-            <div className="text-xl font-bold text-green-400 mb-1">
-              {treeData.tree_accuracy.toFixed(3)}
-            </div>
-            <div className="text-sm text-muted-foreground">Individual Accuracy</div>
-          </div>
+        {/* Final Prediction Section */}
+        <div>
+          <Button
+            variant="outline"
+            className="w-full bg-green-500/10 hover:bg-green-500/20 text-green-400 border-green-500/30"
+            onClick={handleFinalPrediction}
+          >
+            <Zap className="h-4 w-4 mr-2" />
+            {showFinalPrediction ? 'Hide Final Prediction' : 'Show Final Prediction'}
+          </Button>
           
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-center">
-            <div className="text-xl font-bold text-blue-400 mb-1">
-              {treeData.training_samples}
+          {showFinalPrediction && (
+            <div className="mt-4 bg-gray-800/50 p-4 rounded-lg border border-white/10">
+              <div className="flex items-center gap-2 text-green-400">
+                <BarChart3 className="h-5 w-5" />
+                <span className="font-medium">Final Prediction:</span>
+                <span>{finalPrediction}</span>
+              </div>
+              {treeData.oob_score && (
+                <div className="mt-2 flex items-center gap-2 text-blue-400">
+                  <Info className="h-4 w-4" />
+                  <span className="text-sm">OOB Score: {(treeData.oob_score * 100).toFixed(1)}%</span>
+                </div>
+              )}
             </div>
-            <div className="text-sm text-muted-foreground">Training Samples</div>
-          </div>
-        </div>
-
-        {/* Tree Configuration */}
-        <div className="bg-secondary/20 border border-white/10 rounded-lg p-4">
-          <div className="text-center text-muted-foreground text-sm">
-            <div className="mb-2">
-              <span className="text-blue-400 font-semibold">Max Features Strategy:</span> {maxFeatures}
-            </div>
-            <div>
-              <span className="text-green-400 font-semibold">Max Depth Limit:</span> {maxDepth}
-            </div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 };
 
-export default DetailedTreeVisualization;
+export default RandomForestEducation;
