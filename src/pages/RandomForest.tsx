@@ -1,0 +1,184 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, Zap } from 'lucide-react';
+import RandomForestControls from '@/components/RandomForestControls';
+import RandomForestVisualization from '@/components/RandomForestVisualization';
+import RandomForestEducation from '@/components/RandomForestEducation';
+import { RandomForestState, RandomForestParams } from '@/utils/randomForest';
+import { trainRandomForestModel } from '@/utils/randomForest';
+import { toast } from 'sonner';
+
+const RandomForest = () => {
+  const [state, setState] = useState<RandomForestState>({
+    isTraining: false,
+    currentModel: null,
+    trainingProgress: 0,
+    modelMetrics: null,
+    confusion_matrix: null,
+    roc_data: null,
+    feature_importances: null,
+    prediction_probabilities: null,
+    tree_data: null,
+    selectedTreeIndex: 0,
+  });
+
+  const [params, setParams] = useState<RandomForestParams>({
+    n_estimators: 10,
+    max_depth: 5,
+    max_features: 'sqrt',
+    test_size: 0.2,
+    random_state: 42,
+  });
+
+  const handleParamChange = useCallback((newParams: Partial<RandomForestParams>) => {
+    setParams(prev => ({ ...prev, ...newParams }));
+  }, []);
+
+  const handleTrainModel = useCallback(async () => {
+    setState(prev => ({ ...prev, isTraining: true, trainingProgress: 0 }));
+    toast.info('Training Random Forest model...');
+    
+    try {
+      // Simulate training progress
+      const progressInterval = setInterval(() => {
+        setState(prev => ({
+          ...prev,
+          trainingProgress: Math.min(prev.trainingProgress + 10, 90)
+        }));
+      }, 200);
+
+      const result = await trainRandomForestModel(params);
+      
+      clearInterval(progressInterval);
+      
+      setState(prev => ({
+        ...prev,
+        isTraining: false,
+        trainingProgress: 100,
+        currentModel: result.model,
+        modelMetrics: result.metrics,
+        confusion_matrix: result.confusion_matrix,
+        roc_data: result.roc_data,
+        feature_importances: result.feature_importances,
+        prediction_probabilities: result.prediction_probabilities,
+        tree_data: result.tree_data,
+      }));
+      
+      toast.success(`Model trained successfully! Accuracy: ${result.metrics.accuracy.toFixed(3)}`);
+    } catch (error) {
+      setState(prev => ({ ...prev, isTraining: false, trainingProgress: 0 }));
+      toast.error('Failed to train model. Please try again.');
+      console.error('Training error:', error);
+    }
+  }, [params]);
+
+  const handleReset = useCallback(() => {
+    setParams({
+      n_estimators: 10,
+      max_depth: 5,
+      max_features: 'sqrt',
+      test_size: 0.2,
+      random_state: 42,
+    });
+    setState({
+      isTraining: false,
+      currentModel: null,
+      trainingProgress: 0,
+      modelMetrics: null,
+      confusion_matrix: null,
+      roc_data: null,
+      feature_importances: null,
+      prediction_probabilities: null,
+      tree_data: null,
+      selectedTreeIndex: 0,
+    });
+    toast.info('Parameters and model reset');
+  }, []);
+
+  const handleTreeIndexChange = useCallback((index: number) => {
+    setState(prev => ({ ...prev, selectedTreeIndex: index }));
+  }, []);
+
+  // Train initial model on component mount
+  useEffect(() => {
+    handleTrainModel();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background text-foreground antialiased">
+      {/* Header - Neural Network Style */}
+      <header className="w-full glass-panel border-b border-white/5 sticky top-0 z-50 backdrop-blur-xl">
+        <div className="container py-4 px-4 md:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link 
+                to="/" 
+                className="flex items-center gap-2 text-accent hover:text-accent/80 transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span className="font-medium">Back to Visualizations</span>
+              </Link>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-lg">
+                <Zap className="h-6 w-6 text-green-400" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold">Random Forest Visualizer</h1>
+                <p className="text-sm text-muted-foreground">Interactive ensemble learning exploration</p>
+              </div>
+            </div>
+            
+            <div></div>
+          </div>
+          
+          {/* Training Progress Bar */}
+          {state.isTraining && (
+            <div className="mt-4">
+              <div className="flex items-center justify-between text-sm mb-2">
+                <span>Training Progress</span>
+                <span>{state.trainingProgress}%</span>
+              </div>
+              <div className="w-full bg-secondary/30 rounded-full h-2">
+                <div 
+                  className="bg-accent h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${state.trainingProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container px-4 md:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Main Visualization Area */}
+          <div className="lg:col-span-3 space-y-6">
+            <RandomForestVisualization 
+              state={state} 
+              params={params}
+              onTreeIndexChange={handleTreeIndexChange}
+            />
+            <RandomForestEducation />
+          </div>
+          
+          {/* Control Panel */}
+          <div className="lg:col-span-1">
+            <RandomForestControls
+              params={params}
+              state={state}
+              onParamChange={handleParamChange}
+              onTreeIndexChange={handleTreeIndexChange}
+              onTrain={handleTrainModel}
+              onReset={handleReset}
+            />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default RandomForest;
