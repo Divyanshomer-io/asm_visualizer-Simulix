@@ -227,46 +227,86 @@ const RandomForestEducation: React.FC = () => {
         );
 
       case 'training':
-        return (
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-white">Training Process</h2>
-              <p className="text-gray-400">How Random Forest learns from data</p>
-            </div>
+  return (
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-white">Training Process & Dataset Overview</h2>
+        <p className="text-gray-400">
+          How Random Forest learns from data and details about the Breast Cancer Wisconsin dataset used.
+        </p>
+      </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-4 rounded-lg border border-blue-500/30 text-center">
-                  <div className="text-2xl font-bold text-blue-400 mb-2">1</div>
-                  <div className="text-sm text-gray-300">Bootstrap Sample</div>
-                </div>
-                <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 p-4 rounded-lg border border-green-500/30 text-center">
-                  <div className="text-2xl font-bold text-green-400 mb-2">2</div>
-                  <div className="text-sm text-gray-300">Select Features</div>
-                </div>
-                <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 p-4 rounded-lg border border-purple-500/30 text-center">
-                  <div className="text-2xl font-bold text-purple-400 mb-2">3</div>
-                  <div className="text-sm text-gray-300">Train Tree</div>
-                </div>
-                <div className="bg-gradient-to-br from-orange-500/20 to-orange-600/10 p-4 rounded-lg border border-orange-500/30 text-center">
-                  <div className="text-2xl font-bold text-orange-400 mb-2">4</div>
-                  <div className="text-sm text-gray-300">Repeat N Times</div>
-                </div>
-              </div>
-
-              <div className="bg-gray-800/50 p-6 rounded-lg border border-white/10">
-                <h4 className="text-white font-semibold mb-3">Training Algorithm</h4>
-                <ol className="space-y-2 text-sm text-gray-300 list-decimal list-inside">
-                  <li>Create bootstrap sample from training data (sampling with replacement)</li>
-                  <li>At each node, randomly select √m features (where m = total features)</li>
-                  <li>Find best split among selected features using Gini impurity or entropy</li>
-                  <li>Split node and repeat until stopping criteria met</li>
-                  <li>Repeat process for all n_estimators trees</li>
-                </ol>
-              </div>
-            </div>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-4 rounded-lg border border-blue-500/30 text-center">
+            <div className="text-2xl font-bold text-blue-400 mb-2">1</div>
+            <div className="text-sm text-gray-300">Bootstrap Sample</div>
           </div>
-        );
+          <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 p-4 rounded-lg border border-green-500/30 text-center">
+            <div className="text-2xl font-bold text-green-400 mb-2">2</div>
+            <div className="text-sm text-gray-300">Select Features</div>
+          </div>
+          <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 p-4 rounded-lg border border-purple-500/30 text-center">
+            <div className="text-2xl font-bold text-purple-400 mb-2">3</div>
+            <div className="text-sm text-gray-300">Train Tree</div>
+          </div>
+          <div className="bg-gradient-to-br from-orange-500/20 to-orange-600/10 p-4 rounded-lg border border-orange-500/30 text-center">
+            <div className="text-2xl font-bold text-orange-400 mb-2">4</div>
+            <div className="text-sm text-gray-300">Repeat N Times</div>
+          </div>
+        </div>
+
+        <div className="bg-gray-800/50 p-6 rounded-lg border border-white/10">
+          <h4 className="text-white font-semibold mb-3">Training Algorithm</h4>
+          <ol className="space-y-2 text-sm text-gray-300 list-decimal list-inside">
+            <li>Create bootstrap sample from training data (sampling with replacement)</li>
+            <li>At each node, randomly select √m features (where m = total features)</li>
+            <li>Find best split among selected features using Gini impurity or entropy</li>
+            <li>Split node and repeat until stopping criteria met</li>
+            <li>Repeat process for all n_estimators trees</li>
+          </ol>
+        </div>
+
+        {/* DATASET EXPLANATION SECTION */}
+        <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 p-6 rounded-lg border border-white/10 mt-8">
+          <h4 className="text-white font-semibold mb-3">About the Dataset</h4>
+          <p className="text-gray-300 mb-4">
+            This visualization uses the <strong>Breast Cancer Wisconsin (Diagnostic) Dataset</strong>, a widely used dataset in medical machine learning. It contains 569 samples of digitized breast mass images, with 30 numeric features describing characteristics of cell nuclei.
+          </p>
+          <ul className="list-disc list-inside text-gray-300 space-y-2">
+            <li><strong>Samples:</strong> 569 (212 malignant, 357 benign)</li>
+            <li><strong>Features:</strong> 30 numeric measurements including radius, texture, smoothness, concavity, and more.</li>
+            <li><strong>Target:</strong> Binary classification - malignant (cancerous) or benign (non-cancerous) tumors.</li>
+            <li>
+              <strong>Source:</strong>
+              <a
+                href="https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 underline ml-1"
+              >
+                UCI Machine Learning Repository
+              </a>
+            </li>
+            <li>
+              <strong>scikit-learn Dataset:</strong>
+              <a
+                href="https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_breast_cancer.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 underline ml-1"
+              >
+                load_breast_cancer
+              </a>
+            </li>
+          </ul>
+          <p className="text-gray-300 mt-4">
+            This dataset is commonly used for benchmarking classification algorithms and provides a real-world example of medical diagnosis using machine learning.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 
       case 'metrics':
         return (
