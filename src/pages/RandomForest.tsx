@@ -154,6 +154,16 @@ const RandomForest = () => {
           </div>
         </div>
       </main>
+       {/* Footer */}
+      <footer className="w-full glass-panel border-t border-white/5 mt-auto">
+        <div className="container py-4 px-4 md:px-8 text-center">
+          <p className="text-sm opacity-70">
+            <span className="inline-block">Applied Statistical Mathematics • Interactive Visualizations</span>
+            <span className="mx-2">•</span>
+            <span className="inline-block">BITS Pilani, K.K. Birla Goa Campus</span>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
