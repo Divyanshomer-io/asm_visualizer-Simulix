@@ -107,47 +107,22 @@ const RandomForest = () => {
   return (
     <div className="min-h-screen bg-background text-foreground antialiased">
       {/* Header - Neural Network Style */}
-      <header className="w-full glass-panel border-b border-white/5 sticky top-0 z-50 backdrop-blur-xl">
-        <div className="container py-4 px-4 md:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link 
-                to="/" 
-                className="flex items-center gap-2 text-accent hover:text-accent/80 transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-                <span className="font-medium">Back to Visualizations</span>
-              </Link>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-lg">
-                <Zap className="h-6 w-6 text-green-400" />
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold">Random Forest Visualizer</h1>
-                <p className="text-sm text-muted-foreground">Interactive ensemble learning exploration</p>
-              </div>
-            </div>
-            
-            <div></div>
+        {/* Header */}
+      <header className="w-full glass-panel border-b border-white/5 mb-8">
+        <div className="container py-6 px-4 md:px-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-light tracking-tight">
+              Random Forest Visualizer
+              <span className="text-sm ml-3 opacity-70 font-normal">
+                Interactive Learning
+              </span>
+            </h1>
+            <p className="text-sm opacity-70">Interactive ensemble learning exploration</p>
           </div>
-          
-          {/* Training Progress Bar */}
-          {state.isTraining && (
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-sm mb-2">
-                <span>Training Progress</span>
-                <span>{state.trainingProgress}%</span>
-              </div>
-              <div className="w-full bg-secondary/30 rounded-full h-2">
-                <div 
-                  className="bg-accent h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${state.trainingProgress}%` }}
-                />
-              </div>
-            </div>
-          )}
+          <Link to="/" className="control-btn flex items-center gap-2 text-sm">
+            <Home className="h-4 w-4" />
+            Back to Visualizations
+          </Link>
         </div>
       </header>
 
