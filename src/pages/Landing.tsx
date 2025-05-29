@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine } from "lucide-react";
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
@@ -82,6 +81,15 @@ const Landing = () => {
       icon: <Network className="h-6 w-6" />,
       tags: ["Machine Learning", "Deep Learning", "Neural Networks"],
       gradient: "from-violet-500/20 to-fuchsia-500/20"
+    },
+    {
+      id: "random-forest",
+      title: "Random Forest Analyzer",
+      description: "Comprehensive ensemble learning visualization with feature importance, ROC curves, confusion matrices, and decision tree exploration.",
+      path: "/random-forest",
+      icon: <TreePine className="h-6 w-6" />,
+      tags: ["Machine Learning", "Ensemble Learning", "Classification"],
+      gradient: "from-emerald-500/20 to-green-500/20"
     },
   ];
 
