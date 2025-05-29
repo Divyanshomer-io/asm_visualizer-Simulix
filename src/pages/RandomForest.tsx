@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Zap } from 'lucide-react';
+import React, { useState } from "react";
+import { Home } from "lucide-react";
 import RandomForestControls from '@/components/RandomForestControls';
 import RandomForestVisualization from '@/components/RandomForestVisualization';
 import RandomForestEducation from '@/components/RandomForestEducation';
