@@ -141,27 +141,35 @@
   }
 
   /* Enhanced Tooltip Styling - Maximum Overlap */
-  .tooltip-content {
-    position: fixed !important;
-    z-index: 99999 !important;
-    max-width: 280px;
-    padding: 12px;
-    font-size: 12px;
-    line-height: 1.4;
-    background: rgba(17, 24, 39, 0.98) !important;
-    color: white;
-    border-radius: 6px;
-    border: 1px solid rgba(75, 85, 99, 0.5);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(8px);
-    pointer-events: auto;
-    overflow: visible;
-  }
+/* index.css additions */
+.tooltip-content {
+  max-width: 280px;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  background: rgba(17, 24, 39, 0.98) !important;
+  color: white;
+  border-radius: 6px;
+  border: 1px solid rgba(75, 85, 99, 0.5);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  overflow: visible;
+}
 
-  .tooltip-content strong {
-    color: #60a5fa;
-  }
+.tooltip-content strong {
+  color: #60a5fa;
+}
+.plot-container {
+  position: relative;
+  overflow: visible !important;
+  isolation: isolate;
+}
 
+.adjacent-box {
+  z-index: 0 !important;
+  position: relative;
+}
   .info-icon {
     opacity: 0.7;
     transition: opacity 0.2s ease;
