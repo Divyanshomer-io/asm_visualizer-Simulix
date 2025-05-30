@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, TreePine, BarChart3, Target, TrendingUp, Activity } from 'lucide-react';
@@ -56,71 +57,42 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
     error: null
   });
 
-  // Current tree index from treeData with fallback
-  const currentTreeIndex = treeData?.tree_index ?? 0;
-  
-  // Ref to track the latest index to prevent race conditions
-  const latestIndexRef = useRef(currentTreeIndex);
-  
-  // Update ref when index changes
-  useEffect(() => {
-    latestIndexRef.current = currentTreeIndex;
-  }, [currentTreeIndex]);
+  // Current tree index from treeData
+  const currentTreeIndex = treeData?.tree_index || 0;
 
-  // Enhanced navigation handlers with proper bounds checking
-  const handlePreviousTree = useCallback(() => {
-    if (currentTreeIndex > 0 && !state.isLoading) {
+  // Navigation handlers with immediate updates
+  const handlePreviousTree = () => {
+    if (currentTreeIndex > 0) {
       const newIndex = currentTreeIndex - 1;
-      setState(prev => ({ ...prev, isLoading: true, showPrediction: false, error: null }));
+      setState(prev => ({ ...prev, isLoading: true, showPrediction: false }));
       onTreeIndexChange(newIndex);
       
-      // Simulate realistic data fetching delay
+      // Simulate data fetching delay for smooth UX
       setTimeout(() => {
-        // Only update loading state if this is still the latest request
-        if (latestIndexRef.current === newIndex) {
-          setState(prev => ({ ...prev, isLoading: false }));
-        }
-      }, 150);
+        setState(prev => ({ ...prev, isLoading: false }));
+      }, 200);
     }
-  }, [currentTreeIndex, state.isLoading, onTreeIndexChange]);
+  };
 
-  const handleNextTree = useCallback(() => {
-    if (currentTreeIndex < totalTrees - 1 && !state.isLoading) {
+  const handleNextTree = () => {
+    if (currentTreeIndex < totalTrees - 1) {
       const newIndex = currentTreeIndex + 1;
-      setState(prev => ({ ...prev, isLoading: true, showPrediction: false, error: null }));
+      setState(prev => ({ ...prev, isLoading: true, showPrediction: false }));
       onTreeIndexChange(newIndex);
       
-      // Simulate realistic data fetching delay
+      // Simulate data fetching delay for smooth UX
       setTimeout(() => {
-        // Only update loading state if this is still the latest request
-        if (latestIndexRef.current === newIndex) {
-          setState(prev => ({ ...prev, isLoading: false }));
-        }
-      }, 150);
+        setState(prev => ({ ...prev, isLoading: false }));
+      }, 200);
     }
-  }, [currentTreeIndex, totalTrees, state.isLoading, onTreeIndexChange]);
+  };
 
-  const handleSliderChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const newIndex = Number(event.target.value);
-    if (newIndex !== currentTreeIndex && !state.isLoading) {
-      setState(prev => ({ ...prev, isLoading: true, showPrediction: false, error: null }));
-      onTreeIndexChange(newIndex);
-      
-      // Simulate data fetching
-      setTimeout(() => {
-        if (latestIndexRef.current === newIndex) {
-          setState(prev => ({ ...prev, isLoading: false }));
-        }
-      }, 150);
-    }
-  }, [currentTreeIndex, state.isLoading, onTreeIndexChange]);
-
-  const handleFinalPrediction = useCallback(() => {
+  const handleFinalPrediction = () => {
     setState(prev => ({ ...prev, showPrediction: !prev.showPrediction }));
-  }, []);
+  };
 
   // Calculate tree statistics
-  const getTreeStats = useCallback(() => {
+  const getTreeStats = () => {
     if (!treeData) return null;
     
     return {
@@ -130,10 +102,10 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
       maxDepth: treeData.actual_depth,
       treeAccuracy: treeData.tree_accuracy
     };
-  }, [treeData]);
+  };
 
   // Generate prediction result
-  const getPredictionResult = useCallback((): PredictionResult => {
+  const getPredictionResult = (): PredictionResult => {
     if (!treeData) return {
       class: 'Unknown',
       probability: 0.5,
@@ -145,7 +117,7 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
     const probability = treeData.tree_accuracy;
     const predictedClass = probability > 0.5 ? 'Benign' : 'Malignant';
     const confidence = probability > 0.8 ? 'High' : probability > 0.6 ? 'Medium' : 'Low';
-    const leafSamples = Math.floor(treeData.training_samples * 0.1);
+    const leafSamples = Math.floor(treeData.training_samples * 0.1); // Estimate
     
     const reasoning = `Based on ${treeData.decision_path.length} decision steps, this tree follows the path: ${
       treeData.decision_path.map(step => `${step.feature} ${step.condition}`).join(' → ')
@@ -158,30 +130,27 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
       leafSamples,
       reasoning
     };
-  }, [treeData]);
+  };
 
   // Calculate tree insights
-  const getTreeInsights = useCallback(() => {
+  const getTreeInsights = () => {
     if (!treeData) return null;
     
     const stats = getTreeStats();
-    if (!stats) return null;
-    
-    const avgNodes = 15;
+    const avgNodes = 15; // Typical average for reference
     
     return {
-      complexity: stats.totalNodes > avgNodes ? "High" : "Low",
-      performance: stats.treeAccuracy > 0.8 ? "Excellent" : stats.treeAccuracy > 0.6 ? "Good" : "Fair",
+      complexity: stats!.totalNodes > avgNodes ? "High" : "Low",
+      performance: stats!.treeAccuracy > 0.8 ? "Excellent" : stats!.treeAccuracy > 0.6 ? "Good" : "Fair",
       uniqueness: treeData.decision_path.length > 4 ? "Highly Diverse" : "Standard",
-      contribution: stats.treeAccuracy > 0.75 ? "Strong" : "Moderate"
+      contribution: stats!.treeAccuracy > 0.75 ? "Strong" : "Moderate"
     };
-  }, [treeData, getTreeStats]);
+  };
 
   const stats = getTreeStats();
   const insights = getTreeInsights();
   const prediction = getPredictionResult();
 
-  // Loading state component
   if (!treeData || state.isLoading) {
     return (
       <Card className="glass-panel border-white/10">
@@ -192,35 +161,14 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <p className="text-muted-foreground">Loading tree data...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Error state component
-  if (state.error) {
-    return (
-      <Card className="glass-panel border-white/10">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <TreePine className="h-5 w-5 text-red-400" />
-            Decision Tree Analysis - Error
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            <p>Error loading tree visualization: {state.error}</p>
-            <Button 
-              onClick={() => setState(prev => ({ ...prev, error: null }))}
-              className="mt-2"
-              variant="outline"
-            >
-              Retry
-            </Button>
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-secondary/30 rounded w-3/4 mb-4"></div>
+            <div className="grid grid-cols-5 gap-3 mb-6">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className="h-16 bg-secondary/20 rounded"></div>
+              ))}
+            </div>
+            <div className="h-32 bg-secondary/20 rounded"></div>
           </div>
         </CardContent>
       </Card>
@@ -236,72 +184,30 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
             Decision Tree #{currentTreeIndex} Analysis
           </CardTitle>
           
-          {/* Enhanced Navigation Controls */}
-          <div className="flex items-center gap-4">
-            {/* Previous Button with enhanced styling */}
+          {/* Navigation Controls */}
+          <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={handlePreviousTree}
               disabled={currentTreeIndex === 0 || state.isLoading}
-              className={`h-8 w-8 p-0 transition-all duration-200 ${
-                currentTreeIndex === 0 || state.isLoading
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:scale-105 hover:bg-blue-500/20'
-              }`}
-              aria-label="Previous tree"
+              className="h-8 w-8 p-0 transition-all hover:scale-105 disabled:hover:scale-100"
             >
-              <ChevronLeft className={`h-4 w-4 ${
-                currentTreeIndex === 0 ? 'text-gray-500' : 'text-blue-400'
-              }`} />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             
-            {/* Enhanced Index Display */}
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-sm text-muted-foreground font-medium">
-                {currentTreeIndex + 1} / {totalTrees}
-              </span>
-              
-              {/* Synchronized Slider */}
-              <input
-                type="range"
-                min="0"
-                max={Math.max(0, totalTrees - 1)}
-                value={currentTreeIndex}
-                onChange={handleSliderChange}
-                disabled={state.isLoading}
-                className="w-20 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer
-                          slider-thumb:appearance-none slider-thumb:h-4 slider-thumb:w-4 
-                          slider-thumb:rounded-full slider-thumb:bg-blue-500 
-                          slider-thumb:cursor-pointer slider-thumb:border-2 
-                          slider-thumb:border-blue-300 disabled:opacity-50
-                          disabled:cursor-not-allowed"
-                style={{
-                  background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${
-                    (currentTreeIndex / Math.max(totalTrees - 1, 1)) * 100
-                  }%, #374151 ${
-                    (currentTreeIndex / Math.max(totalTrees - 1, 1)) * 100
-                  }%, #374151 100%)`
-                }}
-              />
-            </div>
+            <span className="text-sm text-muted-foreground font-medium px-3">
+              {currentTreeIndex + 1} / {totalTrees}
+            </span>
             
-            {/* Next Button with enhanced styling */}
             <Button
               variant="outline"
               size="sm"
               onClick={handleNextTree}
               disabled={currentTreeIndex === totalTrees - 1 || state.isLoading}
-              className={`h-8 w-8 p-0 transition-all duration-200 ${
-                currentTreeIndex === totalTrees - 1 || state.isLoading
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:scale-105 hover:bg-blue-500/20'
-              }`}
-              aria-label="Next tree"
+              className="h-8 w-8 p-0 transition-all hover:scale-105 disabled:hover:scale-100"
             >
-              <ChevronRight className={`h-4 w-4 ${
-                currentTreeIndex === totalTrees - 1 ? 'text-gray-500' : 'text-blue-400'
-              }`} />
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
