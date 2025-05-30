@@ -185,7 +185,7 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
           </CardTitle>
           
           {/* Navigation Controls */}
-          <div className="flex items-center gap-3">
+{/*           <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
@@ -209,7 +209,7 @@ const DetailedTreeVisualization: React.FC<DetailedTreeVisualizationProps> = ({
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-          </div>
+          </div> */}
         </div>
       </CardHeader>
       
