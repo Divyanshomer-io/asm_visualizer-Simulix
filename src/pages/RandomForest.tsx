@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+mport React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Zap } from 'lucide-react';
-import React, { useState } from "react";
-import { Home } from "lucide-react";
+import { Home } from 'lucide-react';
 import RandomForestControls from '@/components/RandomForestControls';
 import RandomForestVisualization from '@/components/RandomForestVisualization';
 import RandomForestEducation from '@/components/RandomForestEducation';
@@ -108,8 +106,7 @@ const RandomForest = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased">
-      {/* Header - Neural Network Style */}
-        {/* Header */}
+      {/* Header */}
       <header className="w-full glass-panel border-b border-white/5 mb-8">
         <div className="container py-6 px-4 md:px-8 flex justify-between items-center">
           <div>
@@ -154,7 +151,8 @@ const RandomForest = () => {
           </div>
         </div>
       </main>
-       {/* Footer */}
+      
+      {/* Footer */}
       <footer className="w-full glass-panel border-t border-white/5 mt-auto">
         <div className="container py-4 px-4 md:px-8 text-center">
           <p className="text-sm opacity-70">
