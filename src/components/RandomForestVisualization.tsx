@@ -177,7 +177,7 @@ const RandomForestVisualization: React.FC<RandomForestVisualizationProps> = ({
                 <TooltipTrigger asChild>
                   <Info className="h-4 w-4 text-blue-400 cursor-help info-icon" />
                 </TooltipTrigger>
-                <TooltipContent className="tooltip-content max-w-[280px]">
+                <TooltipContent className="tooltip-content max-w-[280px]" side="left" align="start">
                   <div>
                     <strong>Sample Prediction</strong><br />
                     Displays model confidence for a single breast tissue sample from the Wisconsin Diagnostic Dataset.
@@ -341,7 +341,7 @@ const RandomForestVisualization: React.FC<RandomForestVisualizationProps> = ({
                 <TooltipTrigger asChild>
                   <Info className="h-4 w-4 text-purple-400 cursor-help info-icon" />
                 </TooltipTrigger>
-                <TooltipContent className="tooltip-content max-w-[280px]">
+                <TooltipContent className="tooltip-content max-w-[280px]" side="left" align="start">
                   <div>
                     <strong>Confusion Matrix</strong><br />
                     Shows prediction accuracy breakdown:
