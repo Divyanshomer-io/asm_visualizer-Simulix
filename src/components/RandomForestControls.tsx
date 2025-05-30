@@ -8,7 +8,8 @@ import { Play, RotateCcw, TreePine, Settings, BarChart3 } from 'lucide-react';
 
 interface RandomForestControlsProps {
   params: RandomForestParams;
-  state: RandomForestState;
+  state: Omit<RandomForestState, 'selectedTreeIndex'>;
+  selectedTreeIndex: number;
   onParamChange: (params: Partial<RandomForestParams>) => void;
   onTreeIndexChange: (index: number) => void;
   onTrain: () => void;
@@ -18,6 +19,7 @@ interface RandomForestControlsProps {
 const RandomForestControls: React.FC<RandomForestControlsProps> = ({
   params,
   state,
+  selectedTreeIndex,
   onParamChange,
   onTreeIndexChange,
   onTrain,
@@ -159,10 +161,10 @@ const RandomForestControls: React.FC<RandomForestControlsProps> = ({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Selected Tree</label>
-                <Badge variant="secondary">{state.selectedTreeIndex}</Badge>
+                <Badge variant="secondary">{selectedTreeIndex}</Badge>
               </div>
               <Slider
-                value={[state.selectedTreeIndex]}
+                value={[selectedTreeIndex]}
                 onValueChange={([value]) => onTreeIndexChange(value)}
                 min={0}
                 max={params.n_estimators - 1}
