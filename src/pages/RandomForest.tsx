@@ -1,15 +1,22 @@
-mport React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { ArrowLeft, Zap } from 'lucide-react';
+import { Home } from "lucide-react";
 import RandomForestControls from '@/components/RandomForestControls';
 import RandomForestVisualization from '@/components/RandomForestVisualization';
 import RandomForestEducation from '@/components/RandomForestEducation';
-import { RandomForestState, RandomForestParams } from '@/utils/randomForest';
+import { RandomForestState, RandomForestParams, TreeData } from '@/utils/randomForest';
 import { trainRandomForestModel } from '@/utils/randomForest';
 import { toast } from 'sonner';
 
 const RandomForest = () => {
-  const [state, setState] = useState<RandomForestState>({
+  // Separate tree index state from main RF state
+  const [selectedTreeIndex, setSelectedTreeIndex] = useState(0);
+  const [treeData, setTreeData] = useState<TreeData | null>(null);
+  const [isLoadingTree, setIsLoadingTree] = useState(false);
+
+  // Main RF state without tree index
+  const [state, setState] = useState<Omit<RandomForestState, 'selectedTreeIndex'>>({
     isTraining: false,
     currentModel: null,
     trainingProgress: 0,
@@ -19,7 +26,6 @@ const RandomForest = () => {
     feature_importances: null,
     prediction_probabilities: null,
     tree_data: null,
-    selectedTreeIndex: 0,
   });
 
   const [params, setParams] = useState<RandomForestParams>({
@@ -34,8 +40,66 @@ const RandomForest = () => {
     setParams(prev => ({ ...prev, ...newParams }));
   }, []);
 
+  // Centralized tree data fetching with cancellation
+  useEffect(() => {
+    const abortController = new AbortController();
+    
+    const fetchTreeData = async () => {
+      if (params.n_estimators === 0 || !state.currentModel) return;
+      
+      setIsLoadingTree(true);
+      try {
+        // Simulate realistic tree data fetch
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        if (!abortController.signal.aborted) {
+          // Generate mock tree data based on current index
+          const mockTreeData: TreeData = {
+            tree_index: selectedTreeIndex,
+            decision_nodes: Math.floor(Math.random() * 20) + 10,
+            leaf_nodes: Math.floor(Math.random() * 15) + 8,
+            actual_depth: Math.min(params.max_depth, Math.floor(Math.random() * params.max_depth) + 3),
+            decision_path: [
+              {
+                step: 1,
+                feature: `Feature_${Math.floor(Math.random() * 30)}`,
+                threshold: parseFloat((Math.random() * 100).toFixed(2)),
+                condition: Math.random() > 0.5 ? '<= threshold' : '> threshold'
+              },
+              {
+                step: 2,
+                feature: `Feature_${Math.floor(Math.random() * 30)}`,
+                threshold: parseFloat((Math.random() * 100).toFixed(2)),
+                condition: Math.random() > 0.5 ? '<= threshold' : '> threshold'
+              }
+            ],
+            tree_accuracy: 0.7 + Math.random() * 0.2,
+            training_samples: Math.floor(Math.random() * 100) + 500,
+            feature_names: Array.from({length: 30}, (_, i) => `Feature_${i}`)
+          };
+          
+          setTreeData(mockTreeData);
+        }
+      } catch (err) {
+        if (!abortController.signal.aborted) {
+          console.error('Tree fetch failed:', err);
+          toast.error('Failed to load tree data');
+        }
+      } finally {
+        if (!abortController.signal.aborted) {
+          setIsLoadingTree(false);
+        }
+      }
+    };
+
+    fetchTreeData();
+    
+    return () => abortController.abort();
+  }, [selectedTreeIndex, params.n_estimators, state.currentModel]);
+
   const handleTrainModel = useCallback(async () => {
     setState(prev => ({ ...prev, isTraining: true, trainingProgress: 0 }));
+    setSelectedTreeIndex(0); // Reset tree index on new training
     toast.info('Training Random Forest model...');
     
     try {
@@ -90,14 +154,17 @@ const RandomForest = () => {
       feature_importances: null,
       prediction_probabilities: null,
       tree_data: null,
-      selectedTreeIndex: 0,
     });
+    setSelectedTreeIndex(0);
+    setTreeData(null);
     toast.info('Parameters and model reset');
   }, []);
 
+  // Tree index change handler with validation
   const handleTreeIndexChange = useCallback((index: number) => {
-    setState(prev => ({ ...prev, selectedTreeIndex: index }));
-  }, []);
+    const validIndex = Math.max(0, Math.min(index, params.n_estimators - 1));
+    setSelectedTreeIndex(validIndex);
+  }, [params.n_estimators]);
 
   // Train initial model on component mount
   useEffect(() => {
@@ -131,8 +198,11 @@ const RandomForest = () => {
           {/* Main Visualization Area */}
           <div className="lg:col-span-3 space-y-6">
             <RandomForestVisualization 
-              state={state} 
+              state={state}
               params={params}
+              selectedTreeIndex={selectedTreeIndex}
+              treeData={treeData}
+              isLoadingTree={isLoadingTree}
               onTreeIndexChange={handleTreeIndexChange}
             />
             <RandomForestEducation />
@@ -143,6 +213,7 @@ const RandomForest = () => {
             <RandomForestControls
               params={params}
               state={state}
+              selectedTreeIndex={selectedTreeIndex}
               onParamChange={handleParamChange}
               onTreeIndexChange={handleTreeIndexChange}
               onTrain={handleTrainModel}
@@ -151,7 +222,7 @@ const RandomForest = () => {
           </div>
         </div>
       </main>
-      
+
       {/* Footer */}
       <footer className="w-full glass-panel border-t border-white/5 mt-auto">
         <div className="container py-4 px-4 md:px-8 text-center">
