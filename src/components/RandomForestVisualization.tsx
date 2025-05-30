@@ -128,7 +128,7 @@ const RandomForestVisualization: React.FC<RandomForestVisualizationProps> = ({
                 <TooltipTrigger asChild>
                   <Info className="h-4 w-4 text-blue-400 cursor-help info-icon" />
                 </TooltipTrigger>
-                <TooltipContent className="tooltip-content max-w-[280px]">
+                <TooltipContent className="tooltip-content max-w-[280px]" side="left" align="start">
                   <div>
                     <strong>Feature Importance</strong><br />
                     Shows which breast cancer diagnostic features most influence the Random Forest's predictions. Higher bars indicate greater impact on classification decisions.
@@ -243,7 +243,7 @@ const RandomForestVisualization: React.FC<RandomForestVisualizationProps> = ({
                 <TooltipTrigger asChild>
                   <Info className="h-4 w-4 text-orange-400 cursor-help info-icon" />
                 </TooltipTrigger>
-                <TooltipContent className="tooltip-content max-w-[280px]">
+                <TooltipContent className="tooltip-content max-w-[280px]" side="left" align="start">
                   <div>
                     <strong>ROC Curve (Receiver Operating Characteristic)</strong><br />
                     Measures the model's ability to distinguish between benign and malignant tumors at different thresholds.
