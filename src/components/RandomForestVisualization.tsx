@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -116,19 +117,21 @@ const RandomForestVisualization: React.FC<RandomForestVisualizationProps> = ({
         )}
 
         {/* Feature Importance */}
-        <Card className="glass-panel border-white/10">
+        <Card className="glass-panel border-white/10 plot-container">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-accent" />
-              Feature Importance
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-accent" />
+                Feature Importance
+              </div>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-blue-400 cursor-pointer" />
+                  <Info className="h-4 w-4 text-blue-400 cursor-help info-icon" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="tooltip-content max-w-[280px]">
                   <div>
-                    <strong>Feature Importance:</strong><br />
-                    Shows which input features most influenced the model's predictions. Higher bars mean the feature had a greater impact on the Random Forest's decisions.
+                    <strong>Feature Importance</strong><br />
+                    Shows which breast cancer diagnostic features most influence the Random Forest's predictions. Higher bars indicate greater impact on classification decisions.
                   </div>
                 </TooltipContent>
               </Tooltip>
@@ -163,23 +166,24 @@ const RandomForestVisualization: React.FC<RandomForestVisualizationProps> = ({
         </Card>
 
         {/* Prediction Probabilities */}
-        <Card className="glass-panel border-white/10">
+        <Card className="glass-panel border-white/10 plot-container">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <PieChartIcon className="h-5 w-5 text-blue-400" />
-              Sample Prediction
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <PieChartIcon className="h-5 w-5 text-blue-400" />
+                Sample Prediction
+              </div>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-blue-400 cursor-pointer" />
+                  <Info className="h-4 w-4 text-blue-400 cursor-help info-icon" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="tooltip-content max-w-[280px]">
                   <div>
-                    <strong>Sample Prediction:</strong><br />
-                    Displays the model's predicted class and confidence for a single example.<br /><br />
-                    <span style={{ color: '#22c55e' }}>Green:</span> Probability of being Benign<br />
-                    <span style={{ color: '#ef4444' }}>Red:</span> Probability of being Malignant<br /><br />
-                    <strong>Dataset:</strong><br />
-                    This visualization uses the Breast Cancer Wisconsin (Diagnostic) Dataset, which contains 569 samples of breast tumor measurements used to predict whether a tumor is benign or malignant.
+                    <strong>Sample Prediction</strong><br />
+                    Displays model confidence for a single breast tissue sample from the Wisconsin Diagnostic Dataset.
+                    <br /><br />
+                    <span className="text-green-400">Green:</span> Benign probability<br />
+                    <span className="text-red-400">Red:</span> Malignant probability
                   </div>
                 </TooltipContent>
               </Tooltip>
@@ -218,33 +222,39 @@ const RandomForestVisualization: React.FC<RandomForestVisualizationProps> = ({
         </Card>
 
         {/* ROC Curve - FIXED with realistic validation */}
-        <Card className="glass-panel border-white/10">
+        <Card className="glass-panel border-white/10 plot-container">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-orange-400" />
-              ROC Curve Analysis
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-orange-400" />
+                ROC Curve Analysis
+                {state.roc_data && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-normal text-muted-foreground">
+                      (AUC = {state.roc_data.auc.toFixed(3)})
+                    </span>
+                    {aucWarning && (
+                      <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                    )}
+                  </div>
+                )}
+              </div>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-blue-400 cursor-pointer" />
+                  <Info className="h-4 w-4 text-orange-400 cursor-help info-icon" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="tooltip-content max-w-[280px]">
                   <div>
-                    <strong>ROC Curve (Receiver Operating Characteristic):</strong><br />
-                    Illustrates the trade-off between true positive rate and false positive rate at various thresholds.<br />
-                    The AUC (Area Under Curve) summarizes the model's ability to distinguish between classes (1.0 = perfect, 0.5 = random).
+                    <strong>ROC Curve (Receiver Operating Characteristic)</strong><br />
+                    Measures the model's ability to distinguish between benign and malignant tumors at different thresholds.
+                    <br /><br />
+                    <strong>AUC (Area Under Curve):</strong><br />
+                    • 1.0 = Perfect classifier<br />
+                    • 0.5 = Random guessing<br />
+                    • &gt;0.8 = Excellent performance
                   </div>
                 </TooltipContent>
               </Tooltip>
-              {state.roc_data && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-normal text-muted-foreground">
-                    (AUC = {state.roc_data.auc.toFixed(3)})
-                  </span>
-                  {aucWarning && (
-                    <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                  )}
-                </div>
-              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -320,22 +330,26 @@ const RandomForestVisualization: React.FC<RandomForestVisualizationProps> = ({
         </Card>
 
         {/* Confusion Matrix */}
-        <Card className="glass-panel border-white/10">
+        <Card className="glass-panel border-white/10 plot-container">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-purple-400" />
-              Confusion Matrix
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-purple-400" />
+                Confusion Matrix
+              </div>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-blue-400 cursor-pointer" />
+                  <Info className="h-4 w-4 text-purple-400 cursor-help info-icon" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="tooltip-content max-w-[280px]">
                   <div>
-                    <strong>Confusion Matrix:</strong><br />
-                    Shows how many predictions were correct or incorrect for each class.<br /><br />
+                    <strong>Confusion Matrix</strong><br />
+                    Shows prediction accuracy breakdown:
+                    <br /><br />
                     <strong>Diagonal cells:</strong> Correct predictions<br />
-                    <strong>Off-diagonal cells:</strong> Misclassifications<br />
-                    Useful for understanding model errors.
+                    <strong>Off-diagonal:</strong> Misclassifications<br />
+                    <br />
+                    Helps identify if model confuses benign/malignant cases.
                   </div>
                 </TooltipContent>
               </Tooltip>
