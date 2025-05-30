@@ -139,4 +139,53 @@
   .text-gradient-primary {
     @apply bg-gradient-to-br from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
   }
+
+  /* Enhanced Tooltip Styling - Maximum Overlap */
+  .tooltip-content {
+    position: fixed !important;
+    z-index: 99999 !important;
+    max-width: 280px;
+    padding: 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    background: rgba(17, 24, 39, 0.98) !important;
+    color: white;
+    border-radius: 6px;
+    border: 1px solid rgba(75, 85, 99, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(8px);
+    pointer-events: auto;
+    overflow: visible;
+  }
+
+  .tooltip-content strong {
+    color: #60a5fa;
+  }
+
+  .info-icon {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    z-index: 1;
+    position: relative;
+  }
+
+  .info-icon:hover {
+    opacity: 1;
+  }
+
+  /* Ensure tooltip portal has absolute highest z-index */
+  [data-radix-popper-content-wrapper] {
+    z-index: 99999 !important;
+    position: fixed !important;
+  }
+
+  /* Tooltip portal container */
+  [data-radix-portal] {
+    z-index: 99999 !important;
+  }
+
+  /* Override any potential z-index conflicts */
+  body > div[data-radix-portal] {
+    z-index: 99999 !important;
+  }
 }
