@@ -294,7 +294,7 @@ const DeepRLVisualization: React.FC<DeepRLVisualizationProps> = ({ state, params
                 <TooltipTrigger>
                   <Info className="h-4 w-4 text-red-400 cursor-help" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="left">
                   <p className="max-w-xs">
                     <strong>Neural Weights:</strong> Visual representation of the first layer's connection weights. 
                     Colors show how strongly each input feature influences each neuron.
