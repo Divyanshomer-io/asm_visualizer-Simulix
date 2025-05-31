@@ -26,11 +26,9 @@ const About = () => {
           <section className="glass-panel rounded-xl p-8 space-y-6">
             <h2 className="text-2xl font-medium">Project Overview</h2>
             <p className="opacity-80 leading-relaxed">
-              This project presents interactive visualizations of various Applied Statistical Mathematics 
-              concepts and algorithms. Each visualization is designed to help students and educators 
-              understand complex mathematical principles through hands-on exploration.
+             <strong>Simulix</strong> is an immersive educational platform that transforms abstract data science and mathematical concepts into interactive, hands-on learning experiences. Designed for students, educators, and professionals alike, the platform bridges the gap between theoretical knowledge and practical understanding by enabling users to manipulate algorithms, observe real-time outcomes, and dissect complex systems through intuitive visualizations.
             </p>
-            <p className="opacity-80 leading-relaxed">
+{/*             <p className="opacity-80 leading-relaxed">
               Currently, the project features visualizations for:
             </p>
             <ul className="list-disc pl-6 opacity-80 space-y-2">
@@ -52,7 +50,7 @@ const About = () => {
                <li>
                 <strong>Huber M-Estimator:</strong> Robust Regression- Interactive exploration of iteratively reweighted least squares (IRLS) for outlier-resistant regression. Adjust tuning constant k to see how weights downvote outliers while preserving efficiency for normal data.
               </li>
-            </ul>
+            </ul> */}
             <p className="opacity-80 leading-relaxed">
               Each simulator allows users to customize parameters and observe in real-time how 
               these algorithms work, making complex concepts more accessible.
