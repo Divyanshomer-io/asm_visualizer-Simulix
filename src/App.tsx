@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,9 +13,11 @@ import ImportanceSampling from "./pages/ImportanceSampling";
 import NeuralNetwork from "./pages/NeuralNetwork";
 import RandomForest from "./pages/RandomForest";
 import EMClustering from "./pages/EMClustering";
+import DeepRL from "./pages/DeepRL";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { Analytics } from "@vercel/analytics/next"
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/neural-network" element={<NeuralNetwork />} />
           <Route path="/random-forest" element={<RandomForest />} />
           <Route path="/em-clustering" element={<EMClustering />} />
+          <Route path="/deep-rl" element={<DeepRL />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
