@@ -77,7 +77,7 @@ const DeepRLVisualization: React.FC<DeepRLVisualizationProps> = ({ state, params
               <TooltipTrigger>
                 <Info className="h-4 w-4 text-blue-400 cursor-help" />
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent side="left" align="start>
                 <p className="max-w-xs">
                   <strong>Training Progress:</strong> Shows how well the agent performs over time. 
                   Blue line = individual episode rewards, Orange line = moving average trend.
@@ -137,7 +137,7 @@ const DeepRLVisualization: React.FC<DeepRLVisualizationProps> = ({ state, params
                 <TooltipTrigger>
                   <Info className="h-4 w-4 text-green-400 cursor-help" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="left" align="start>
                   <p className="max-w-xs">
                     <strong>Q-Values:</strong> Current neural network predictions for each action. 
                     Higher values indicate the agent thinks that action will lead to better rewards.
@@ -187,7 +187,7 @@ const DeepRLVisualization: React.FC<DeepRLVisualizationProps> = ({ state, params
                 <TooltipTrigger>
                   <Info className="h-4 w-4 text-yellow-400 cursor-help" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="left" align="start>
                   <p className="max-w-xs">
                     <strong>Epsilon (ε):</strong> Controls exploration vs exploitation. 
                     Starts high (random actions) and decays over time (learned actions).
@@ -241,7 +241,7 @@ const DeepRLVisualization: React.FC<DeepRLVisualizationProps> = ({ state, params
               <TooltipTrigger>
                 <Info className="h-4 w-4 text-orange-400 cursor-help" />
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent side="left" align="start>
                 <p className="max-w-xs">
                   <strong>Training Loss:</strong> Measures how well the neural network is learning. 
                   Lower values indicate better Q-value predictions.
@@ -293,7 +293,7 @@ const DeepRLVisualization: React.FC<DeepRLVisualizationProps> = ({ state, params
                 <TooltipTrigger>
                   <Info className="h-4 w-4 text-red-400 cursor-help" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="left" align="start>
                   <p className="max-w-xs">
                     <strong>Neural Weights:</strong> Visual representation of the first layer's connection weights. 
                     Colors show how strongly each input feature influences each neuron.
@@ -367,7 +367,7 @@ const DeepRLVisualization: React.FC<DeepRLVisualizationProps> = ({ state, params
                 <TooltipTrigger>
                   <Info className="h-4 w-4 text-purple-400 cursor-help" />
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="left" align="start>
                   <p className="max-w-xs">
                     <strong>Neural Network:</strong> The DQN architecture with input layer (4 state features), 
                     hidden layers, and output layer (2 Q-values for actions).
