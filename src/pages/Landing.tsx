@@ -91,6 +91,15 @@ const Landing = () => {
       tags: ["Machine Learning", "Ensemble Learning", "Classification"],
       gradient: "from-emerald-500/20 to-green-500/20"
     },
+    {
+      id: "deep-rl",
+      title: "Deep Reinforcement Learning",
+      description: "Deep Q-Networks with experience replay, epsilon-greedy exploration, and neural weight evolution.",
+      path: "/deep-rl",
+      icon: <Brain className="h-6 w-6" />,
+      tags: ["Machine Learning", "Reinforcement Learning", "Q-Learning"],
+      gradient: "from-purple-500/20 to-pink-500/20"
+    },
   ];
 
   // Filter visualizations based on search query
