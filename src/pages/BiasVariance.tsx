@@ -281,7 +281,13 @@ const BiasVariance: React.FC = () => {
       {/* Main Content */}
       <main className="container px-4 md:px-8 pb-16">
         <div className="bias-variance-container">
-          {/* Control Panel */}
+          {/* Visualizations Grid - Now on LEFT */}
+          <BiasVarianceVisualization 
+            params={params}
+            state={state}
+          />
+
+          {/* Control Panel - Now on RIGHT */}
           <div className="control-panel">
             <BiasVarianceControls
               params={params}
@@ -296,12 +302,6 @@ const BiasVariance: React.FC = () => {
               onGenerate={generateAllPredictions}
             />
           </div>
-
-          {/* Visualizations Grid */}
-          <BiasVarianceVisualization 
-            params={params}
-            state={state}
-          />
         </div>
 
         {/* Educational Content */}
@@ -330,10 +330,11 @@ const BiasVariance: React.FC = () => {
         </div>
       </footer>
 
-      <style jsx>{`
+      <style>
+        {`
         .bias-variance-container {
           display: grid;
-          grid-template-columns: 300px 1fr;
+          grid-template-columns: 1fr 300px;
           gap: 20px;
           min-height: 80vh;
         }
@@ -374,7 +375,8 @@ const BiasVariance: React.FC = () => {
             position: static;
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
