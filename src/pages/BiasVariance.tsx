@@ -14,7 +14,8 @@ import {
   trainPolynomialModel,
   predict,
   calculateErrors,
-  trueFunction
+  trueFunction,
+  generatePlotX
 } from '@/utils/biasVariance';
 
 const BiasVariance: React.FC = () => {
@@ -61,32 +62,35 @@ const BiasVariance: React.FC = () => {
     };
   }, []);
 
-  // Generate predictions - mirrors Python's _generate_predictions
-  const generatePredictions = useCallback(() => {
-    const predictions: number[][] = [];
-    const xPlot = Array.from({ length: 100 }, (_, i) => -1 + (i / 99) * 2);
+  // Generate all 50 predictions at once when parameters change
+  const generateAllPredictions = useCallback(() => {
+    console.log('Generating all 50 predictions with params:', params);
+    
+    const allPredictions: number[][] = [];
+    const xPlot = generatePlotX();
     
     for (let i = 0; i < 50; i++) {
       const { X, y } = generateData(params.samples, params.noise);
       const model = trainPolynomialModel(X, y, params.degree);
       const pred = predict(model, xPlot);
-      predictions.push(pred);
+      allPredictions.push(pred);
     }
 
-    // Calculate mean prediction
+    // Calculate mean prediction for all 50 predictions
     const meanPred = xPlot.map((_, i) => 
-      predictions.reduce((sum, pred) => sum + pred[i], 0) / predictions.length
+      allPredictions.reduce((sum, pred) => sum + pred[i], 0) / allPredictions.length
     );
 
-    // Calculate error decomposition
-    const errors = calculateErrors(predictions, meanPred, xPlot, params.noise);
+    // Calculate error decomposition for all predictions
+    const errors = calculateErrors(allPredictions, meanPred, xPlot, params.noise);
 
     setState(prev => ({
       ...prev,
-      predictions,
+      predictions: allPredictions,
       meanPrediction: meanPred,
       errorDecomposition: errors,
-      currentIteration: 1
+      currentIteration: 1,
+      isPlaying: false
     }));
 
     // Trigger tradeoff curve calculation
@@ -110,7 +114,7 @@ const BiasVariance: React.FC = () => {
 
       degrees.forEach(degree => {
         const predictions: number[][] = [];
-        const xPlot = Array.from({ length: 100 }, (_, i) => -1 + (i / 99) * 2);
+        const xPlot = generatePlotX();
         
         for (let i = 0; i < 20; i++) { // Reduced for performance
           const { X, y } = generateData(params.samples, params.noise);
@@ -151,8 +155,12 @@ const BiasVariance: React.FC = () => {
       
       const newIteration = prev.currentIteration + 1;
       
-      // Schedule next frame
-      animationRef.current = requestAnimationFrame(animationLoop);
+      // Schedule next frame with 500ms delay
+      setTimeout(() => {
+        if (prev.isPlaying) {
+          animationRef.current = requestAnimationFrame(animationLoop);
+        }
+      }, 500);
       
       return {
         ...prev,
@@ -164,6 +172,35 @@ const BiasVariance: React.FC = () => {
   // Control handlers
   const handleParamChange = useCallback((newParams: Partial<BiasVarianceParams>) => {
     setParams(prev => ({ ...prev, ...newParams }));
+  }, []);
+
+  const handleIterationChange = useCallback((newIteration: number) => {
+    setState(prev => ({
+      ...prev,
+      currentIteration: Math.max(1, Math.min(newIteration, 50)),
+      isPlaying: false
+    }));
+    
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+  }, []);
+
+  const handleStepForward = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      currentIteration: Math.min(prev.currentIteration + 1, 50),
+      isPlaying: false
+    }));
+  }, []);
+
+  const handleStepBackward = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      currentIteration: Math.max(prev.currentIteration - 1, 1),
+      isPlaying: false
+    }));
   }, []);
 
   const handlePlayPause = useCallback(() => {
@@ -217,8 +254,8 @@ const BiasVariance: React.FC = () => {
 
   // Generate initial predictions
   useEffect(() => {
-    generatePredictions();
-  }, [generatePredictions]);
+    generateAllPredictions();
+  }, [generateAllPredictions]);
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
@@ -243,31 +280,32 @@ const BiasVariance: React.FC = () => {
 
       {/* Main Content */}
       <main className="container px-4 md:px-8 pb-16">
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
-          {/* Visualizations */}
-          <div className="xl:col-span-3">
-            <BiasVarianceVisualization 
-              params={params}
-              state={state}
-            />
-          </div>
-
+        <div className="bias-variance-container">
           {/* Control Panel */}
-          <div className="xl:col-span-1">
+          <div className="control-panel">
             <BiasVarianceControls
               params={params}
               state={state}
               onParamChange={handleParamChange}
+              onIterationChange={handleIterationChange}
+              onStepForward={handleStepForward}
+              onStepBackward={handleStepBackward}
               onPlayPause={handlePlayPause}
               onReset={handleReset}
               onResetAll={handleResetAll}
-              onGenerate={generatePredictions}
+              onGenerate={generateAllPredictions}
             />
           </div>
+
+          {/* Visualizations Grid */}
+          <BiasVarianceVisualization 
+            params={params}
+            state={state}
+          />
         </div>
 
         {/* Educational Content */}
-        <div className="w-full">
+        <div className="w-full mt-16">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-white mb-2">
               Understanding Bias-Variance Tradeoff
@@ -291,6 +329,52 @@ const BiasVariance: React.FC = () => {
           </p>
         </div>
       </footer>
+
+      <style jsx>{`
+        .bias-variance-container {
+          display: grid;
+          grid-template-columns: 300px 1fr;
+          gap: 20px;
+          min-height: 80vh;
+        }
+
+        .control-panel {
+          position: sticky;
+          top: 20px;
+          height: fit-content;
+        }
+
+        .visualization-grid {
+          display: grid;
+          grid-template-areas: 
+            "plot-1 plot-2"
+            "plot-3 plot-3"
+            "plot-4 plot-5"
+            "plot-6 plot-6";
+          grid-template-rows: 350px 280px 230px;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          height: fit-content;
+        }
+
+        .plot-1 { grid-area: plot-1; }
+        .plot-2 { grid-area: plot-2; }
+        .plot-3 { grid-area: plot-3; }
+        .plot-4 { grid-area: plot-4; }
+        .plot-5 { grid-area: plot-5; }
+        .plot-6 { grid-area: plot-6; }
+
+        @media (max-width: 1200px) {
+          .bias-variance-container {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+          
+          .control-panel {
+            position: static;
+          }
+        }
+      `}</style>
     </div>
   );
 };

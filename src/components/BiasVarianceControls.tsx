@@ -4,13 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Play, Pause, RotateCcw, RefreshCw, Shuffle } from 'lucide-react';
+import { Play, Pause, RotateCcw, RefreshCw, Shuffle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BiasVarianceParams, BiasVarianceState } from '@/utils/biasVariance';
 
 interface BiasVarianceControlsProps {
   params: BiasVarianceParams;
   state: BiasVarianceState;
   onParamChange: (params: Partial<BiasVarianceParams>) => void;
+  onIterationChange: (iteration: number) => void;
+  onStepForward: () => void;
+  onStepBackward: () => void;
   onPlayPause: () => void;
   onReset: () => void;
   onResetAll: () => void;
@@ -21,6 +24,9 @@ const BiasVarianceControls: React.FC<BiasVarianceControlsProps> = ({
   params,
   state,
   onParamChange,
+  onIterationChange,
+  onStepForward,
+  onStepBackward,
   onPlayPause,
   onReset,
   onResetAll,
@@ -59,11 +65,52 @@ const BiasVarianceControls: React.FC<BiasVarianceControlsProps> = ({
             </div>
           </div>
           
+          {/* Progress Bar */}
           <div className="w-full bg-secondary rounded-full h-2">
             <div 
               className="bg-accent h-2 rounded-full transition-all duration-200"
               style={{ width: `${(state.currentIteration / 50) * 100}%` }}
             />
+          </div>
+
+          {/* Iteration Slider */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Manual Iteration Control</label>
+            <Slider
+              value={[state.currentIteration]}
+              onValueChange={([value]) => onIterationChange(value)}
+              min={1}
+              max={50}
+              step={1}
+              className="w-full"
+              disabled={state.isPlaying}
+            />
+            <div className="flex justify-between text-xs opacity-60">
+              <span>1</span>
+              <span>50</span>
+            </div>
+          </div>
+
+          {/* Step Controls */}
+          <div className="flex justify-center gap-2">
+            <Button
+              onClick={onStepBackward}
+              disabled={state.currentIteration <= 1 || state.isPlaying}
+              size="sm"
+              variant="outline"
+              className="control-btn"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={onStepForward}
+              disabled={state.currentIteration >= 50 || state.isPlaying}
+              size="sm"
+              variant="outline"
+              className="control-btn"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -102,6 +149,7 @@ const BiasVarianceControls: React.FC<BiasVarianceControlsProps> = ({
               max={15}
               step={1}
               className="w-full"
+              disabled={state.isPlaying}
             />
             <div className="flex justify-between text-xs opacity-60">
               <span>Simple (1)</span>
@@ -135,6 +183,7 @@ const BiasVarianceControls: React.FC<BiasVarianceControlsProps> = ({
               max={1.0}
               step={0.05}
               className="w-full"
+              disabled={state.isPlaying}
             />
             <div className="flex justify-between text-xs opacity-60">
               <span>Low (0.05)</span>
@@ -167,6 +216,7 @@ const BiasVarianceControls: React.FC<BiasVarianceControlsProps> = ({
               max={200}
               step={5}
               className="w-full"
+              disabled={state.isPlaying}
             />
             <div className="flex justify-between text-xs opacity-60">
               <span>Few (20)</span>
@@ -199,46 +249,6 @@ const BiasVarianceControls: React.FC<BiasVarianceControlsProps> = ({
           </Button>
         </CardContent>
       </Card>
-
-      {/* Current Statistics */}
-      {state.errorDecomposition.bias.length > 0 && (
-        <Card className="glass-panel">
-          <CardHeader>
-            <CardTitle className="text-lg">Error Analysis</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="space-y-1">
-                <span className="opacity-70">Bias²</span>
-                <div className="font-mono text-green-400">
-                  {(state.errorDecomposition.bias.reduce((a, b) => a + b, 0) / state.errorDecomposition.bias.length).toFixed(3)}
-                </div>
-              </div>
-              
-              <div className="space-y-1">
-                <span className="opacity-70">Variance</span>
-                <div className="font-mono text-blue-400">
-                  {(state.errorDecomposition.variance.reduce((a, b) => a + b, 0) / state.errorDecomposition.variance.length).toFixed(3)}
-                </div>
-              </div>
-              
-              <div className="space-y-1">
-                <span className="opacity-70">Noise</span>
-                <div className="font-mono text-yellow-400">
-                  {(state.errorDecomposition.noise.reduce((a, b) => a + b, 0) / state.errorDecomposition.noise.length).toFixed(3)}
-                </div>
-              </div>
-              
-              <div className="space-y-1">
-                <span className="opacity-70">Total Error</span>
-                <div className="font-mono text-red-400">
-                  {(state.errorDecomposition.total.reduce((a, b) => a + b, 0) / state.errorDecomposition.total.length).toFixed(3)}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
