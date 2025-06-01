@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,7 +12,6 @@ import HuberMean from "./pages/HuberMean";
 import ImportanceSampling from "./pages/ImportanceSampling";
 import NeuralNetwork from "./pages/NeuralNetwork";
 import RandomForest from "./pages/RandomForest";
-import BiasVariance from "./pages/BiasVariance";
 import EMClustering from "./pages/EMClustering";
 import DeepRL from "./pages/DeepRL";
 import About from "./pages/About";
@@ -38,7 +36,6 @@ const App = () => (
           <Route path="/importance-sampling" element={<ImportanceSampling />} />
           <Route path="/neural-network" element={<NeuralNetwork />} />
           <Route path="/random-forest" element={<RandomForest />} />
-          <Route path="/bias-variance" element={<BiasVariance />} />
           <Route path="/em-clustering" element={<EMClustering />} />
           <Route path="/deep-rl" element={<DeepRL />} />
           <Route path="/about" element={<About />} />
