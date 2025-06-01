@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Zap } from 'lucide-react';
-import { Home } from "lucide-react";
 import RandomForestControls from '@/components/RandomForestControls';
 import RandomForestVisualization from '@/components/RandomForestVisualization';
 import RandomForestEducation from '@/components/RandomForestEducation';
@@ -186,7 +186,7 @@ const RandomForest = () => {
             <p className="text-sm opacity-70">Interactive ensemble learning exploration</p>
           </div>
           <Link to="/" className="control-btn flex items-center gap-2 text-sm">
-            <Home className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
             Back to Visualizations
           </Link>
         </div>

@@ -14,7 +14,7 @@ import ControlPanel from "@/components/ControlPanel";
 import InfoPanel from "@/components/InfoPanel";
 import Charts from "@/components/Charts";
 import { toast } from "sonner";
-import { Home } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const Simulator = () => {
   // Simulation state and parameters
@@ -194,7 +194,7 @@ const Simulator = () => {
             <p className="text-sm opacity-70">Traveling Salesman Problem Solver</p>
           </div>
           <Link to="/" className="control-btn flex items-center gap-2 text-sm">
-            <Home className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
             Back to Visualizations
           </Link>
         </div>

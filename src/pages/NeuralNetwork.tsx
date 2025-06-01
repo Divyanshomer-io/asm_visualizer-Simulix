@@ -1,7 +1,8 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Home } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import NeuralNetworkVisualization from "@/components/NeuralNetworkVisualization";
 import NeuralNetworkControls from "@/components/NeuralNetworkControls";
 import NeuralNetworkEducation from "@/components/NeuralNetworkEducation";
@@ -57,7 +58,7 @@ const NeuralNetwork: React.FC = () => {
             <p className="text-sm opacity-70">Multi-Layer Perceptron Training & Visualization</p>
           </div>
           <Link to="/" className="control-btn flex items-center gap-2 text-sm">
-            <Home className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
             Back to Visualizations
           </Link>
         </div>

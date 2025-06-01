@@ -10,7 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { 
-  Home, 
+  ArrowLeft, 
   Play, 
   Pause, 
   RotateCcw, 
@@ -243,7 +243,7 @@ const DeepRL: React.FC = () => {
               </p>
             </div>
             <Link to="/" className="control-btn flex items-center gap-2 text-sm">
-              <Home className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4" />
               Back to Visualizations
             </Link>
           </div>
