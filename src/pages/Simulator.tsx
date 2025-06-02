@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -27,10 +28,14 @@ const Simulator = () => {
   // Animation frame reference
   const animationRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(0);
+  const isMountedRef = useRef<boolean>(true);
   
   // Handle component unmounting
   useEffect(() => {
+    isMountedRef.current = true;
+    
     return () => {
+      isMountedRef.current = false;
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;
@@ -150,17 +155,24 @@ const Simulator = () => {
     setState(prevState => ({ ...prevState, animationSpeed: speed }));
   }, []);
   
-  // Animation loop
+  // Animation loop - cleaned up properly
   useEffect(() => {
-    if (!state.isRunning) {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
+    // Clean up any existing animation
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    
+    if (!state.isRunning || !isMountedRef.current) {
       return;
     }
     
     const step = (timestamp: number) => {
+      // Check if component is still mounted
+      if (!isMountedRef.current) {
+        return;
+      }
+      
       // Control frame rate based on animation speed
       const frameInterval = 30 / state.animationSpeed; // milliseconds between frames
       const elapsed = timestamp - lastFrameTimeRef.current;
@@ -168,8 +180,12 @@ const Simulator = () => {
       if (elapsed > frameInterval) {
         lastFrameTimeRef.current = timestamp;
         
-        // Run the simulation step
+        // Run the simulation step only if still mounted and running
         setState(prevState => {
+          if (!isMountedRef.current || !prevState.isRunning) {
+            return prevState;
+          }
+          
           // Stop if we've reached the maximum iterations
           if (prevState.iteration >= prevState.totalIterations) {
             toast.success("Simulation completed!");
@@ -181,8 +197,8 @@ const Simulator = () => {
         });
       }
       
-      // Continue animation if still running
-      if (state.isRunning) {
+      // Continue animation if still running and mounted
+      if (isMountedRef.current && state.isRunning) {
         animationRef.current = requestAnimationFrame(step);
       }
     };
