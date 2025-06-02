@@ -533,7 +533,7 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
         <CardContent>
           <ChartContainer
             config={{
-              true: { label: "True Function", color: "#000000" },
+              true: { label: "True Function", color: "yellow" },
               mean: { label: "Mean Prediction", color: "#ef4444" },
               predictionAverage: { label: "Avg Predictions", color: "#ef4444" }
             }}
