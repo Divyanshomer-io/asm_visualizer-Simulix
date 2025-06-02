@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale } from "lucide-react";
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
@@ -90,6 +90,15 @@ const Landing = () => {
       icon: <TreePine className="h-6 w-6" />,
       tags: ["Machine Learning", "Ensemble Learning", "Classification"],
       gradient: "from-emerald-500/20 to-green-500/20"
+    },
+    {
+      id: "bias-variance",
+      title: "Bias-Variance Tradeoff",
+      description: "Explore the fundamental tradeoff between bias and variance in machine learning models through polynomial regression visualization.",
+      path: "/bias-variance",
+      icon: <Scale className="h-6 w-6" />,
+      tags: ["Machine Learning", "Model Selection", "Tradeoff Analysis"],
+      gradient: "from-pink-500/20 to-rose-500/20"
     },
     {
       id: "deep-rl",
