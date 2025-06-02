@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState } from "react";
+
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { CityCanvasProps } from "@/utils/types";
 
 const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
@@ -36,14 +37,15 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
     return coord * canvasSize[dimension];
   };
   
-  const renderGrid = () => {
-    const gridLines = [];
+  // Memoize grid lines to prevent unnecessary re-renders
+  const gridLines = useMemo(() => {
+    const lines = [];
     const spacing = 0.1; // 10% of canvas
     
     for (let x = 0; x <= 1; x += spacing) {
-      gridLines.push(
+      lines.push(
         <line
-          key={`vline-${x}`}
+          key={`vline-${Math.round(x * 10)}`}
           x1={toPixels(x, 'width')}
           y1={0}
           x2={toPixels(x, 'width')}
@@ -54,9 +56,9 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
     }
     
     for (let y = 0; y <= 1; y += spacing) {
-      gridLines.push(
+      lines.push(
         <line
-          key={`hline-${y}`}
+          key={`hline-${Math.round(y * 10)}`}
           x1={0}
           y1={toPixels(y, 'height')}
           x2={canvasSize.width}
@@ -66,72 +68,87 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
       );
     }
     
-    return gridLines;
-  };
+    return lines;
+  }, [canvasSize.width, canvasSize.height]);
 
-  const renderPaths = () => {
-    if (state.cities.length < 2) return null;
+  // Memoize path data to prevent unnecessary recalculations
+  const pathData = useMemo(() => {
+    if (state.cities.length < 2) return { current: "", best: "" };
     
     let currentPathData = "";
-    if (state.currentPath.length > 0) {
+    if (state.currentPath.length > 0 && state.cities[0]) {
       const startX = toPixels(state.cities[0].x, 'width');
       const startY = toPixels(state.cities[0].y, 'height');
       currentPathData = `M ${startX} ${startY}`;
       
       for (const cityIndex of state.currentPath) {
         const city = state.cities[cityIndex];
-        const x = toPixels(city.x, 'width');
-        const y = toPixels(city.y, 'height');
-        currentPathData += ` L ${x} ${y}`;
+        if (city) {
+          const x = toPixels(city.x, 'width');
+          const y = toPixels(city.y, 'height');
+          currentPathData += ` L ${x} ${y}`;
+        }
       }
       
       currentPathData += ` L ${startX} ${startY}`;
     }
     
     let bestPathData = "";
-    if (state.bestPath.length > 0) {
+    if (state.bestPath.length > 0 && state.cities[0]) {
       const startX = toPixels(state.cities[0].x, 'width');
       const startY = toPixels(state.cities[0].y, 'height');
       bestPathData = `M ${startX} ${startY}`;
       
       for (const cityIndex of state.bestPath) {
         const city = state.cities[cityIndex];
-        const x = toPixels(city.x, 'width');
-        const y = toPixels(city.y, 'height');
-        bestPathData += ` L ${x} ${y}`;
+        if (city) {
+          const x = toPixels(city.x, 'width');
+          const y = toPixels(city.y, 'height');
+          bestPathData += ` L ${x} ${y}`;
+        }
       }
       
       bestPathData += ` L ${startX} ${startY}`;
     }
     
+    return { current: currentPathData, best: bestPathData };
+  }, [state.cities, state.currentPath, state.bestPath, canvasSize]);
+
+  const renderPaths = () => {
+    if (state.cities.length < 2) return null;
+    
     return (
-      <>
+      <g key="paths-group">
         <path 
-          d={currentPathData} 
+          key="current-path"
+          d={pathData.current} 
           className="path-current opacity-100"
           strokeDasharray="none"
         />
         
         <path 
-          d={bestPathData} 
+          key="best-path"
+          d={pathData.best} 
           className="path-best"
           strokeDasharray={state.isRunning ? "1" : "none"}
           strokeDashoffset={state.isRunning ? "1" : "0"}
         />
-      </>
+      </g>
     );
   };
   
-  const renderCities = () => {
+  // Memoize cities to prevent unnecessary re-renders
+  const cities = useMemo(() => {
     return state.cities.map((city, index) => {
       const x = toPixels(city.x, 'width');
       const y = toPixels(city.y, 'height');
       
       return (
-        <g key={`city-${city.id}`} className="animate-fade-in" style={{ 
+        <g key={`city-group-${city.id}`} className="animate-fade-in" style={{ 
           animationDelay: `${index * 30}ms` 
         }}>
           <circle 
+            key={`city-circle-${city.id}`}
             cx={x} 
             cy={y} 
             r={5} 
@@ -139,6 +156,7 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
           />
           
           <text 
+            key={`city-text-${city.id}`}
             x={x} 
             y={y - 10} 
             className="fill-white text-xs font-medium" 
@@ -149,6 +167,7 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
           
           {index === 0 && (
             <circle 
+              key={`city-pulse-${city.id}`}
               cx={x} 
               cy={y} 
               r={10} 
@@ -159,7 +178,7 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
         </g>
       );
     });
-  };
+  }, [state.cities, canvasSize]);
   
   return (
     <div 
@@ -181,12 +200,17 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
         width={canvasSize.width}
         height={canvasSize.height}
         className="w-full h-full"
+        key="main-svg"
       >
-        {renderGrid()}
+        <g key="grid-group">
+          {gridLines}
+        </g>
         
         {renderPaths()}
         
-        {renderCities()}
+        <g key="cities-group">
+          {cities}
+        </g>
       </svg>
       
       {state.isRunning && (
