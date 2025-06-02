@@ -543,7 +543,38 @@ content={<CustomTooltip chartType="functionSpace" />}
 />
 <Line type="monotone" dataKey="true" stroke="#000000" strokeWidth={2} strokeDasharray="5 5" dot={false} />
 <Line type="monotone" dataKey="mean" stroke="#ef4444" strokeWidth={2} dot={false} />
-{/* {allPredictions.slice(0, params.currentIteration).map((_, idx) => (
+
+<Card className="glass-panel w-full">
+<CardHeader className="flex flex-row items-center justify-between">
+<CardTitle className="text-lg">Function Space (Iter: {params.currentIteration})</CardTitle>
+<InfoIcon content={tooltipContents.functionSpace} />
+</CardHeader>
+<CardContent>
+<ChartContainer
+config={{
+true: { label: "True Function", color: "#000000" },
+mean: { label: "Mean Prediction", color: "#ef4444" }
+}}
+className="h-64 w-full"
+>
+<ResponsiveContainer width="100%" height="100%">
+<LineChart data={functionSpaceData} margin={{ top: 10, right: 30, left: 20, bottom: 40 }}>
+<CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+<XAxis
+dataKey="x"
+tickFormatter={formatTick}
+label={{ value: 'Input (x)', position: 'insideBottom', offset: -10 }}
+/>
+<YAxis
+tickFormatter={formatTick}
+label={{ value: 'Output (y)', angle: -90, position: 'insideLeft' }}
+/>
+<ChartTooltip
+content={<CustomTooltip chartType="functionSpace" />}
+/>
+<Line type="monotone" dataKey="true" stroke="#000000" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+<Line type="monotone" dataKey="mean" stroke="#ef4444" strokeWidth={2} dot={false} />
+{allPredictions.slice(0, params.currentIteration).map((_, idx) => (
 <Line
 key={idx}
 type="monotone"
@@ -552,8 +583,14 @@ stroke="#9ca3af"
 strokeWidth={0.5}
 opacity={Math.max(0.1, 0.5 * (idx + 1) / params.currentIteration)}
 dot={false}
+   hide={true}
 />
-))} */}
+))}
+</LineChart>
+</ResponsiveContainer>
+</ChartContainer>
+</CardContent>
+</Card>
 </LineChart>
 </ResponsiveContainer>
 </ChartContainer>
