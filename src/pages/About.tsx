@@ -70,6 +70,7 @@ const About = () => {
                   <h3 className="text-lg font-medium">Created by</h3>
                   <p className="opacity-80">Divyanshu Lila</p>
                   <p className="text-sm opacity-60">ID: 2022A3PS1056G</p>
+                  <p className="text-sm opacity-60">Mail: f20221056@goa.bits-pilani.ac.in</p>
                 </div>
               </div>
               
