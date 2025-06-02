@@ -39,7 +39,7 @@ const InfoIcon: React.FC<{ content: React.ReactNode }> = ({ content }) => (
           </svg>
         </div>
       </TooltipTrigger>
-      <TooltipContent className="tooltip-content">
+      <TooltipContent className="tooltip-content" side="left">
         {content}
       </TooltipContent>
     </Tooltip>
@@ -513,52 +513,110 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
     <div className="space-y-6">
       {/* Row 1: Function Space - Full Width */}
       <Card className="glass-panel w-full">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Function Space (Iter: {params.currentIteration})</CardTitle>
-          <InfoIcon content={tooltipContents.functionSpace} />
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              true: { label: "True Function", color: "#000000" },
-              mean: { label: "Mean Prediction", color: "#ef4444" }
-            }}
-            className="h-64 w-full"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={functionSpaceData} margin={{ top: 10, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                <XAxis 
-                  dataKey="x" 
-                  tickFormatter={formatTick}
-                  label={{ value: 'Input (x)', position: 'insideBottom', offset: -10 }}
-                />
-                <YAxis 
-                  tickFormatter={formatTick}
-                  label={{ value: 'Output (y)', angle: -90, position: 'insideLeft' }}
-                />
-                <ChartTooltip 
-                  content={<CustomTooltip chartType="functionSpace" />} 
-                />
-                <Line type="monotone" dataKey="true" stroke="#000000" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-                <Line type="monotone" dataKey="mean" stroke="#ef4444" strokeWidth={2} dot={false} />
-                {allPredictions.slice(0, params.currentIteration).map((_, idx) => (
-                  <Line 
-                    key={idx}
-                    type="monotone" 
-                    dataKey={`pred${idx}`} 
-                    stroke="#9ca3af" 
-                    strokeWidth={0.5}
-                    opacity={Math.max(0.1, 0.5 * (idx + 1) / params.currentIteration)}
-                    dot={false}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+  <CardHeader className="flex flex-row items-center justify-between">
+    <CardTitle className="text-lg">Function Space (Iter: {params.currentIteration})</CardTitle>
+    <InfoIcon content={tooltipContents.functionSpace} />
+  </CardHeader>
+  <CardContent>
+    <ChartContainer
+      config={{
+        true: { label: "True Function", color: "#000000" },
+        mean: { label: "Mean Prediction", color: "#ef4444" }
+      }}
+      className="h-64 w-full"
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart 
+          data={functionSpaceData} 
+          margin={{ top: 10, right: 30, left: 20, bottom: 40 }}
+          onMouseMove={(e) => {
+            if (e.activeTooltipIndex !== undefined) {
+              setHoveredIndex(e.activeTooltipIndex);
+            }
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+          <XAxis 
+            dataKey="x" 
+            tickFormatter={formatTick}
+            label={{ value: 'Input (x)', position: 'insideBottom', offset: -10 }}
+          />
+          <YAxis 
+            tickFormatter={formatTick}
+            label={{ value: 'Output (y)', angle: -90, position: 'insideLeft' }}
+          />
+          <Tooltip
+            content={({ payload, label }) => {
+              if (!payload) return null;
+              
+              const predictions = payload
+                .filter(entry => entry.dataKey.startsWith('pred'))
+                .map(p => p.value);
 
+              const predictionSummary = {
+                min: Math.min(...predictions),
+                max: Math.max(...predictions),
+                avg: predictions.reduce((a, b) => a + b, 0) / predictions.length
+              };
+
+              return (
+                <div className="custom-tooltip bg-background p-4 rounded-lg shadow-lg border">
+                  <div className="mb-2 font-semibold">
+                    Prediction Summary at x={formatTick(label)}
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 mb-3">
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">Min</div>
+                      <div className="text-sm">{predictionSummary.min.toFixed(3)}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">Avg</div>
+                      <div className="text-sm">{predictionSummary.avg.toFixed(3)}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">Max</div>
+                      <div className="text-sm">{predictionSummary.max.toFixed(3)}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {params.currentIteration} total predictions
+                  </div>
+                </div>
+              );
+            }}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="true" 
+            stroke="#000000" 
+            strokeWidth={2} 
+            strokeDasharray="5 5" 
+            dot={false} 
+          />
+          <Line 
+            type="monotone" 
+            dataKey="mean" 
+            stroke="#ef4444" 
+            strokeWidth={2} 
+            dot={false} 
+          />
+          {allPredictions.slice(0, params.currentIteration).map((_, idx) => (
+            <Line 
+              key={idx}
+              type="monotone" 
+              dataKey={`pred${idx}`} 
+              stroke="#9ca3af" 
+              strokeWidth={0.5}
+              opacity={Math.max(0.1, 0.5 * (idx + 1) / params.currentIteration)}
+              dot={false}
+              hide={true}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartContainer>
+  </CardContent>
+</Card>
       {/* Row 2: Error Decomposition (1/2) + Bias-Variance Tradeoff (1/2) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="glass-panel">
