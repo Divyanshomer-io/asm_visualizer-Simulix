@@ -7,11 +7,13 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
 interface State {
   hasError: boolean;
   error?: Error;
+  errorInfo?: ErrorInfo;
 }
 
 class ErrorBoundary extends Component<Props, State> {
@@ -25,10 +27,16 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    this.setState({ errorInfo });
+    
+    // Call optional error handler
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: undefined });
+    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
   public render() {
@@ -52,8 +60,13 @@ class ErrorBoundary extends Component<Props, State> {
             {this.state.error && (
               <details className="text-xs text-muted-foreground">
                 <summary className="cursor-pointer">Error details</summary>
-                <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">
+                <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto max-h-32">
                   {this.state.error.message}
+                  {this.state.errorInfo && (
+                    <div className="mt-2 pt-2 border-t border-muted">
+                      {this.state.errorInfo.componentStack}
+                    </div>
+                  )}
                 </pre>
               </details>
             )}

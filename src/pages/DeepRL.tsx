@@ -14,6 +14,7 @@ import {
 import DeepRLControls from '@/components/DeepRLControls';
 import DeepRLVisualization from '@/components/DeepRLVisualization';
 import DeepRLEducation from '@/components/DeepRLEducation';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export interface DeepRLParams {
   epsilon: number;
@@ -64,15 +65,24 @@ const DeepRL: React.FC = () => {
     currentParams: params
   });
 
-  const trainingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // CRITICAL: Track mount status to prevent state updates after unmount
   const isMountedRef = useRef(true);
+  const trainingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Training simulation with stable updates
+  // Training simulation with safe state updates
   const simulateTrainingStep = useCallback(() => {
-    if (!isMountedRef.current) return;
+    // CRITICAL: Check if component is still mounted before any state update
+    if (!isMountedRef.current) {
+      console.log('Component unmounted, skipping training step');
+      return;
+    }
     
     setState(prevState => {
-      if (!isMountedRef.current) return prevState;
+      // Double-check mount status inside setState callback
+      if (!isMountedRef.current) {
+        console.log('Component unmounted during setState, returning previous state');
+        return prevState;
+      }
       
       // Simulate episode completion
       const episodeReward = Math.floor(Math.random() * 150) + 50;
@@ -130,10 +140,14 @@ const DeepRL: React.FC = () => {
     });
   }, []);
 
-  // Start training with proper cleanup
+  // Start training with proper cleanup and mount checks
   const handleStartTraining = useCallback(() => {
-    if (state.isTraining || !isMountedRef.current) return;
+    if (!isMountedRef.current || state.isTraining) {
+      console.log('Cannot start training: component unmounted or already training');
+      return;
+    }
 
+    console.log('Starting training...');
     setState(prev => ({ ...prev, isTraining: true, currentParams: params }));
     
     const getInterval = () => {
@@ -144,11 +158,24 @@ const DeepRL: React.FC = () => {
       }
     };
 
+    // Clear any existing interval before creating new one
     if (trainingIntervalRef.current) {
       clearInterval(trainingIntervalRef.current);
+      trainingIntervalRef.current = null;
     }
 
-    trainingIntervalRef.current = setInterval(simulateTrainingStep, getInterval());
+    trainingIntervalRef.current = setInterval(() => {
+      if (isMountedRef.current) {
+        simulateTrainingStep();
+      } else {
+        // Component unmounted, clear interval
+        if (trainingIntervalRef.current) {
+          clearInterval(trainingIntervalRef.current);
+          trainingIntervalRef.current = null;
+        }
+      }
+    }, getInterval());
+
     toast.success('Training started! Watch the agent learn through trial and error.');
   }, [params, state.isTraining, simulateTrainingStep]);
 
@@ -156,39 +183,51 @@ const DeepRL: React.FC = () => {
   const handleStopTraining = useCallback(() => {
     if (!state.isTraining) return;
 
-    setState(prev => ({ ...prev, isTraining: false }));
+    console.log('Stopping training...');
     
+    // Clear interval first
     if (trainingIntervalRef.current) {
       clearInterval(trainingIntervalRef.current);
       trainingIntervalRef.current = null;
     }
-    toast.info('Training paused. Click Start to resume.');
+
+    // Only update state if component is still mounted
+    if (isMountedRef.current) {
+      setState(prev => ({ ...prev, isTraining: false }));
+      toast.info('Training paused. Click Start to resume.');
+    }
   }, [state.isTraining]);
 
-  // Reset training
+  // Reset training with proper cleanup
   const handleReset = useCallback(() => {
+    console.log('Resetting training...');
     handleStopTraining();
     
-    setState({
-      episodeRewards: [],
-      movingAvg: [],
-      epsilonHistory: [],
-      lossHistory: [],
-      qValues: [0, 0],
-      weightsData: Array.from({ length: 4 }, () => 
-        Array.from({ length: params.networkSize }, () => Math.random() * 2 - 1)
-      ),
-      isTraining: false,
-      episodeCount: 0,
-      currentParams: { ...params, epsilon: 1.0 }
-    });
+    // Only update state if component is still mounted
+    if (isMountedRef.current) {
+      setState({
+        episodeRewards: [],
+        movingAvg: [],
+        epsilonHistory: [],
+        lossHistory: [],
+        qValues: [0, 0],
+        weightsData: Array.from({ length: 4 }, () => 
+          Array.from({ length: params.networkSize }, () => Math.random() * 2 - 1)
+        ),
+        isTraining: false,
+        episodeCount: 0,
+        currentParams: { ...params, epsilon: 1.0 }
+      });
 
-    setParams(prev => ({ ...prev, epsilon: 1.0 }));
-    toast.success('Training reset to initial state.');
-  }, [handleStopTraining, params.networkSize]);
+      setParams(prev => ({ ...prev, epsilon: 1.0 }));
+      toast.success('Training reset to initial state.');
+    }
+  }, [handleStopTraining, params]);
 
-  // Update parameters
+  // Update parameters with mount check
   const handleParamsChange = useCallback((newParams: DeepRLParams) => {
+    if (!isMountedRef.current) return;
+    
     setParams(newParams);
     
     // Update weights data if network size changed
@@ -202,12 +241,16 @@ const DeepRL: React.FC = () => {
     }
   }, [params.networkSize]);
 
-  // Cleanup on unmount
+  // CRITICAL: Proper cleanup on mount/unmount
   useEffect(() => {
+    console.log('DeepRL component mounted');
     isMountedRef.current = true;
     
     return () => {
+      console.log('DeepRL component unmounting, cleaning up...');
       isMountedRef.current = false;
+      
+      // Clear any active intervals
       if (trainingIntervalRef.current) {
         clearInterval(trainingIntervalRef.current);
         trainingIntervalRef.current = null;
@@ -240,109 +283,119 @@ const DeepRL: React.FC = () => {
         </header>
 
         {/* Hero Section */}
-        <section className="container px-4 md:px-8 mb-8">
-          <div className="text-center mb-8">
-            <h2 className="text-xl font-light mb-4">
-              Watch AI Agents Learn Through Trial and Error
-            </h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto">
-              Experiment with Deep Q-Networks (DQN) hyperparameters and observe how artificial agents balance 
-              <strong className="text-accent"> exploration vs exploitation</strong> to master decision-making tasks. 
-              See neural network weights evolve in real-time as the agent learns optimal strategies.
-            </p>
-          </div>
+        <ErrorBoundary>
+          <section className="container px-4 md:px-8 mb-8">
+            <div className="text-center mb-8">
+              <h2 className="text-xl font-light mb-4">
+                Watch AI Agents Learn Through Trial and Error
+              </h2>
+              <p className="text-muted-foreground max-w-3xl mx-auto">
+                Experiment with Deep Q-Networks (DQN) hyperparameters and observe how artificial agents balance 
+                <strong className="text-accent"> exploration vs exploitation</strong> to master decision-making tasks. 
+                See neural network weights evolve in real-time as the agent learns optimal strategies.
+              </p>
+            </div>
 
-          {/* Key Concepts */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="glass-panel p-4 rounded-lg text-center">
-              <Target className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-              <h3 className="font-medium mb-1">Q-Learning</h3>
-              <p className="text-sm text-muted-foreground">
-                Agent learns Q(state, action) values representing expected future rewards
-              </p>
+            {/* Key Concepts */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="glass-panel p-4 rounded-lg text-center">
+                <Target className="h-8 w-8 text-blue-400 mx-auto mb-2" />
+                <h3 className="font-medium mb-1">Q-Learning</h3>
+                <p className="text-sm text-muted-foreground">
+                  Agent learns Q(state, action) values representing expected future rewards
+                </p>
+              </div>
+              <div className="glass-panel p-4 rounded-lg text-center">
+                <Activity className="h-8 w-8 text-green-400 mx-auto mb-2" />
+                <h3 className="font-medium mb-1">Experience Replay</h3>
+                <p className="text-sm text-muted-foreground">
+                  Training on random samples from memory buffer breaks correlation
+                </p>
+              </div>
+              <div className="glass-panel p-4 rounded-lg text-center">
+                <Zap className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
+                <h3 className="font-medium mb-1">ε-Greedy Strategy</h3>
+                <p className="text-sm text-muted-foreground">
+                  Balance between exploring new actions and exploiting known good ones
+                </p>
+              </div>
             </div>
-            <div className="glass-panel p-4 rounded-lg text-center">
-              <Activity className="h-8 w-8 text-green-400 mx-auto mb-2" />
-              <h3 className="font-medium mb-1">Experience Replay</h3>
-              <p className="text-sm text-muted-foreground">
-                Training on random samples from memory buffer breaks correlation
-              </p>
-            </div>
-            <div className="glass-panel p-4 rounded-lg text-center">
-              <Zap className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
-              <h3 className="font-medium mb-1">ε-Greedy Strategy</h3>
-              <p className="text-sm text-muted-foreground">
-                Balance between exploring new actions and exploiting known good ones
-              </p>
-            </div>
-          </div>
-        </section>
+          </section>
+        </ErrorBoundary>
 
         {/* Main Dashboard */}
         <main className="container px-4 md:px-8 pb-16">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Visualization Grid - Left Side (3/4 width) */}
             <div className="lg:col-span-3 space-y-6">
-              <DeepRLVisualization state={state} params={params} />
+              <ErrorBoundary>
+                <DeepRLVisualization state={state} params={params} />
+              </ErrorBoundary>
               
               {/* Live Statistics */}
-              <Card className="glass-panel border-white/10">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-accent" />
-                    Live Training Statistics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-400">
-                        {state.episodeCount}
+              <ErrorBoundary>
+                <Card className="glass-panel border-white/10">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5 text-accent" />
+                      Live Training Statistics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-400">
+                          {state.episodeCount}
+                        </div>
+                        <div className="text-sm text-muted-foreground">Episodes</div>
                       </div>
-                      <div className="text-sm text-muted-foreground">Episodes</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-400">
-                        {state.episodeRewards.length > 0 
-                          ? (state.episodeRewards.slice(-10).reduce((a, b) => a + b, 0) / Math.min(10, state.episodeRewards.length)).toFixed(1)
-                          : '0.0'
-                        }
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-400">
+                          {state.episodeRewards.length > 0 
+                            ? (state.episodeRewards.slice(-10).reduce((a, b) => a + b, 0) / Math.min(10, state.episodeRewards.length)).toFixed(1)
+                            : '0.0'
+                          }
+                        </div>
+                        <div className="text-sm text-muted-foreground">Avg Reward (10)</div>
                       </div>
-                      <div className="text-sm text-muted-foreground">Avg Reward (10)</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-yellow-400">
-                        {state.currentParams.epsilon.toFixed(3)}
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-yellow-400">
+                          {state.currentParams.epsilon.toFixed(3)}
+                        </div>
+                        <div className="text-sm text-muted-foreground">Exploration Rate</div>
                       </div>
-                      <div className="text-sm text-muted-foreground">Exploration Rate</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-400">
-                        {Math.min(state.episodeCount * 5, state.currentParams.memorySize)}/{state.currentParams.memorySize}
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-400">
+                          {Math.min(state.episodeCount * 5, state.currentParams.memorySize)}/{state.currentParams.memorySize}
+                        </div>
+                        <div className="text-sm text-muted-foreground">Memory Buffer</div>
                       </div>
-                      <div className="text-sm text-muted-foreground">Memory Buffer</div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </ErrorBoundary>
             </div>
 
             {/* Control Panel - Right Side (1/4 width) */}
             <div className="lg:col-span-1">
-              <DeepRLControls
-                params={params}
-                onParamsChange={handleParamsChange}
-                isTraining={state.isTraining}
-                onStartTraining={handleStartTraining}
-                onStopTraining={handleStopTraining}
-                onReset={handleReset}
-              />
+              <ErrorBoundary>
+                <DeepRLControls
+                  params={params}
+                  onParamsChange={handleParamsChange}
+                  isTraining={state.isTraining}
+                  onStartTraining={handleStartTraining}
+                  onStopTraining={handleStopTraining}
+                  onReset={handleReset}
+                />
+              </ErrorBoundary>
             </div>
           </div>
         </main>
 
         {/* Educational Content */}
-        <DeepRLEducation />
+        <ErrorBoundary>
+          <DeepRLEducation />
+        </ErrorBoundary>
 
         {/* Footer */}
         <footer className="w-full glass-panel border-t border-white/5 mt-auto">

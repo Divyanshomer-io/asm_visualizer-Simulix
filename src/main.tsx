@@ -1,14 +1,15 @@
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { Analytics } from '@vercel/analytics/react'; // <-- Add this import
 
-createRoot(document.getElementById("root")!).render(<App />);
-ReactDOM.createRoot(document.getElementById('root')!).render(
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+import { Analytics } from '@vercel/analytics/react';
+
+const root = createRoot(document.getElementById("root")!);
+
+root.render(
   <React.StrictMode>
     <App />
-    <Analytics /> {/* <-- Add this line */}
+    <Analytics />
   </React.StrictMode>
 );

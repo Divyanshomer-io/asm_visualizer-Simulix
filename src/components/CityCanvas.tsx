@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from "react";
 import { CityCanvasProps } from "@/utils/types";
 
@@ -5,10 +6,13 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const isMountedRef = useRef(true);
   
   useEffect(() => {
+    isMountedRef.current = true;
+    
     const updateCanvasSize = () => {
-      if (canvasRef.current) {
+      if (canvasRef.current && isMountedRef.current) {
         const { width, height } = canvasRef.current.getBoundingClientRect();
         setCanvasSize({ width, height });
       }
@@ -16,11 +20,15 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
     
     updateCanvasSize();
     window.addEventListener("resize", updateCanvasSize);
-    return () => window.removeEventListener("resize", updateCanvasSize);
+    
+    return () => {
+      isMountedRef.current = false;
+      window.removeEventListener("resize", updateCanvasSize);
+    };
   }, []);
   
   const handleCanvasClick = (e: React.MouseEvent) => {
-    if (canvasRef.current && !state.isRunning) {
+    if (canvasRef.current && !state.isRunning && isMountedRef.current) {
       const rect = canvasRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
       const y = (e.clientY - rect.top) / rect.height;
@@ -39,7 +47,7 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
     for (let x = 0; x <= 1; x += spacing) {
       gridLines.push(
         <line
-          key={`vline-${x}`}
+          key={`vline-${x.toFixed(1)}`}
           x1={toPixels(x, 'width')}
           y1={0}
           x2={toPixels(x, 'width')}
@@ -52,7 +60,7 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
     for (let y = 0; y <= 1; y += spacing) {
       gridLines.push(
         <line
-          key={`hline-${y}`}
+          key={`hline-${y.toFixed(1)}`}
           x1={0}
           y1={toPixels(y, 'height')}
           x2={canvasSize.width}
@@ -76,9 +84,11 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
       
       for (const cityIndex of state.currentPath) {
         const city = state.cities[cityIndex];
-        const x = toPixels(city.x, 'width');
-        const y = toPixels(city.y, 'height');
-        currentPathData += ` L ${x} ${y}`;
+        if (city) {
+          const x = toPixels(city.x, 'width');
+          const y = toPixels(city.y, 'height');
+          currentPathData += ` L ${x} ${y}`;
+        }
       }
       
       currentPathData += ` L ${startX} ${startY}`;
@@ -92,9 +102,11 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
       
       for (const cityIndex of state.bestPath) {
         const city = state.cities[cityIndex];
-        const x = toPixels(city.x, 'width');
-        const y = toPixels(city.y, 'height');
-        bestPathData += ` L ${x} ${y}`;
+        if (city) {
+          const x = toPixels(city.x, 'width');
+          const y = toPixels(city.y, 'height');
+          bestPathData += ` L ${x} ${y}`;
+        }
       }
       
       bestPathData += ` L ${startX} ${startY}`;
@@ -123,6 +135,7 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
       const x = toPixels(city.x, 'width');
       const y = toPixels(city.y, 'height');
       
+      // Use stable, unique key based on city.id instead of index
       return (
         <g key={`city-${city.id}`} className="animate-fade-in" style={{ 
           animationDelay: `${index * 30}ms` 

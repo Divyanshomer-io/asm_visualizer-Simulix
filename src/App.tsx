@@ -19,99 +19,111 @@ import DeepRL from "./pages/DeepRL";
 import BiasVarianceTradeoff from "./pages/BiasVarianceTradeoff";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
-import { Analytics } from "@vercel/analytics/next"
 
+// Configure React Query with safe defaults
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
+      retry: 1,
+      staleTime: 30_000,
       refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+    mutations: {
+      retry: 1,
     },
   },
 });
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ErrorBoundary>
-      <TooltipProvider>
-        <ErrorBoundary>
-          <Toaster />
-          <Sonner />
-        </ErrorBoundary>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/simulator" element={
-              <ErrorBoundary>
-                <Simulator />
-              </ErrorBoundary>
-            } />
-            <Route path="/simulated-annealing-toy" element={
-              <ErrorBoundary>
-                <SimulatedAnnealingToy />
-              </ErrorBoundary>
-            } />
-            <Route path="/alias-method" element={
-              <ErrorBoundary>
-                <AliasMethod />
-              </ErrorBoundary>
-            } />
-            <Route path="/bootstrapping" element={
-              <ErrorBoundary>
-                <Bootstrapping />
-              </ErrorBoundary>
-            } />
-            <Route path="/huber-mean" element={
-              <ErrorBoundary>
-                <HuberMean />
-              </ErrorBoundary>
-            } />
-            <Route path="/importance-sampling" element={
-              <ErrorBoundary>
-                <ImportanceSampling />
-              </ErrorBoundary>
-            } />
-            <Route path="/neural-network" element={
-              <ErrorBoundary>
-                <NeuralNetwork />
-              </ErrorBoundary>
-            } />
-            <Route path="/random-forest" element={
-              <ErrorBoundary>
-                <RandomForest />
-              </ErrorBoundary>
-            } />
-            <Route path="/em-clustering" element={
-              <ErrorBoundary>
-                <EMClustering />
-              </ErrorBoundary>
-            } />
-            <Route path="/deep-rl" element={
-              <ErrorBoundary>
-                <DeepRL />
-              </ErrorBoundary>
-            } />
-            <Route path="/bias-variance" element={
-              <ErrorBoundary>
-                <BiasVarianceTradeoff />
-              </ErrorBoundary>
-            } />
-            <Route path="/about" element={
-              <ErrorBoundary>
-                <About />
-              </ErrorBoundary>
-            } />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={
-              <ErrorBoundary>
-                <NotFound />
-              </ErrorBoundary>
-            } />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ErrorBoundary>
-  </QueryClientProvider>
+  <ErrorBoundary onError={(error, errorInfo) => {
+    console.error('App level error:', error, errorInfo);
+  }}>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
+        <TooltipProvider>
+          <ErrorBoundary>
+            <Toaster />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <Sonner />
+          </ErrorBoundary>
+          <BrowserRouter>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/simulator" element={
+                  <ErrorBoundary>
+                    <Simulator />
+                  </ErrorBoundary>
+                } />
+                <Route path="/simulated-annealing-toy" element={
+                  <ErrorBoundary>
+                    <SimulatedAnnealingToy />
+                  </ErrorBoundary>
+                } />
+                <Route path="/alias-method" element={
+                  <ErrorBoundary>
+                    <AliasMethod />
+                  </ErrorBoundary>
+                } />
+                <Route path="/bootstrapping" element={
+                  <ErrorBoundary>
+                    <Bootstrapping />
+                  </ErrorBoundary>
+                } />
+                <Route path="/huber-mean" element={
+                  <ErrorBoundary>
+                    <HuberMean />
+                  </ErrorBoundary>
+                } />
+                <Route path="/importance-sampling" element={
+                  <ErrorBoundary>
+                    <ImportanceSampling />
+                  </ErrorBoundary>
+                } />
+                <Route path="/neural-network" element={
+                  <ErrorBoundary>
+                    <NeuralNetwork />
+                  </ErrorBoundary>
+                } />
+                <Route path="/random-forest" element={
+                  <ErrorBoundary>
+                    <RandomForest />
+                  </ErrorBoundary>
+                } />
+                <Route path="/em-clustering" element={
+                  <ErrorBoundary>
+                    <EMClustering />
+                  </ErrorBoundary>
+                } />
+                <Route path="/deep-rl" element={
+                  <ErrorBoundary>
+                    <DeepRL />
+                  </ErrorBoundary>
+                } />
+                <Route path="/bias-variance" element={
+                  <ErrorBoundary>
+                    <BiasVarianceTradeoff />
+                  </ErrorBoundary>
+                } />
+                <Route path="/about" element={
+                  <ErrorBoundary>
+                    <About />
+                  </ErrorBoundary>
+                } />
+                <Route path="*" element={
+                  <ErrorBoundary>
+                    <NotFound />
+                  </ErrorBoundary>
+                } />
+              </Routes>
+            </ErrorBoundary>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ErrorBoundary>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
