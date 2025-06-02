@@ -1,38 +1,16 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { 
   ArrowLeft, 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Info, 
   Target, 
-  Brain,
-  TrendingUp,
-  BarChart3,
   Activity,
-  Zap
+  Zap,
+  BarChart3
 } from 'lucide-react';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell
-} from 'recharts';
 import DeepRLControls from '@/components/DeepRLControls';
 import DeepRLVisualization from '@/components/DeepRLVisualization';
 import DeepRLEducation from '@/components/DeepRLEducation';
@@ -86,11 +64,16 @@ const DeepRL: React.FC = () => {
     currentParams: params
   });
 
-  const [trainingInterval, setTrainingInterval] = useState<NodeJS.Timeout | null>(null);
+  const trainingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
 
-  // Training simulation
+  // Training simulation with stable updates
   const simulateTrainingStep = useCallback(() => {
+    if (!isMountedRef.current) return;
+    
     setState(prevState => {
+      if (!isMountedRef.current) return prevState;
+      
       // Simulate episode completion
       const episodeReward = Math.floor(Math.random() * 150) + 50;
       const newEpisodeRewards = [...prevState.episodeRewards, episodeReward];
@@ -147,9 +130,9 @@ const DeepRL: React.FC = () => {
     });
   }, []);
 
-  // Start training
+  // Start training with proper cleanup
   const handleStartTraining = useCallback(() => {
-    if (state.isTraining) return;
+    if (state.isTraining || !isMountedRef.current) return;
 
     setState(prev => ({ ...prev, isTraining: true, currentParams: params }));
     
@@ -161,23 +144,26 @@ const DeepRL: React.FC = () => {
       }
     };
 
-    const interval = setInterval(simulateTrainingStep, getInterval());
-    setTrainingInterval(interval);
+    if (trainingIntervalRef.current) {
+      clearInterval(trainingIntervalRef.current);
+    }
+
+    trainingIntervalRef.current = setInterval(simulateTrainingStep, getInterval());
     toast.success('Training started! Watch the agent learn through trial and error.');
   }, [params, state.isTraining, simulateTrainingStep]);
 
-  // Stop training
+  // Stop training with proper cleanup
   const handleStopTraining = useCallback(() => {
     if (!state.isTraining) return;
 
     setState(prev => ({ ...prev, isTraining: false }));
     
-    if (trainingInterval) {
-      clearInterval(trainingInterval);
-      setTrainingInterval(null);
+    if (trainingIntervalRef.current) {
+      clearInterval(trainingIntervalRef.current);
+      trainingIntervalRef.current = null;
     }
     toast.info('Training paused. Click Start to resume.');
-  }, [state.isTraining, trainingInterval]);
+  }, [state.isTraining]);
 
   // Reset training
   const handleReset = useCallback(() => {
@@ -218,12 +204,16 @@ const DeepRL: React.FC = () => {
 
   // Cleanup on unmount
   useEffect(() => {
+    isMountedRef.current = true;
+    
     return () => {
-      if (trainingInterval) {
-        clearInterval(trainingInterval);
+      isMountedRef.current = false;
+      if (trainingIntervalRef.current) {
+        clearInterval(trainingIntervalRef.current);
+        trainingIntervalRef.current = null;
       }
     };
-  }, [trainingInterval]);
+  }, []);
 
   return (
     <TooltipProvider>
