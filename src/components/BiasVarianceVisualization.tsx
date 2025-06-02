@@ -55,7 +55,7 @@ const tooltipContents = {
       <ul className="space-y-1 text-sm">
         <li><span className="text-gray-400">Gray Lines:</span> Individual model predictions from different training sets</li>
         <li><span className="text-red-400">Red Line:</span> Mean prediction across all models (ensemble average)</li>
-        <li><span className="text-white">Black Dashed:</span> True underlying function</li>
+        <li><span className="text-yellow-400">Yellow Line:</span> True underlying function</li>
       </ul>
       <p className="text-sm"><strong>Key Insight:</strong> As iterations increase, the mean prediction becomes more stable.</p>
       <div className="bg-slate-700 p-2 rounded text-xs font-mono text-center">
@@ -174,7 +174,7 @@ const CustomTooltip: React.FC<{
 
   // Filter payload for function space to show only desired fields
   const filteredPayload = chartType === 'functionSpace' 
-    ? payload.filter(entry => ['true', 'mean', 'predictionAverage'].includes(entry.dataKey))
+    ? payload.filter(entry => ['true', 'mean'].includes(entry.dataKey))
     : payload;
 
   return (
@@ -193,7 +193,8 @@ const CustomTooltip: React.FC<{
               }}
             />
             <span className="text-sm font-medium text-white">
-              {entry.dataKey === 'predictionAverage' ? 'Avg Predictions' : entry.dataKey}:
+              {entry.dataKey === 'true' ? 'True Function' : 
+               entry.dataKey === 'mean' ? 'Mean Prediction' : entry.dataKey}:
             </span>
             <span className="text-sm text-yellow-400 font-mono">
               {formatValue(entry.value, entry.dataKey)}
@@ -346,7 +347,7 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
     updateStats();
   };
 
-  // STEP 2: Fix function space visualization with simplified tooltip data
+  // STEP 2: Fix function space visualization with proper mean line
   const updateFunctionSpace = () => {
     console.log(`Updating function space for iteration ${params.currentIteration}`);
     
@@ -357,24 +358,15 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
         )
       : Array(testPoints.length).fill(0);
 
-    // Calculate the average of all predictions for tooltip
-    const predictionAverage = currentPredictions.length > 0 
-      ? testPoints.map((_, i) => 
-          currentPredictions.reduce((sum, pred) => sum + pred[i], 0) / currentPredictions.length
-        )
-      : Array(testPoints.length).fill(0);
-
     const data = testPoints.map((x, i) => {
       const dataPoint: any = {
         x: x,
         true: trueValues[i],
-        mean: meanPrediction[i],
-        predictionAverage: predictionAverage[i] // Add this for tooltip display
+        mean: meanPrediction[i]
       };
       
-      // Add individual prediction lines with varying alpha (for visualization only, not tooltip)
+      // Add individual prediction lines (for visualization only, not tooltip)
       currentPredictions.forEach((pred, idx) => {
-        const alpha = Math.max(0.2, 0.7 * (idx + 1) / params.currentIteration);
         dataPoint[`pred${idx}`] = pred[i];
       });
       
@@ -533,9 +525,8 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
         <CardContent>
           <ChartContainer
             config={{
-              true: { label: "True Function", color: "yellow" },
-              mean: { label: "Mean Prediction", color: "#ef4444" },
-              predictionAverage: { label: "Avg Predictions", color: "#ef4444" }
+              true: { label: "True Function", color: "#facc15" },
+              mean: { label: "Mean Prediction", color: "#ef4444" }
             }}
             className="h-64 w-full"
           >
@@ -554,8 +545,8 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
                 <ChartTooltip
                   content={<CustomTooltip chartType="functionSpace" />}
                 />
-                <Line type="monotone" dataKey="true" stroke="#000000" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-                <Line type="monotone" dataKey="mean" stroke="#ef4444" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="true" stroke="#facc15" strokeWidth={3} strokeDasharray="5 5" dot={false} />
+                <Line type="monotone" dataKey="mean" stroke="#ef4444" strokeWidth={3} dot={false} />
                 {allPredictions.slice(0, params.currentIteration).map((_, idx) => (
                   <Line
                     key={idx}
