@@ -14,6 +14,7 @@ import NeuralNetwork from "./pages/NeuralNetwork";
 import RandomForest from "./pages/RandomForest";
 import EMClustering from "./pages/EMClustering";
 import DeepRL from "./pages/DeepRL";
+import BiasVarianceTradeoff from "./pages/BiasVarianceTradeoff";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { Analytics } from "@vercel/analytics/next"
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/random-forest" element={<RandomForest />} />
           <Route path="/em-clustering" element={<EMClustering />} />
           <Route path="/deep-rl" element={<DeepRL />} />
+          <Route path="/bias-variance" element={<BiasVarianceTradeoff />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
