@@ -29,6 +29,7 @@ const Simulator = () => {
   const animationRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(0);
   const isMountedRef = useRef<boolean>(true);
+  const isAnimatingRef = useRef<boolean>(false);
   
   // Handle component unmounting
   useEffect(() => {
@@ -36,6 +37,7 @@ const Simulator = () => {
     
     return () => {
       isMountedRef.current = false;
+      isAnimatingRef.current = false;
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;
@@ -45,7 +47,7 @@ const Simulator = () => {
 
   // Handle adding a new city
   const handleAddCity = useCallback((x: number, y: number) => {
-    if (state.isRunning) return;
+    if (state.isRunning || isAnimatingRef.current) return;
     
     console.log('Adding city at:', x, y);
     
@@ -81,12 +83,13 @@ const Simulator = () => {
   
   // Handle simulation parameters change
   const handleParamsChange = useCallback((newParams: SimulationParams) => {
+    if (isAnimatingRef.current) return;
     setParams(newParams);
   }, []);
   
   // Clear all cities
   const handleClearCities = useCallback(() => {
-    if (state.isRunning) return;
+    if (state.isRunning || isAnimatingRef.current) return;
     console.log('Clearing all cities');
     setState(getInitialState());
     toast.info("All cities cleared");
@@ -94,7 +97,7 @@ const Simulator = () => {
   
   // Reset simulation
   const handleReset = useCallback(() => {
-    if (state.isRunning) return;
+    if (state.isRunning || isAnimatingRef.current) return;
     if (state.cities.length < 3) {
       toast.error("Add at least 3 cities to start the simulation");
       return;
@@ -111,7 +114,7 @@ const Simulator = () => {
   
   // Generate random cities
   const handleRandomizeCities = useCallback((count: number) => {
-    if (state.isRunning) return;
+    if (state.isRunning || isAnimatingRef.current) return;
     console.log('Generating random cities:', count);
     const newCities = createRandomCities(count);
     
@@ -126,6 +129,8 @@ const Simulator = () => {
   
   // Start or stop the simulation
   const handleStartStop = useCallback(() => {
+    if (isAnimatingRef.current) return;
+    
     setState(prevState => {
       // Don't start if we don't have enough cities
       if (!prevState.isRunning && prevState.cities.length < 3) {
@@ -135,6 +140,7 @@ const Simulator = () => {
       
       // If we're stopping, just update the running flag
       if (prevState.isRunning) {
+        isAnimatingRef.current = false;
         toast.info("Simulation paused");
         return { ...prevState, isRunning: false };
       }
@@ -145,6 +151,7 @@ const Simulator = () => {
         newState = initializeSimulation(prevState.cities, params);
       }
       
+      isAnimatingRef.current = true;
       toast.success("Simulation started");
       return { ...newState, isRunning: true };
     });
@@ -155,7 +162,7 @@ const Simulator = () => {
     setState(prevState => ({ ...prevState, animationSpeed: speed }));
   }, []);
   
-  // Animation loop - cleaned up properly
+  // Animation loop - improved stability
   useEffect(() => {
     // Clean up any existing animation
     if (animationRef.current) {
@@ -164,30 +171,34 @@ const Simulator = () => {
     }
     
     if (!state.isRunning || !isMountedRef.current) {
+      isAnimatingRef.current = false;
       return;
     }
     
+    isAnimatingRef.current = true;
+    
     const step = (timestamp: number) => {
-      // Check if component is still mounted
-      if (!isMountedRef.current) {
+      // Check if component is still mounted and should be running
+      if (!isMountedRef.current || !isAnimatingRef.current) {
         return;
       }
       
       // Control frame rate based on animation speed
-      const frameInterval = 30 / state.animationSpeed; // milliseconds between frames
+      const frameInterval = 50 / state.animationSpeed; // milliseconds between frames
       const elapsed = timestamp - lastFrameTimeRef.current;
       
       if (elapsed > frameInterval) {
         lastFrameTimeRef.current = timestamp;
         
-        // Run the simulation step only if still mounted and running
+        // Use functional update to ensure we have the latest state
         setState(prevState => {
-          if (!isMountedRef.current || !prevState.isRunning) {
+          if (!isMountedRef.current || !isAnimatingRef.current || !prevState.isRunning) {
             return prevState;
           }
           
           // Stop if we've reached the maximum iterations
           if (prevState.iteration >= prevState.totalIterations) {
+            isAnimatingRef.current = false;
             toast.success("Simulation completed!");
             return { ...prevState, isRunning: false };
           }
@@ -198,7 +209,7 @@ const Simulator = () => {
       }
       
       // Continue animation if still running and mounted
-      if (isMountedRef.current && state.isRunning) {
+      if (isMountedRef.current && isAnimatingRef.current && state.isRunning) {
         animationRef.current = requestAnimationFrame(step);
       }
     };
@@ -206,6 +217,7 @@ const Simulator = () => {
     animationRef.current = requestAnimationFrame(step);
     
     return () => {
+      isAnimatingRef.current = false;
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;

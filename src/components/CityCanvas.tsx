@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { CityCanvasProps } from "@/utils/types";
 
 const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
@@ -36,15 +36,17 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
     return coord * canvasSize[dimension];
   };
   
-  // Simplified grid rendering without memoization
-  const renderGrid = () => {
+  // Memoized grid to prevent unnecessary re-renders
+  const gridLines = useMemo(() => {
+    if (canvasSize.width === 0 || canvasSize.height === 0) return [];
+    
     const lines = [];
     const spacing = 0.1; // 10% of canvas
     
     for (let x = 0; x <= 1; x += spacing) {
       lines.push(
         <line
-          key={`vline-${Math.round(x * 10)}`}
+          key={`vline-${x}`}
           x1={toPixels(x, 'width')}
           y1={0}
           x2={toPixels(x, 'width')}
@@ -59,7 +61,7 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
     for (let y = 0; y <= 1; y += spacing) {
       lines.push(
         <line
-          key={`hline-${Math.round(y * 10)}`}
+          key={`hline-${y}`}
           x1={0}
           y1={toPixels(y, 'height')}
           x2={canvasSize.width}
@@ -72,18 +74,19 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
     }
     
     return lines;
-  };
+  }, [canvasSize.width, canvasSize.height]);
 
-  // Simplified path rendering
-  const renderPaths = () => {
-    if (state.cities.length < 2) return null;
+  // Memoized paths to prevent unnecessary re-renders
+  const pathElements = useMemo(() => {
+    if (state.cities.length < 2 || canvasSize.width === 0 || canvasSize.height === 0) return null;
+    
+    const elements = [];
     
     // Current path
-    let currentPathData = "";
     if (state.currentPath.length > 0 && state.cities[0]) {
       const startX = toPixels(state.cities[0].x, 'width');
       const startY = toPixels(state.cities[0].y, 'height');
-      currentPathData = `M ${startX} ${startY}`;
+      let currentPathData = `M ${startX} ${startY}`;
       
       for (const cityIndex of state.currentPath) {
         const city = state.cities[cityIndex];
@@ -94,14 +97,24 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
         }
       }
       currentPathData += ` L ${startX} ${startY}`;
+      
+      elements.push(
+        <path 
+          key="current-path"
+          d={currentPathData} 
+          fill="none"
+          stroke="#3b82f6"
+          strokeWidth={2}
+          opacity={1}
+        />
+      );
     }
     
     // Best path
-    let bestPathData = "";
     if (state.bestPath.length > 0 && state.cities[0]) {
       const startX = toPixels(state.cities[0].x, 'width');
       const startY = toPixels(state.cities[0].y, 'height');
-      bestPathData = `M ${startX} ${startY}`;
+      let bestPathData = `M ${startX} ${startY}`;
       
       for (const cityIndex of state.bestPath) {
         const city = state.cities[cityIndex];
@@ -112,42 +125,33 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
         }
       }
       bestPathData += ` L ${startX} ${startY}`;
+      
+      elements.push(
+        <path 
+          key="best-path"
+          d={bestPathData} 
+          fill="none"
+          stroke="#10b981"
+          strokeWidth={3}
+          opacity={0.8}
+          strokeDasharray={state.isRunning ? "5,5" : "none"}
+        />
+      );
     }
     
-    return (
-      <>
-        {currentPathData && (
-          <path 
-            d={currentPathData} 
-            fill="none"
-            stroke="#3b82f6"
-            strokeWidth={2}
-            opacity={1}
-          />
-        )}
-        
-        {bestPathData && (
-          <path 
-            d={bestPathData} 
-            fill="none"
-            stroke="#10b981"
-            strokeWidth={3}
-            opacity={0.8}
-            strokeDasharray={state.isRunning ? "5,5" : "none"}
-          />
-        )}
-      </>
-    );
-  };
+    return elements;
+  }, [state.currentPath, state.bestPath, state.cities, state.isRunning, canvasSize.width, canvasSize.height]);
   
-  // Simplified cities rendering
-  const renderCities = () => {
+  // Memoized cities to prevent unnecessary re-renders
+  const cityElements = useMemo(() => {
+    if (canvasSize.width === 0 || canvasSize.height === 0) return [];
+    
     return state.cities.map((city, index) => {
       const x = toPixels(city.x, 'width');
       const y = toPixels(city.y, 'height');
       
       return (
-        <g key={`city-${city.id}-${index}`}>
+        <g key={`city-${city.id}`}>
           <circle 
             cx={x} 
             cy={y} 
@@ -180,7 +184,7 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
         </g>
       );
     });
-  };
+  }, [state.cities, canvasSize.width, canvasSize.height]);
   
   return (
     <div 
@@ -203,16 +207,16 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
           height={canvasSize.height}
           className="w-full h-full"
         >
-          <g>
-            {renderGrid()}
+          <g key="grid-layer">
+            {gridLines}
           </g>
           
-          <g>
-            {renderPaths()}
+          <g key="path-layer">
+            {pathElements}
           </g>
           
-          <g>
-            {renderCities()}
+          <g key="city-layer">
+            {cityElements}
           </g>
         </svg>
       )}
