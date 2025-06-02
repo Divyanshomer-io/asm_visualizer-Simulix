@@ -172,13 +172,18 @@ const CustomTooltip: React.FC<{
     }
   };
 
+  // Filter payload for function space to show only desired fields
+  const filteredPayload = chartType === 'functionSpace' 
+    ? payload.filter(entry => ['true', 'mean', 'predictionAverage'].includes(entry.dataKey))
+    : payload;
+
   return (
     <div className="bg-slate-900/95 border border-blue-400/50 rounded-lg p-3 shadow-xl backdrop-blur-sm">
       <div className="font-semibold text-blue-400 mb-2">
         {typeof label === 'number' ? `x: ${label.toFixed(2)}` : label}
       </div>
       <div className="space-y-1">
-        {payload.map((entry, index) => (
+        {filteredPayload.map((entry, index) => (
           <div key={index} className="flex items-center space-x-2">
             <div 
               className="w-3 h-3 rounded-sm border-2"
@@ -188,7 +193,7 @@ const CustomTooltip: React.FC<{
               }}
             />
             <span className="text-sm font-medium text-white">
-              {entry.dataKey}:
+              {entry.dataKey === 'predictionAverage' ? 'Avg Predictions' : entry.dataKey}:
             </span>
             <span className="text-sm text-yellow-400 font-mono">
               {formatValue(entry.value, entry.dataKey)}
@@ -341,7 +346,7 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
     updateStats();
   };
 
-  // STEP 2: Fix function space visualization
+  // STEP 2: Fix function space visualization with simplified tooltip data
   const updateFunctionSpace = () => {
     console.log(`Updating function space for iteration ${params.currentIteration}`);
     
@@ -352,14 +357,22 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
         )
       : Array(testPoints.length).fill(0);
 
+    // Calculate the average of all predictions for tooltip
+    const predictionAverage = currentPredictions.length > 0 
+      ? testPoints.map((_, i) => 
+          currentPredictions.reduce((sum, pred) => sum + pred[i], 0) / currentPredictions.length
+        )
+      : Array(testPoints.length).fill(0);
+
     const data = testPoints.map((x, i) => {
       const dataPoint: any = {
         x: x,
         true: trueValues[i],
-        mean: meanPrediction[i]
+        mean: meanPrediction[i],
+        predictionAverage: predictionAverage[i] // Add this for tooltip display
       };
       
-      // Add individual prediction lines with varying alpha
+      // Add individual prediction lines with varying alpha (for visualization only, not tooltip)
       currentPredictions.forEach((pred, idx) => {
         const alpha = Math.max(0.2, 0.7 * (idx + 1) / params.currentIteration);
         dataPoint[`pred${idx}`] = pred[i];
@@ -521,7 +534,8 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
           <ChartContainer
             config={{
               true: { label: "True Function", color: "#000000" },
-              mean: { label: "Mean Prediction", color: "#ef4444" }
+              mean: { label: "Mean Prediction", color: "#ef4444" },
+              predictionAverage: { label: "Avg Predictions", color: "#ef4444" }
             }}
             className="h-64 w-full"
           >
