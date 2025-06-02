@@ -508,7 +508,7 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
       </div>
     );
   }
-
+const [hoveredIndex, setHoveredIndex] = useState(null);
   return (
     <div className="space-y-6">
       {/* Row 1: Function Space - Full Width */}
