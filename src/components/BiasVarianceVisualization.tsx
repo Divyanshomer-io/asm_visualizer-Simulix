@@ -546,7 +546,7 @@ const BiasVarianceVisualization: React.FC<BiasVarianceVisualizationProps> = ({
                   <Line
                     key={idx}
                     type="monotone"
-{/*                     dataKey={`pred${idx}`} */}
+                    dataKey={`pred${idx}`}
                     stroke="#9ca3af"
                     strokeWidth={0.5}
                     opacity={Math.max(0.1, 0.5 * (idx + 1) / params.currentIteration)}
