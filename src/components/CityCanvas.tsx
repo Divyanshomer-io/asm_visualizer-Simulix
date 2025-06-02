@@ -20,10 +20,14 @@ const CityCanvas: React.FC<CityCanvasProps> = ({ state, onAddCity }) => {
   }, []);
   
   const handleCanvasClick = (e: React.MouseEvent) => {
+    console.log('Canvas clicked, isRunning:', state.isRunning);
+    
     if (canvasRef.current && !state.isRunning) {
       const rect = canvasRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
       const y = (e.clientY - rect.top) / rect.height;
+      
+      console.log('Calling onAddCity with coordinates:', x, y);
       onAddCity(x, y);
     }
   };
