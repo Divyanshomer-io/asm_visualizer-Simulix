@@ -423,11 +423,24 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   stroke="rgba(255,255,255,0.8)"
                   fontSize={12}
                   tickFormatter={(value) => formatNumber(value, params.forceIntegerData ? 0 : 2)}
+                    label={{ 
+                      value: 'Value', 
+                      position: 'insideBottom', 
+                      offset: -20, 
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                    }}
                 />
                 <YAxis 
                   stroke="rgba(255,255,255,0.8)"
                   fontSize={12}
                   tickFormatter={(value) => formatNumber(value, 3)}
+                   label={{ 
+                      value: 'Density', 
+                      angle: -90, 
+                      position: 'insideLeft', 
+                      offset: 10,
+                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
+                    }}
                 />
                 <Tooltip 
                   formatter={(value, name) => [
@@ -443,6 +456,20 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                 />
                 <Bar dataKey="original" fill="rgba(156, 163, 175, 0.6)" name="Original Data" />
                 <Bar dataKey="bootstrap" fill="rgba(251, 146, 60, 0.7)" name="Bootstrap Statistics" />
+                {confidenceInterval && (
+                    <ReferenceLine 
+                      x={confidenceInterval.mean} 
+                      stroke="#ff8c00" 
+                      strokeWidth={2}
+                      strokeDasharray="6 6"
+                      label={{
+                        value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 2)}`,
+                        position: "top", 
+                        offset: 10,
+                        style: { fill: "#ff8c00", fontSize: "10px", fontWeight: "bold" }
+                      }}
+                    />
+                  )}
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -545,6 +572,25 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
               </LineChart>
             </ResponsiveContainer>
           </div>
+           {/* Convergence statistics display */}
+            {convergenceData.length > 0 && (
+              <div className="mt-4 p-3 bg-white/5 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 text-sm text-white">
+                  <div>
+                    <p><strong>Current Bias:</strong></p>
+                    <p className="font-mono text-blue-400">
+                      {formatNumber(convergenceData[convergenceData.length - 1]?.bias || 0, 4)}
+                    </p>
+                  </div>
+                  <div>
+                    <p><strong>Current MSE:</strong></p>
+                    <p className="font-mono text-red-400">
+                      {formatNumber(convergenceData[convergenceData.length - 1]?.mse || 0, 4)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
         </CardContent>
       </Card>
     </div>
