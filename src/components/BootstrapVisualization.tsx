@@ -398,7 +398,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
         side="left"
         content={
           <div className="space-y-2">
-            {/* ... keep existing tooltip content ... */}
+            {/* ... existing tooltip content ... */}
           </div>
         }
       />
@@ -407,19 +407,17 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
   <CardContent>
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
+        <ComposedChart 
+          data={comparisonData} 
+          margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
           <XAxis 
             dataKey="x" 
             stroke="rgba(255,255,255,0.8)"
             fontSize={12}
             tickFormatter={(value) => formatNumber(value, params.forceIntegerData ? 0 : 2)}
-            domain={params.forceIntegerData ? ['dataMin', 'dataMax'] : ['auto', 'auto']}
-            ticks={params.forceIntegerData ? 
-              Array.from(new Set(state.originalData.map(val => Math.round(val)))).sort((a,b) => a-b) : 
-              undefined
-            }
-            interval={0}
+            domain={['dataMin', 'dataMax']} // Force include mean
             label={{ 
               value: 'Value', 
               position: 'insideBottom', 
@@ -451,19 +449,35 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
               borderRadius: '8px'
             }}
           />
-          <Bar dataKey="original" fill="rgba(156, 163, 175, 0.6)" name="Original Data" />
-          <Bar dataKey="bootstrap" fill="rgba(251, 146, 60, 0.7)" name="Bootstrap Statistics" />
+          <Bar 
+            dataKey="original" 
+            fill="rgba(156, 163, 175, 0.6)" 
+            name="Original Data"
+            radius={[0, 0, 0, 0]}
+          />
+          <Bar 
+            dataKey="bootstrap" 
+            fill="rgba(251, 146, 60, 0.7)" 
+            name="Bootstrap Statistics"
+            radius={[0, 0, 0, 0]}
+          />
           {confidenceInterval && (
             <ReferenceLine 
-              x={confidenceInterval.mean} 
-              stroke="#ff8c00" 
-              strokeWidth={2}
-              strokeDasharray="6 6"
+              x={confidenceInterval.mean}
+              stroke="#00FF88" // High-visibility neon green
+              strokeWidth={3}
+              strokeDasharray="8 4"
+              zIndex={100} // Force above bars
               label={{
                 value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 2)}`,
-                position: "top", 
-                offset: 10,
-                style: { fill: "#ff8c00", fontSize: "10px", fontWeight: "bold" }
+                position: "insideTop",
+                offset: 25,
+                style: { 
+                  fill: "#00FF88", 
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  textShadow: "0 0 5px rgba(0,0,0,0.8)"
+                }
               }}
             />
           )}
