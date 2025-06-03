@@ -389,104 +389,92 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
         </CardContent>
       </Card>
 
-  {/* Row 2: Original Data vs Bootstrap Statistics - Full Width */}
+{/* Row 2: Original Data vs Bootstrap Statistics - Full Width */}
 <Card className="glass-panel border-white/10">
-  <CardHeader>
-    <CardTitle className="text-lg font-semibold text-white flex items-center">
-      Original Data vs Bootstrap Statistics
-      <InfoTooltip 
-        side="left"
-        content={
-          <div className="space-y-2">
-            {/* ... existing tooltip content ... */}
-          </div>
-        }
-      />
-    </CardTitle>
-  </CardHeader>
-  <CardContent>
-    <div className="h-[300px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart 
-          data={comparisonData} 
-          margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-          <XAxis 
-            dataKey="x" 
-            stroke="rgba(255,255,255,0.8)"
-            fontSize={12}
-            tickFormatter={(value) => formatNumber(value, params.forceIntegerData ? 0 : 2)}
-            domain={['dataMin', 'dataMax']} // Force include mean
-            label={{ 
-              value: 'Value', 
-              position: 'insideBottom', 
-              offset: -20, 
-              style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-            }}
-          />
-          <YAxis 
-            stroke="rgba(255,255,255,0.8)"
-            fontSize={12}
-            tickFormatter={(value) => formatNumber(value, 3)}
-            label={{ 
-              value: 'Density', 
-              angle: -90, 
-              position: 'insideLeft', 
-              offset: 10,
-              style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-            }}
-          />
-          <Tooltip 
-            formatter={(value, name) => [
-              formatNumber(value as number, 4),
-              name === 'original' ? 'Original Data' : 'Bootstrap Statistics'
-            ]}
-            labelFormatter={(label) => `Value: ${formatNumber(label, params.forceIntegerData ? 0 : 3)}`}
-            contentStyle={{ 
-              backgroundColor: 'rgba(0,0,0,0.8)', 
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px'
-            }}
-          />
-          <Bar 
-            dataKey="original" 
-            fill="rgba(156, 163, 175, 0.6)" 
-            name="Original Data"
-            radius={[0, 0, 0, 0]}
-          />
-          <Bar 
-            dataKey="bootstrap" 
-            fill="rgba(251, 146, 60, 0.7)" 
-            name="Bootstrap Statistics"
-            radius={[0, 0, 0, 0]}
-          />
-          {confidenceInterval && (
-            <ReferenceLine 
-              x={confidenceInterval.mean}
-              stroke="#00FF88" // High-visibility neon green
-              strokeWidth={3}
-              strokeDasharray="8 4"
-              zIndex={100} // Force above bars
-              label={{
-                value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 2)}`,
-                position: "insideTop",
-                offset: 25,
-                style: { 
-                  fill: "#00FF88", 
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  textShadow: "0 0 5px rgba(0,0,0,0.8)"
-                }
-              }}
-            />
-          )}
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
-  </CardContent>
+<CardHeader>
+<CardTitle className="text-lg font-semibold text-white flex items-center">
+Original Data vs Bootstrap Statistics
+<InfoTooltip
+side="left"
+content={
+<div className="space-y-2">
+<p><strong>Comparison Chart:</strong></p>
+<p>Compares the distribution of original raw data with computed bootstrap statistics.</p>
+<p><strong>Key Insights:</strong></p>
+<ul className="list-disc list-inside space-y-1">
+<li>Gray bars: Original data distribution (discrete if integer mode)</li>
+<li>Orange bars: Bootstrap statistics distribution (continuous)</li>
+<li>Different supports are expected - bootstrap statistics are computed means</li>
+<li>Bootstrap distribution is typically more concentrated around the true parameter</li>
+</ul>
+<p>This demonstrates how bootstrap statistics converge to the sampling distribution of the estimator.</p>
+</div>
+}
+/>
+</CardTitle>
+</CardHeader>
+<CardContent>
+<div className="h-[300px] w-full">
+<ResponsiveContainer width="100%" height="100%">
+<BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
+<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+<XAxis
+dataKey="x"
+stroke="rgba(255,255,255,0.8)"
+fontSize={12}
+tickFormatter={(value) => formatNumber(value, params.forceIntegerData ? 0 : 2)}
+label={{
+value: 'Value',
+position: 'insideBottom',
+offset: -20,
+style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' }
+}}
+/>
+<YAxis
+stroke="rgba(255,255,255,0.8)"
+fontSize={12}
+tickFormatter={(value) => formatNumber(value, 3)}
+label={{
+value: 'Density',
+angle: -90,
+position: 'insideLeft',
+offset: 10,
+style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' }
+}}
+/>
+<Tooltip
+formatter={(value, name) => [
+formatNumber(value as number, 4),
+name === 'original' ? 'Original Data' : 'Bootstrap Statistics'
+]}
+labelFormatter={(label) => `Value: ${formatNumber(label, params.forceIntegerData ? 0 : 3)}`}
+contentStyle={{
+backgroundColor: 'rgba(0,0,0,0.8)',
+border: '1px solid rgba(255,255,255,0.1)',
+borderRadius: '8px'
+}}
+/>
+<Bar dataKey="original" fill="rgba(156, 163, 175, 0.6)" name="Original Data" />
+<Bar dataKey="bootstrap" fill="rgba(251, 146, 60, 0.7)" name="Bootstrap Statistics" />
+{confidenceInterval && (
+<ReferenceLine
+x={confidenceInterval.mean}
+stroke="#ff8c00"
+strokeWidth={2}
+strokeDasharray="6 6"
+label={{
+value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 2)}`,
+position: "top",
+offset: 10,
+style: { fill: "#ff8c00", fontSize: "10px", fontWeight: "bold" }
+}}
+/>
+)}
+</BarChart>
+</ResponsiveContainer>
+</div>
+</CardContent>
 </Card>
-
 
       {/* Row 3: Bias and MSE Convergence - Full Width */}
       <Card className="glass-panel">
