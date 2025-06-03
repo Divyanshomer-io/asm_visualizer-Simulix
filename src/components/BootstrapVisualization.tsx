@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -429,7 +430,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   y={getClassicMeanMSE()} 
                   stroke="#eab308" 
                   strokeDasharray="5 5"
-                  label={{ value: "Classical MSE", position: "topRight", style: { fill: '#eab308', fontSize: 12 } }}
+                  label={{ value: "Classical MSE", position: "top", style: { fill: '#eab308', fontSize: 12 } }}
                 />
               </LineChart>
             </ResponsiveContainer>
