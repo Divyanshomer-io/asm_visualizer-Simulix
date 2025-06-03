@@ -14,7 +14,6 @@ import HuberMean from "./pages/HuberMean";
 import ImportanceSampling from "./pages/ImportanceSampling";
 import NeuralNetwork from "./pages/NeuralNetwork";
 import RandomForest from "./pages/RandomForest";
-import EMClustering from "./pages/EMClustering";
 import DeepRL from "./pages/DeepRL";
 import BiasVarianceTradeoff from "./pages/BiasVarianceTradeoff";
 import About from "./pages/About";
@@ -90,11 +89,6 @@ const App = () => (
                 <Route path="/random-forest" element={
                   <ErrorBoundary>
                     <RandomForest />
-                  </ErrorBoundary>
-                } />
-                <Route path="/em-clustering" element={
-                  <ErrorBoundary>
-                    <EMClustering />
                   </ErrorBoundary>
                 } />
                 <Route path="/deep-rl" element={
