@@ -87,8 +87,8 @@ const BootstrapControls: React.FC<BootstrapControlsProps> = ({
               className="py-2"
             />
             <div className="flex justify-between text-xs opacity-60 mt-1">
-              <span>Slow</span>
               <span>Fast</span>
+              <span>Slow</span>
             </div>
           </div>
 
