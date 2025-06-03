@@ -17,6 +17,7 @@ import {
   ReferenceArea,
 } from "recharts";
 import { BootstrapState, BootstrapParams } from "@/pages/Bootstrapping";
+import InfoTooltip from "@/components/InfoTooltip";
 
 interface BootstrapVisualizationProps {
   state: BootstrapState;
@@ -219,367 +220,222 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Top Row: Bootstrap Distribution - Full Width */}
-      <Card className="glass-panel">
+      {/* Row 1: Bootstrap Distribution - Full Width */}
+      <Card className="glass-panel border-white/10">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-white">Bootstrap Distribution</CardTitle>
+          <CardTitle className="text-lg font-semibold text-white flex items-center">
+            Bootstrap Distribution
+            <InfoTooltip 
+              side="left"
+              content={
+                <div className="space-y-2">
+                  <p><strong>Bootstrap Distribution:</strong></p>
+                  <p>Shows the histogram of bootstrap statistics (means/medians) computed from {state.currentIteration} bootstrap samples.</p>
+                  <p><strong>Key Elements:</strong></p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Gray bars: Frequency of bootstrap statistics</li>
+                    <li>Purple curve: Normal distribution fit</li>
+                    <li>Red lines: 95% confidence interval bounds</li>
+                    <li>Green line: Bootstrap mean estimate</li>
+                  </ul>
+                  <p>As sample size increases, this distribution approaches normality (Central Limit Theorem).</p>
+                </div>
+              }
+            />
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-80">
+          <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={histogramData} margin={{ top: 20, right: 30, left: 60, bottom: 80 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
-                
-                {/* Confidence interval highlighting */}
-                {state.showCI && confidenceInterval && (
-                  <ReferenceArea 
-                    x1={confidenceInterval.lower} 
-                    x2={confidenceInterval.upper} 
-                    fill="#ff0000" 
-                    fillOpacity={0.2}
-                    stroke="none"
-                  />
-                )}
-                
+              <ComposedChart data={histogramData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis 
                   dataKey="x" 
-                  stroke="#ffffff"
-                  fontSize={14}
-                  fontWeight="bold"
-                  tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 2) : '0'}
-                  domain={['dataMin', 'dataMax']}
-                  type="number"
-                  scale="linear"
-                  label={{ 
-                    value: 'Bootstrap Statistic Value', 
-                    position: 'insideBottom', 
-                    offset: -20, 
-                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-                  }}
+                  stroke="rgba(255,255,255,0.8)"
+                  fontSize={12}
+                  tickFormatter={(value) => formatNumber(value, 3)}
                 />
-
                 <YAxis 
-                  stroke="#ffffff"
-                  fontSize={14}
-                  fontWeight="bold"
-                  label={{ 
-                    value: 'Frequency', 
-                    angle: -90, 
-                    position: 'insideLeft', 
-                    offset: 10,
-                    style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-                  }}
+                  stroke="rgba(255,255,255,0.8)"
+                  fontSize={12}
                 />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'rgba(22, 22, 26, 0.95)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    color: 'white'
-                  }}
-                  formatter={(value: number, name: string) => [
-                    name === 'normalFit' ? formatNumber(value, 3) : value,
-                    name === 'normalFit' ? 'Normal Fit' : 'Frequency'
+                <Tooltip 
+                  formatter={(value, name) => [
+                    typeof value === 'number' ? formatNumber(value, 2) : value, 
+                    name === 'count' ? 'Frequency' : name === 'normalFit' ? 'Normal Fit' : name
                   ]}
-                  labelFormatter={(value) => `Value: ${typeof value === 'number' ? formatNumber(value, 3) : '0'}`}
+                  labelFormatter={(label) => `Value: ${formatNumber(label, 3)}`}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(0,0,0,0.8)', 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px'
+                  }}
                 />
                 
-                <Bar 
-                  dataKey="count" 
-                  fill="#87CEEB" 
-                  stroke="#4682B4" 
-                  strokeWidth={1}
-                  opacity={0.7}
-                />
+                <Bar dataKey="count" fill="rgba(156, 163, 175, 0.6)" name="Bootstrap Frequency" />
                 
-                {/* Normal fit line */}
                 {state.showNormalFit && (
                   <Line 
+                    type="monotone" 
                     dataKey="normalFit" 
-                    stroke="#9932CC" 
-                    strokeWidth={3}
+                    stroke="#8b5cf6" 
+                    strokeWidth={2}
                     dot={false}
-                    type="monotone"
+                    name="Normal Fit"
                   />
                 )}
                 
-                {/* Confidence Interval vertical lines */}
                 {state.showCI && confidenceInterval && (
                   <>
-                    <ReferenceLine 
-                      x={confidenceInterval.lower} 
-                      stroke="#ff0000" 
-                      strokeWidth={3}
-                      strokeDasharray="8 4"
-                      label={{
-                        value: `CI Lower: ${formatNumber(confidenceInterval.lower, 3)}`,
-                        position: "top",
-                        offset: 10,
-                        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
-                      }}
-                    />
-                   
-                    <ReferenceLine 
-                      x={confidenceInterval.upper} 
-                      stroke="#ff0000" 
-                      strokeWidth={3}
-                      strokeDasharray="8 4"
-                      label={{
-                        value: `CI Upper: ${formatNumber(confidenceInterval.upper, 3)}`,
-                        position: "top",
-                        offset: 10,
-                        style: { fill: "#ff0000", fontSize: "12px", fontWeight: "bold" }
-                      }}
-                    />
+                    <ReferenceLine x={confidenceInterval.lower} stroke="#ef4444" strokeDasharray="5 5" />
+                    <ReferenceLine x={confidenceInterval.upper} stroke="#ef4444" strokeDasharray="5 5" />
+                    <ReferenceLine x={confidenceInterval.mean} stroke="#10b981" strokeWidth={2} />
                   </>
                 )}
-
-                {/* Bootstrap mean line */}
-                {confidenceInterval && (
-                  <ReferenceLine 
-                    x={confidenceInterval.mean} 
-                    stroke="#00ff00" 
-                    strokeWidth={2}
-                    label={{
-                      value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 3)}`,
-                      position: "top",
-                      offset: 10,
-                      style: { fill: "#00ff00", fontSize: "12px", fontWeight: "bold" }
-                    }}
-                  />
-                )}
-
               </ComposedChart>
             </ResponsiveContainer>
           </div>
-          
-          {/* Confidence interval display */}
-          {state.showCI && confidenceInterval && (
-            <div className="mt-4 p-3 bg-white/5 rounded-lg">
-              <p className="text-sm text-white">
-                <strong>{(params.confidenceLevel * 100).toFixed(0)}% Confidence Interval:</strong>
-                <span className="ml-2 font-mono">
-                  [{formatNumber(confidenceInterval.lower, 3)}, {formatNumber(confidenceInterval.upper, 3)}]
-                </span>
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      {/* Bottom Row: Original vs Bootstrap Comparison and Convergence Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* FIXED: Original vs Bootstrap Comparison with Integer Mode Support */}
-        <Card className="glass-panel">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-white">Original Data vs Bootstrap Statistics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={comparisonData} margin={{ top: 20, right: 30, left: 60, bottom: 80 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
-                  <XAxis 
-                    dataKey="x" 
-                    stroke="#ffffff"
-                    fontSize={14}
-                    fontWeight="bold"
-                    type="number"
-                    scale="linear"
-                    domain={params.forceIntegerData ? ['dataMin', 'dataMax'] : ['auto', 'auto']}
-                    ticks={params.forceIntegerData ? 
-                      Array.from(new Set(state.originalData.map(val => Math.round(val)))).sort((a,b) => a-b) : 
-                      undefined
-                    }
-                    tickFormatter={(value) => 
-                      params.forceIntegerData 
-                        ? `${Math.round(value)}` 
-                        : formatNumber(value, 1)
-                    }
-                    interval={0}
-                    label={{ 
-                      value: 'Value', 
-                      position: 'insideBottom', 
-                      offset: -20, 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-                    }}
-                  />
-                  <YAxis 
-                    stroke="#ffffff"
-                    fontSize={14}
-                    fontWeight="bold"
-                    label={{ 
-                      value: 'Density', 
-                      angle: -90, 
-                      position: 'insideLeft', 
-                      offset: 10,
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-                    }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(22, 22, 26, 0.95)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '8px',
-                      color: 'white'
-                    }}
-                    formatter={(value: number, name: string) => [
-                      formatNumber(value, 4),
-                      name === 'original' ? `Original Raw Data (n=${state.originalData.length})` : `Bootstrap ${params.statistic}s (n=${state.currentIteration})`
-                    ]}
-                  />
-                  
-                  <Bar 
-                    dataKey="original" 
-                    fill="rgba(128,128,128,0.5)" 
-                    stroke="rgba(128,128,128,1)"
-                    strokeWidth={1}
-                    name="Original Raw Data"
-                    barSize={params.forceIntegerData ? 30 : 15}
-                    radius={[0, 0, 0, 0]}
-                  />
-                  <Bar 
-                    dataKey="bootstrap" 
-                    fill="rgba(255,165,0,0.7)" 
-                    stroke="rgba(255,165,0,1)"
-                    strokeWidth={1}
-                    name={`Bootstrap ${params.statistic}s`}
-                    barSize={params.forceIntegerData ? 30 : 15}
-                    radius={[0, 0, 0, 0]}
-                  />
-
-                  {/* Add mean lines */}
-                  <ReferenceLine 
-                    x={state.originalData.reduce((a, b) => a + b, 0) / state.originalData.length} 
-                    stroke="#000000" 
-                    strokeWidth={2}
-                    label={{
-                      value: `Original Mean: ${formatNumber(state.originalData.reduce((a, b) => a + b, 0) / state.originalData.length, 2)}`,
-                      position: "bottom",
-                      offset: 10,
-                      style: { fill: "#000000", fontSize: "10px", fontWeight: "bold" }
-                    }}
-                  />
-                  {confidenceInterval && (
-                    <ReferenceLine 
-                      x={confidenceInterval.mean} 
-                      stroke="#ff8c00" 
-                      strokeWidth={2}
-                      strokeDasharray="6 6"
-                      label={{
-                        value: `Bootstrap Mean: ${formatNumber(confidenceInterval.mean, 2)}`,
-                        position: "top", 
-                        offset: 10,
-                        style: { fill: "#ff8c00", fontSize: "10px", fontWeight: "bold" }
-                      }}
-                    />
-                  )}
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Convergence Analysis with MSE Baseline */}
-        <Card className="glass-panel">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-white">Bias and MSE Convergence</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={convergenceData} margin={{ top: 20, right: 30, left: 60, bottom: 80 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
-                  <XAxis 
-                    dataKey="samples" 
-                    stroke="#ffffff"
-                    fontSize={14}
-                    fontWeight="bold"
-                    label={{ 
-                      value: 'Number of Bootstrap Samples', 
-                      position: 'insideBottom', 
-                      offset: -20, 
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-                    }}
-                  />
-                  <YAxis 
-                    stroke="#ffffff"
-                    fontSize={14}
-                    fontWeight="bold"
-                    label={{ 
-                      value: 'Error Value', 
-                      angle: -90, 
-                      position: 'insideLeft', 
-                      offset: 10,
-                      style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
-                    }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(22, 22, 26, 0.95)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '8px',
-                      color: 'white'
-                    }}
-                    formatter={(value: number, name: string) => [formatNumber(value, 4), name === 'bias' ? '|Bias|' : 'MSE']}
-                  />
-                  
-                  {/* MSE BASELINE REFERENCE LINE */}
-                  <ReferenceLine 
-                    y={getClassicMeanMSE()} 
-                    stroke="#FFD700" 
-                    strokeWidth={2}
-                    strokeDasharray="8 4"
-                    label={{
-                      value: `Classic MSE: ${formatNumber(getClassicMeanMSE(), 4)}`,
-                      position: "top",
-                      offset: 10,
-                      style: { fill: "#FFD700", fontSize: "12px", fontWeight: "bold" }
-                    }}
-                  />
-                  
-                  <Line 
-                    type="monotone" 
-                    dataKey="bias" 
-                    stroke="#4169E1"
-                    strokeWidth={2}
-                    dot={false}
-                    name="|Bias|"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="mse" 
-                    stroke="#DC143C"
-                    strokeWidth={2}
-                    dot={false}
-                    name="MSE"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            
-            {/* Convergence statistics display */}
-            {convergenceData.length > 0 && (
-              <div className="mt-4 p-3 bg-white/5 rounded-lg">
-                <div className="grid grid-cols-2 gap-4 text-sm text-white">
-                  <div>
-                    <p><strong>Current Bias:</strong></p>
-                    <p className="font-mono text-blue-400">
-                      {formatNumber(convergenceData[convergenceData.length - 1]?.bias || 0, 4)}
-                    </p>
-                  </div>
-                  <div>
-                    <p><strong>Current MSE:</strong></p>
-                    <p className="font-mono text-red-400">
-                      {formatNumber(convergenceData[convergenceData.length - 1]?.mse || 0, 4)}
-                    </p>
-                  </div>
+      {/* Row 2: Original Data vs Bootstrap Statistics - Full Width */}
+      <Card className="glass-panel border-white/10">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-white flex items-center">
+            Original Data vs Bootstrap Statistics
+            <InfoTooltip 
+              side="left"
+              content={
+                <div className="space-y-2">
+                  <p><strong>Comparison Chart:</strong></p>
+                  <p>Compares the distribution of original raw data with computed bootstrap statistics.</p>
+                  <p><strong>Key Insights:</strong></p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Gray bars: Original data distribution (discrete if integer mode)</li>
+                    <li>Orange bars: Bootstrap statistics distribution (continuous)</li>
+                    <li>Different supports are expected - bootstrap statistics are computed means</li>
+                    <li>Bootstrap distribution is typically more concentrated around the true parameter</li>
+                  </ul>
+                  <p>This demonstrates how bootstrap statistics converge to the sampling distribution of the estimator.</p>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              }
+            />
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis 
+                  dataKey="x" 
+                  stroke="rgba(255,255,255,0.8)"
+                  fontSize={12}
+                  tickFormatter={(value) => formatNumber(value, params.forceIntegerData ? 0 : 2)}
+                />
+                <YAxis 
+                  stroke="rgba(255,255,255,0.8)"
+                  fontSize={12}
+                  tickFormatter={(value) => formatNumber(value, 3)}
+                />
+                <Tooltip 
+                  formatter={(value, name) => [
+                    formatNumber(value as number, 4),
+                    name === 'original' ? 'Original Data' : 'Bootstrap Statistics'
+                  ]}
+                  labelFormatter={(label) => `Value: ${formatNumber(label, params.forceIntegerData ? 0 : 3)}`}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(0,0,0,0.8)', 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Bar dataKey="original" fill="rgba(156, 163, 175, 0.6)" name="Original Data" />
+                <Bar dataKey="bootstrap" fill="rgba(251, 146, 60, 0.7)" name="Bootstrap Statistics" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Row 3: Bias and MSE Convergence - Full Width */}
+      <Card className="glass-panel border-white/10">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-white flex items-center">
+            Bias and MSE Convergence
+            <InfoTooltip 
+              side="left"
+              content={
+                <div className="space-y-2">
+                  <p><strong>Convergence Analysis:</strong></p>
+                  <p>Tracks how bias and MSE of bootstrap estimates change with increasing bootstrap samples.</p>
+                  <p><strong>Key Elements:</strong></p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Blue line: Bootstrap bias over iterations</li>
+                    <li>Red line: Bootstrap MSE over iterations</li>
+                    <li>Yellow dashed line: Classical MSE baseline for comparison</li>
+                  </ul>
+                  <p><strong>Expected Behavior:</strong></p>
+                  <p>Both bias and MSE should stabilize as bootstrap samples increase, with MSE approaching the classical estimator's MSE.</p>
+                </div>
+              }
+            />
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={convergenceData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis 
+                  dataKey="samples" 
+                  stroke="rgba(255,255,255,0.8)"
+                  fontSize={12}
+                />
+                <YAxis 
+                  stroke="rgba(255,255,255,0.8)"
+                  fontSize={12}
+                  tickFormatter={(value) => formatNumber(value, 4)}
+                />
+                <Tooltip 
+                  formatter={(value, name) => [
+                    formatNumber(value as number, 6),
+                    name === 'bias' ? 'Bootstrap Bias' : name === 'mse' ? 'Bootstrap MSE' : name
+                  ]}
+                  labelFormatter={(label) => `Bootstrap Samples: ${label}`}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(0,0,0,0.8)', 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="bias" 
+                  stroke="#3b82f6" 
+                  strokeWidth={2}
+                  dot={false}
+                  name="Bootstrap Bias"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="mse" 
+                  stroke="#ef4444" 
+                  strokeWidth={2}
+                  dot={false}
+                  name="Bootstrap MSE"
+                />
+                <ReferenceLine 
+                  y={getClassicMeanMSE()} 
+                  stroke="#eab308" 
+                  strokeDasharray="5 5"
+                  label={{ value: "Classical MSE", position: "topRight", style: { fill: '#eab308', fontSize: 12 } }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -4,10 +4,11 @@ import { ArrowLeft, Play, Pause, RefreshCw, BarChart3, TrendingUp } from "lucide
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { generateOriginalData, generateBootstrapSamples, computeStatistic, calculateConfidenceInterval, calculateBiasAndMSE, generateNormalData } from "@/utils/bootstrapping";
 import BootstrapVisualization from "@/components/BootstrapVisualization";
 import BootstrapControls from "@/components/BootstrapControls";
+import BootstrapEducationalPanels from "@/components/BootstrapEducationalPanels";
 
 export interface BootstrapState {
   originalData: number[];
@@ -61,7 +62,6 @@ const Bootstrapping: React.FC = () => {
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // CORRECTED: Fix bootstrap sampling logic
   const performBootstrapSample = (originalData: number[], statistic: string): number => {
     const bootstrapSample = Array.from({ length: originalData.length }, () => {
       const randomIndex = Math.floor(Math.random() * originalData.length);
@@ -174,7 +174,6 @@ const Bootstrapping: React.FC = () => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
-        intervalRef.current = null;
       }
     };
   }, [state.isRunning, state.animationSpeed, state.currentIteration, params.numBootstrapSamples]);
@@ -195,7 +194,6 @@ const Bootstrapping: React.FC = () => {
     resetBootstrap();
   };
 
-  // Enhanced input validation handlers
   const handleMinInputChange = (value: string) => {
     setInputValues(prev => ({ ...prev, min: value }));
     
@@ -288,290 +286,197 @@ const Bootstrapping: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
-      {/* Header */}
-      <header className="w-full glass-panel border-b border-white/5 mb-8">
-        <div className="container py-6 px-4 md:px-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-light tracking-tight">
-              Bootstrapping Visualization
-            </h1>
-            <p className="text-sm opacity-70 mt-1">
-              Understanding Statistical Inference Through Resampling
-            </p>
+    <TooltipProvider>
+      <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
+        {/* Header */}
+        <header className="w-full glass-panel border-b border-white/5 mb-8">
+          <div className="container py-6 px-4 md:px-8 flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight">
+                Bootstrapping Visualization
+              </h1>
+              <p className="text-sm opacity-70 mt-1">
+                Understanding Statistical Inference Through Resampling
+              </p>
+            </div>
+            <Link to="/" className="control-btn flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Visualizations
+            </Link>
           </div>
-          <Link to="/" className="control-btn flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Visualizations
-          </Link>
-        </div>
-      </header>
+        </header>
 
-      <div className="container px-4 md:px-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Visualization Area */}
-          <div className="lg:col-span-2 space-y-6">
-            <BootstrapVisualization 
-              state={state} 
-              params={params}
-              getClassicMeanMSE={getClassicMeanMSE}
-            />
-          </div>
+        <div className="container px-4 md:px-8 pb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Visualization Area */}
+            <div className="lg:col-span-2 space-y-6">
+              <BootstrapVisualization 
+                state={state} 
+                params={params}
+                getClassicMeanMSE={getClassicMeanMSE}
+              />
+            </div>
 
-          {/* Controls and Information */}
-          <div className="space-y-6">
-            <BootstrapControls
-              state={state}
-              params={params}
-              onParamsChange={handleParamsChange}
-              onStateChange={handleStateChange}
-              onStartStop={startStop}
-              onReset={reset}
-            />
-            
-            {/* Integer Data Controls with Enhanced Validation */}
-            <Card className="glass-panel">
-              <CardHeader>
-                <CardTitle className="text-lg">Data Generation</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Data Type</label>
-                  <button
-                    onClick={() => setParams(prev => ({ 
-                      ...prev, 
-                      forceIntegerData: !prev.forceIntegerData 
-                    }))}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                      params.forceIntegerData 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                    disabled={state.isRunning}
-                  >
-                    {params.forceIntegerData ? 'Integer Only' : 'Any Numeric'}
-                  </button>
-                </div>
-
-                {params.forceIntegerData && (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-white">Integer Range</label>
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        <div>
-                          <input
-                            type="text"
-                            placeholder="Min"
-                            value={inputValues.min}
-                            onChange={(e) => handleMinInputChange(e.target.value)}
-                            onKeyPress={handleMinKeyPress}
-                            className={`w-full px-2 py-1 text-xs rounded border bg-gray-800 text-white ${
-                              inputErrors.min ? 'border-red-500' : 'border-gray-600'
-                            }`}
-                            disabled={state.isRunning}
-                          />
-                          {inputErrors.min && (
-                            <p className="text-red-400 text-xs mt-1">{inputErrors.min}</p>
-                          )}
-                        </div>
-                        <div>
-                          <input
-                            type="text"
-                            placeholder="Max"
-                            value={inputValues.max}
-                            onChange={(e) => handleMaxInputChange(e.target.value)}
-                            onKeyPress={handleMaxKeyPress}
-                            className={`w-full px-2 py-1 text-xs rounded border bg-gray-800 text-white ${
-                              inputErrors.max ? 'border-red-500' : 'border-gray-600'
-                            }`}
-                            disabled={state.isRunning}
-                          />
-                          {inputErrors.max && (
-                            <p className="text-red-400 text-xs mt-1">{inputErrors.max}</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
+            {/* Controls and Information */}
+            <div className="space-y-6">
+              <BootstrapControls
+                state={state}
+                params={params}
+                onParamsChange={handleParamsChange}
+                onStateChange={handleStateChange}
+                onStartStop={startStop}
+                onReset={reset}
+              />
+              
+              {/* Integer Data Controls with Enhanced Validation */}
+              <Card className="glass-panel">
+                <CardHeader>
+                  <CardTitle className="text-lg">Data Generation</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Data Type</label>
                     <button
-                      onClick={generateIntegerSequenceData}
-                      className="w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                      onClick={() => setParams(prev => ({ 
+                        ...prev, 
+                        forceIntegerData: !prev.forceIntegerData 
+                      }))}
+                      className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                        params.forceIntegerData 
+                          ? 'bg-blue-500 text-white' 
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
                       disabled={state.isRunning}
                     >
-                      Generate Integer Sequence Data
+                      {params.forceIntegerData ? 'Integer Only' : 'Any Numeric'}
                     </button>
                   </div>
-                )}
-                
-                <button
-                  onClick={generateNewData}
-                  className="w-full px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-                  disabled={state.isRunning}
-                >
-                  Generate New Random Data
-                </button>
-              </CardContent>
-            </Card>
 
-            {/* Real-time Statistics */}
-            <Card className="glass-panel">
-              <CardHeader>
-                <CardTitle className="text-lg">Statistics</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="opacity-80">Bootstrap Samples:</span>
-                  <span className="font-mono">{state.currentIteration}/{params.numBootstrapSamples}</span>
-                </div>
-                {state.currentStatValues.length > 0 && (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="opacity-80">Bootstrap {params.statistic}:</span>
-                      <span className="font-mono">
-                        {(state.currentStatValues.slice(0, state.currentIteration).reduce((a, b) => a + b, 0) / 
-                          Math.max(state.currentIteration, 1)).toFixed(3)}
-                      </span>
+                  {params.forceIntegerData && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-white">Integer Range</label>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          <div>
+                            <input
+                              type="text"
+                              placeholder="Min"
+                              value={inputValues.min}
+                              onChange={(e) => handleMinInputChange(e.target.value)}
+                              onKeyPress={handleMinKeyPress}
+                              className={`w-full px-2 py-1 text-xs rounded border bg-gray-800 text-white ${
+                                inputErrors.min ? 'border-red-500' : 'border-gray-600'
+                              }`}
+                              disabled={state.isRunning}
+                            />
+                            {inputErrors.min && (
+                              <p className="text-red-400 text-xs mt-1">{inputErrors.min}</p>
+                            )}
+                          </div>
+                          <div>
+                            <input
+                              type="text"
+                              placeholder="Max"
+                              value={inputValues.max}
+                              onChange={(e) => handleMaxInputChange(e.target.value)}
+                              onKeyPress={handleMaxKeyPress}
+                              className={`w-full px-2 py-1 text-xs rounded border bg-gray-800 text-white ${
+                                inputErrors.max ? 'border-red-500' : 'border-gray-600'
+                              }`}
+                              disabled={state.isRunning}
+                            />
+                            {inputErrors.max && (
+                              <p className="text-red-400 text-xs mt-1">{inputErrors.max}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={generateIntegerSequenceData}
+                        className="w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                        disabled={state.isRunning}
+                      >
+                        Generate Integer Sequence Data
+                      </button>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="opacity-80">Original {params.statistic}:</span>
-                      <span className="font-mono">
-                        {params.statistic === 'mean' 
-                          ? (state.originalData.reduce((a, b) => a + b, 0) / state.originalData.length).toFixed(3)
-                          : state.originalData.sort((a, b) => a - b)[Math.floor(state.originalData.length / 2)].toFixed(3)
-                        }
-                      </span>
-                    </div>
-                    {state.currentIteration > 10 && (
+                  )}
+                  
+                  <button
+                    onClick={generateNewData}
+                    className="w-full px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                    disabled={state.isRunning}
+                  >
+                    Generate New Random Data
+                  </button>
+                </CardContent>
+              </Card>
+
+              {/* Real-time Statistics */}
+              <Card className="glass-panel">
+                <CardHeader>
+                  <CardTitle className="text-lg">Statistics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="opacity-80">Bootstrap Samples:</span>
+                    <span className="font-mono">{state.currentIteration}/{params.numBootstrapSamples}</span>
+                  </div>
+                  {state.currentStatValues.length > 0 && (
+                    <>
                       <div className="flex justify-between">
-                        <span className="opacity-80">Bootstrap SE:</span>
+                        <span className="opacity-80">Bootstrap {params.statistic}:</span>
                         <span className="font-mono">
-                          {Math.sqrt(
-                            state.currentStatValues.slice(0, state.currentIteration)
-                              .reduce((acc, val, _, arr) => {
-                                const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
-                                return acc + Math.pow(val - mean, 2);
-                              }, 0) / (state.currentIteration - 1)
-                          ).toFixed(3)}
+                          {(state.currentStatValues.slice(0, state.currentIteration).reduce((a, b) => a + b, 0) / 
+                            Math.max(state.currentIteration, 1)).toFixed(3)}
                         </span>
                       </div>
-                    )}
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                      <div className="flex justify-between">
+                        <span className="opacity-80">Original {params.statistic}:</span>
+                        <span className="font-mono">
+                          {params.statistic === 'mean' 
+                            ? (state.originalData.reduce((a, b) => a + b, 0) / state.originalData.length).toFixed(3)
+                            : state.originalData.sort((a, b) => a - b)[Math.floor(state.originalData.length / 2)].toFixed(3)
+                          }
+                        </span>
+                      </div>
+                      {state.currentIteration > 10 && (
+                        <div className="flex justify-between">
+                          <span className="opacity-80">Bootstrap SE:</span>
+                          <span className="font-mono">
+                            {Math.sqrt(
+                              state.currentStatValues.slice(0, state.currentIteration)
+                                .reduce((acc, val, _, arr) => {
+                                  const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+                                  return acc + Math.pow(val - mean, 2);
+                                }, 0) / (state.currentIteration - 1)
+                            ).toFixed(3)}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Educational Content */}
+          <div className="mt-12">
+            <BootstrapEducationalPanels />
           </div>
         </div>
 
-        {/* Educational Content */}
-        <div className="mt-12 space-y-6">
-          <Accordion type="multiple" className="space-y-4">
-            <AccordionItem value="theory" className="glass-panel border-white/10">
-              <AccordionTrigger className="text-lg font-semibold text-white px-6">
-                Bootstrap Theory & Methodology
-              </AccordionTrigger>
-              <AccordionContent className="text-white px-6 pb-6">
-                <div className="space-y-4 text-sm">
-                  <p>
-                    <strong>Bootstrap Resampling</strong> is a powerful statistical method for estimating the sampling distribution 
-                    of a statistic without making assumptions about the underlying population distribution.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold mb-2">How It Works:</h4>
-                      <ol className="list-decimal list-inside space-y-1 text-xs">
-                        <li>Start with original sample of size n</li>
-                        <li>Draw B bootstrap samples (with replacement)</li>
-                        <li>Calculate statistic for each bootstrap sample</li>
-                        <li>Analyze distribution of bootstrap statistics</li>
-                      </ol>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-semibold mb-2">Applications:</h4>
-                      <ul className="list-disc list-inside space-y-1 text-xs">
-                        <li>Confidence interval estimation</li>
-                        <li>Bias correction</li>
-                        <li>Hypothesis testing</li>
-                        <li>Model selection and validation</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* NEW: Corrected Variance Explanation Panel */}
-            <AccordionItem value="variance" className="glass-panel border-white/10">
-              <AccordionTrigger className="text-lg font-semibold text-white px-6">
-                Bootstrap Variance Theory
-              </AccordionTrigger>
-              <AccordionContent className="text-white px-6 pb-6">
-                <div className="space-y-4 text-sm">
-                  <p>
-                    <strong>Key Theoretical Result:</strong>
-                  </p>
-                  <p>
-                    The variance computed from bootstrap samples is <em>conditional</em> on fixing X₁, ..., Xₙ and equals:
-                  </p>
-                  <p className="font-mono bg-gray-800 p-3 rounded border-l-4 border-blue-500">
-                    Var[θ*|X₁,...,Xₙ] = (1 - 1/n) × Var[θ̂]
-                  </p>
-                  <p>
-                    where θ̂ is the classic mean estimator. When n is large, the factor (1 - 1/n) ≈ 1, 
-                    so the bootstrap variance closely approximates the true variance.
-                  </p>
-                  <p className="text-yellow-300">
-                    <em>Note: This is different from the unconditional bootstrap variance relationship.</em>
-                  </p>
-                  <div className="mt-4 p-3 bg-blue-900/30 rounded">
-                    <p className="text-xs">
-                      <strong>Practical Implication:</strong> For large samples, bootstrap variance provides an excellent 
-                      approximation to the true sampling variance, making it invaluable for statistical inference.
-                    </p>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="interpretation" className="glass-panel border-white/10">
-              <AccordionTrigger className="text-lg font-semibold text-white px-6">
-                Chart Interpretation Guide
-              </AccordionTrigger>
-              <AccordionContent className="text-white px-6 pb-6">
-                <div className="space-y-4 text-sm">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-3 bg-blue-900/30 rounded">
-                      <h4 className="font-semibold mb-2">Bootstrap Distribution</h4>
-                      <p className="text-xs">Shows the distribution of bootstrap statistics. Should approximate normal distribution for means (Central Limit Theorem).</p>
-                    </div>
-                    
-                    <div className="p-3 bg-green-900/30 rounded">
-                      <h4 className="font-semibold mb-2">Original vs Bootstrap</h4>
-                      <p className="text-xs">Compares original data distribution (gray) with bootstrap statistics distribution (orange). Note different scales!</p>
-                    </div>
-                    
-                    <div className="p-3 bg-purple-900/30 rounded">
-                      <h4 className="font-semibold mb-2">Convergence Analysis</h4>
-                      <p className="text-xs">Tracks bias and MSE as bootstrap samples increase. Should converge to stable values with sufficient samples.</p>
-                    </div>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
+        {/* Footer */}
+        <footer className="w-full glass-panel border-t border-white/5 mt-16">
+          <div className="container py-4 px-4 md:px-8 text-center">
+            <p className="text-sm opacity-70">
+              Bootstrap Visualization • Statistical Resampling • BITS Pilani, K.K. Birla Goa Campus
+            </p>
+          </div>
+        </footer>
       </div>
-
-      {/* Footer */}
-      <footer className="w-full glass-panel border-t border-white/5 mt-16">
-        <div className="container py-4 px-4 md:px-8 text-center">
-          <p className="text-sm opacity-70">
-            Bootstrap Visualization • Statistical Resampling • BITS Pilani, K.K. Birla Goa Campus
-          </p>
-        </div>
-      </footer>
-    </div>
+    </TooltipProvider>
   );
 };
 
