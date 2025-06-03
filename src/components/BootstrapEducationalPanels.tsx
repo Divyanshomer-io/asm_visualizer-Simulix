@@ -44,7 +44,7 @@ const BootstrapEducationalPanels: React.FC = () => {
                 <li>Given original sample: X₁, X₂, ..., Xₙ</li>
                 <li>Draw B bootstrap samples of size n with replacement</li>
                 <li>Compute statistic θ* for each bootstrap sample</li>
-                <li>Use the collection {θ*₁, θ*₂, ..., θ*ᵦ} to estimate sampling distribution</li>
+                <li>Use the collection {`{θ*₁, θ*₂, ..., θ*ᵦ}`} to estimate sampling distribution</li>
                 <li>Calculate confidence intervals, bias, and variance estimates</li>
               </ol>
             </div>
@@ -211,7 +211,7 @@ const BootstrapEducationalPanels: React.FC = () => {
           onClick={() => togglePanel('tips')}
         >
           <CardTitle className="text-lg font-semibold text-white flex items-center justify-between">
-            Bootstrap Tips & Best Practices
+            Bootstrap Tips &amp; Best Practices
             {openPanels.tips ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </CardTitle>
         </CardHeader>
@@ -251,7 +251,7 @@ const BootstrapEducationalPanels: React.FC = () => {
               <ul className="list-disc list-inside text-sm space-y-1">
                 <li>Too few bootstrap samples (B &lt; 100) gives unstable results</li>
                 <li>Original sample too small (n &lt; 20) may not represent population</li>
-                <li>Bootstrap doesn't fix problems with biased original samples</li>
+                <li>Bootstrap doesn&apos;t fix problems with biased original samples</li>
                 <li>Time series data requires specialized bootstrap methods</li>
               </ul>
             </div>
