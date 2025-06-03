@@ -83,8 +83,19 @@ const Bootstrapping: React.FC = () => {
   const generateIntegerSequenceData = () => {
     const { min, max } = state.integerDataRange;
     const sequenceData = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-    setState(prev => ({ ...prev, originalData: sequenceData }));
-    resetBootstrap();
+    setState(prev => ({ 
+      ...prev, 
+      originalData: sequenceData,
+      currentStatValues: [],
+      currentIteration: 0,
+      isRunning: false
+    }));
+    
+    // Clear any running interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
   };
 
   const getClassicMeanMSE = (): number => {
@@ -111,8 +122,15 @@ const Bootstrapping: React.FC = () => {
       ...prev, 
       originalData: newData,
       currentStatValues: [],
-      currentIteration: 0
+      currentIteration: 0,
+      isRunning: false
     }));
+
+    // Clear any running interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
   };
 
   const resetBootstrap = () => {
@@ -130,50 +148,69 @@ const Bootstrapping: React.FC = () => {
   };
 
   const performBootstrapIteration = () => {
-    if (state.currentIteration >= params.numBootstrapSamples) {
-      setState(prev => ({ ...prev, isRunning: false }));
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+    setState(prev => {
+      if (prev.currentIteration >= params.numBootstrapSamples) {
+        // Stop the animation when we reach the limit
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        return { ...prev, isRunning: false };
       }
-      return;
-    }
 
-    const newStat = performBootstrapSample(state.originalData, params.statistic);
-    
-    setState(prev => ({
-      ...prev,
-      currentStatValues: [...prev.currentStatValues, newStat],
-      currentIteration: prev.currentIteration + 1
-    }));
+      const newStat = performBootstrapSample(prev.originalData, params.statistic);
+      
+      return {
+        ...prev,
+        currentStatValues: [...prev.currentStatValues, newStat],
+        currentIteration: prev.currentIteration + 1
+      };
+    });
   };
 
   const startStop = () => {
-    if (state.isRunning) {
-      setState(prev => ({ ...prev, isRunning: false }));
+    setState(prev => {
+      if (prev.isRunning) {
+        // Stop the animation
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        return { ...prev, isRunning: false };
+      } else {
+        // Start the animation only if we haven't reached the limit
+        if (prev.currentIteration < params.numBootstrapSamples) {
+          return { ...prev, isRunning: true };
+        }
+        return prev;
+      }
+    });
+  };
+
+  // Fixed animation loop with proper dependency management
+  useEffect(() => {
+    if (state.isRunning && state.currentIteration < params.numBootstrapSamples) {
+      if (!intervalRef.current) {
+        intervalRef.current = setInterval(() => {
+          performBootstrapIteration();
+        }, state.animationSpeed);
+      }
+    } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-    } else {
-      setState(prev => ({ ...prev, isRunning: true }));
-    }
-  };
-
-  // Animation loop
-  useEffect(() => {
-    if (state.isRunning && !intervalRef.current) {
-      intervalRef.current = setInterval(() => {
-        performBootstrapIteration();
-      }, state.animationSpeed);
-    } else if (!state.isRunning && intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+      
+      // Auto-stop when reaching the limit
+      if (state.currentIteration >= params.numBootstrapSamples && state.isRunning) {
+        setState(prev => ({ ...prev, isRunning: false }));
+      }
     }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, [state.isRunning, state.animationSpeed, state.currentIteration, params.numBootstrapSamples]);
