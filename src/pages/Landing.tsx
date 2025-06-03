@@ -395,7 +395,7 @@ const Landing = () => {
           <p className="text-center">
             <span className="opacity-70">Created by </span>
             <span className="font-medium">Divyanshu Lila</span>
-            <span className="text-sm opacity-50 ml-2">2022A3PS1056G</span>
+{/*             <span className="text-sm opacity-50 ml-2">2022A3PS1056G</span> */}
           </p>
         </div>
       </section>
