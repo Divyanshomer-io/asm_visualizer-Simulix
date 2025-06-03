@@ -29,6 +29,8 @@ interface DataVisualizationProps {
   currentEstimate: number;
   iteration: number;
   k: number;
+  isLogScale: boolean;
+  yAxisDecimals: number;
 }
 
 const DataVisualization: React.FC<DataVisualizationProps> = ({
@@ -37,6 +39,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({
   currentEstimate,
   iteration,
   k,
+  isLogScale,
+  yAxisDecimals,
 }) => {
   // Transform data for visualization
   const formattedData: DataPoint[] = data.map((value, index) => ({
@@ -51,6 +55,9 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({
   const dataMin = Math.min(...data);
   const dataMax = Math.max(...data);
   
+  // Validate if log scale is safe (no zero or negative values)
+  const safeLogScale = isLogScale && data.every(val => val > 0) && currentEstimate > 0;
+  
   // Custom tooltip for the scatter chart
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -58,7 +65,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({
       return (
         <div className="glass-panel p-2 border border-white/10 shadow-lg rounded-md">
           <p className="font-semibold">Point {dataPoint.id + 1}</p>
-          <p>Value: {dataPoint.value}</p>
+          <p>Value: {dataPoint.value.toFixed(yAxisDecimals)}</p>
           <p>Weight: {dataPoint.weight.toFixed(4)}</p>
         </div>
       );
@@ -110,7 +117,9 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({
                 type="number" 
                 dataKey="value" 
                 name="Value" 
-                domain={[Math.min(dataMin - 5, currentEstimate - k * 2), Math.max(dataMax + 5, currentEstimate + k * 2)]}
+                scale={safeLogScale ? "log" : "linear"}
+                domain={safeLogScale ? ['auto', 'auto'] : [Math.min(dataMin - 5, currentEstimate - k * 2), Math.max(dataMax + 5, currentEstimate + k * 2)]}
+                tickFormatter={(value) => Number(value).toFixed(yAxisDecimals)}
                 label={{ 
                   value: 'Value', 
                   angle: -90, 
@@ -131,7 +140,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({
                 strokeWidth={2}
                 strokeDasharray="3 3"
                 label={{ 
-                  value: `Estimate: ${currentEstimate.toFixed(3)}`, 
+                  value: `Estimate: ${currentEstimate.toFixed(yAxisDecimals)}`, 
                   position: 'insideTopLeft',
                   style: { fontWeight: 'bold', fill: '#ef4444' }
                 }}

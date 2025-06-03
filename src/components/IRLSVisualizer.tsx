@@ -29,6 +29,8 @@ const IRLSVisualizer: React.FC = () => {
   const [convergenceHistory, setConvergenceHistory] = useState<ConvergenceData[]>([{ iteration: 0, estimate: 20 }]);
   const [convergenceThreshold, setConvergenceThreshold] = useState<number>(0.001);
   const [hasConverged, setHasConverged] = useState<boolean>(false);
+  const [isLogScale, setIsLogScale] = useState<boolean>(false);
+  const [yAxisDecimals, setYAxisDecimals] = useState<number>(2);
 
   useEffect(() => {
     if (data.length > 0) {
@@ -139,7 +141,11 @@ const IRLSVisualizer: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left side - Visualizations */}
           <div className="lg:col-span-2 space-y-6">
-            <ConvergenceChart iterations={convergenceHistory} />
+            <ConvergenceChart 
+              iterations={convergenceHistory}
+              isLogScale={isLogScale}
+              yAxisDecimals={yAxisDecimals}
+            />
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <DataVisualization
@@ -148,12 +154,16 @@ const IRLSVisualizer: React.FC = () => {
                 currentEstimate={currentEstimate}
                 iteration={currentIteration}
                 k={k}
+                isLogScale={isLogScale}
+                yAxisDecimals={yAxisDecimals}
               />
               <WeightsVisualization
                 data={data}
                 weights={weights}
                 currentEstimate={currentEstimate}
                 k={k}
+                isLogScale={isLogScale}
+                yAxisDecimals={yAxisDecimals}
               />
             </div>
           </div>
@@ -179,6 +189,10 @@ const IRLSVisualizer: React.FC = () => {
               currentEstimate={currentEstimate}
               simpleMean={simpleMean}
               hasConverged={hasConverged}
+              isLogScale={isLogScale}
+              setIsLogScale={setIsLogScale}
+              yAxisDecimals={yAxisDecimals}
+              setYAxisDecimals={setYAxisDecimals}
               onParseData={parseDataInput}
               onPerformIteration={performIteration}
               onToggleAutoMode={toggleAutoMode}

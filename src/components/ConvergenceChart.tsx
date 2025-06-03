@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -20,9 +21,18 @@ interface ConvergenceData {
 
 interface ConvergenceChartProps {
   iterations: ConvergenceData[];
+  isLogScale: boolean;
+  yAxisDecimals: number;
 }
 
-const ConvergenceChart: React.FC<ConvergenceChartProps> = ({ iterations }) => {
+const ConvergenceChart: React.FC<ConvergenceChartProps> = ({ 
+  iterations, 
+  isLogScale, 
+  yAxisDecimals 
+}) => {
+  // Validate if log scale is safe (no zero or negative values)
+  const safeLogScale = isLogScale && iterations.every(item => item.estimate > 0);
+
   return (
     <Card className="glass-panel">
       <CardHeader>
@@ -58,6 +68,9 @@ const ConvergenceChart: React.FC<ConvergenceChartProps> = ({ iterations }) => {
                 }}
               />
               <YAxis 
+                scale={safeLogScale ? "log" : "linear"}
+                domain={safeLogScale ? ['auto', 'auto'] : ['dataMin - 1', 'dataMax + 1']}
+                tickFormatter={(value) => Number(value).toFixed(yAxisDecimals)}
                 label={{ 
                   value: 'Estimate', 
                   angle: -90, 
@@ -66,7 +79,7 @@ const ConvergenceChart: React.FC<ConvergenceChartProps> = ({ iterations }) => {
                 }}
               />
               <RechartsTooltip  
-                formatter={(value: number) => value.toFixed(4)}
+                formatter={(value: number) => [value.toFixed(yAxisDecimals), 'Estimate']}
                 labelFormatter={(label) => `Iteration ${label}`}
                 contentStyle={{ 
                   backgroundColor: 'rgba(0,0,0,0.8)', 

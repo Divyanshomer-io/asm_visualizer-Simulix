@@ -25,6 +25,8 @@ interface WeightsVisualizationProps {
   weights: number[];
   currentEstimate: number;
   k: number;
+  isLogScale: boolean;
+  yAxisDecimals: number;
 }
 
 const WeightsVisualization: React.FC<WeightsVisualizationProps> = ({
@@ -32,6 +34,8 @@ const WeightsVisualization: React.FC<WeightsVisualizationProps> = ({
   weights,
   currentEstimate,
   k,
+  isLogScale,
+  yAxisDecimals,
 }) => {
   // Transform data for visualization
   const formattedData: WeightData[] = data.map((value, index) => ({
@@ -39,6 +43,9 @@ const WeightsVisualization: React.FC<WeightsVisualizationProps> = ({
     weight: weights[index],
     value,
   }));
+
+  // Validate if log scale is safe (no zero or negative weights)
+  const safeLogScale = isLogScale && weights.every(w => w > 0);
 
   // Custom tooltip for the bar chart
   const CustomTooltip = ({ active, payload }: any) => {
@@ -49,7 +56,7 @@ const WeightsVisualization: React.FC<WeightsVisualizationProps> = ({
         <div className="glass-panel p-2 border border-white/10 shadow-lg rounded-md">
           <p className="font-semibold">Point {dataPoint.index}</p>
           <p>Value: {dataPoint.value}</p>
-          <p>Weight: {dataPoint.weight.toFixed(4)}</p>
+          <p>Weight: {dataPoint.weight.toFixed(Math.min(yAxisDecimals, 2))}</p>
           <p>Residual: {residual.toFixed(4)}</p>
         </div>
       );
@@ -92,13 +99,15 @@ const WeightsVisualization: React.FC<WeightsVisualizationProps> = ({
                 }}
               />
               <YAxis 
+                scale={safeLogScale ? "log" : "linear"}
+                domain={safeLogScale ? [0.001, 'dataMax + 0.1'] : [0, 'dataMax + 0.1']}
+                tickFormatter={(value) => Number(value).toFixed(Math.min(yAxisDecimals, 2))}
                 label={{ 
                   value: 'Weight', 
                   angle: -90, 
                   position: 'insideLeft',
                   style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
                 }}
-                domain={[0, 1.1]}
               />
               <RechartsTooltip content={<CustomTooltip />} />
               <Bar dataKey="weight" name="Weight">

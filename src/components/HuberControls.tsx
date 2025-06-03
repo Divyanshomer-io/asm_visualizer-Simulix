@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +28,10 @@ interface HuberControlsProps {
   currentEstimate: number;
   simpleMean: number;
   hasConverged: boolean;
+  isLogScale: boolean;
+  setIsLogScale: (value: boolean) => void;
+  yAxisDecimals: number;
+  setYAxisDecimals: (value: number) => void;
   onParseData: () => void;
   onPerformIteration: () => void;
   onToggleAutoMode: () => void;
@@ -54,6 +57,10 @@ const HuberControls: React.FC<HuberControlsProps> = ({
   currentEstimate,
   simpleMean,
   hasConverged,
+  isLogScale,
+  setIsLogScale,
+  yAxisDecimals,
+  setYAxisDecimals,
   onParseData,
   onPerformIteration,
   onToggleAutoMode,
@@ -202,6 +209,42 @@ const HuberControls: React.FC<HuberControlsProps> = ({
             </div>
           </div>
         )}
+
+        {/* New Y-Axis Controls Section */}
+        <div className="space-y-4 p-4 glass-panel rounded-lg">
+          <h3 className="text-sm font-medium">Y-Axis Controls</h3>
+          
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Y-Axis Scale</label>
+            <button
+              onClick={() => setIsLogScale(!isLogScale)}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                isLogScale 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {isLogScale ? 'Log Scale' : 'Linear Scale'}
+            </button>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Y-Axis Decimals: {yAxisDecimals}</label>
+            <input
+              type="range"
+              min="0"
+              max="4"
+              step="1"
+              value={yAxisDecimals}
+              onChange={(e) => setYAxisDecimals(parseInt(e.target.value))}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>0</span>
+              <span>4</span>
+            </div>
+          </div>
+        </div>
 
         <div className="flex flex-wrap gap-2">
           <Button
