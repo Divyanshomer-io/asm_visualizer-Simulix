@@ -21,11 +21,13 @@ import { BootstrapState, BootstrapParams } from "@/pages/Bootstrapping";
 interface BootstrapVisualizationProps {
   state: BootstrapState;
   params: BootstrapParams;
+  getClassicMeanMSE: () => number;
 }
 
 const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
   state,
   params,
+  getClassicMeanMSE,
 }) => {
   // Safe number formatter
   const formatNumber = (value: any, decimals: number = 2): string => {
@@ -35,7 +37,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     return '0';
   };
 
-  // Prepare data for bootstrap distribution histogram - following Python logic exactly
+  // Prepare data for bootstrap distribution histogram
   const getBootstrapHistogramData = () => {
     const currentStats = state.currentStatValues.slice(0, state.currentIteration);
     if (currentStats.length === 0) return [];
@@ -71,16 +73,14 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
       }
     });
 
-    // Add normal fit data to each bin - following Python scipy.stats.norm.pdf logic
+    // Add normal fit data to each bin
     if (state.showNormalFit && currentStats.length >= 10) {
       const mean = currentStats.reduce((a, b) => a + b, 0) / currentStats.length;
       const variance = currentStats.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / currentStats.length;
       const std = Math.sqrt(variance);
 
       histogram.forEach(bin => {
-        // Normal PDF calculation
         const normalPdf = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((bin.x - mean) / std, 2));
-        // Scale to match histogram frequency (not density)
         bin.normalFit = normalPdf * currentStats.length * binWidth;
       });
     }
@@ -88,7 +88,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     return histogram;
   };
 
-  // Calculate confidence intervals - following Python percentile logic exactly
+  // Calculate confidence intervals
   const getConfidenceInterval = () => {
     const currentStats = state.currentStatValues.slice(0, state.currentIteration);
     if (currentStats.length < 10) return null;
@@ -105,58 +105,87 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
     };
   };
 
-  // Prepare data for original vs bootstrap comparison - TRUE DENSITY (Python logic)
+  // FIXED: Original vs Bootstrap Comparison Data with Integer Mode Support
   const getComparisonData = () => {
     const currentStats = state.currentStatValues.slice(0, state.currentIteration);
     if (currentStats.length === 0) return [];
 
-    // Use same range for both original data and bootstrap stats
-    const allValues = [...state.originalData, ...currentStats];
-    const min = Math.min(...allValues);
-    const max = Math.max(...allValues);
+    if (params.forceIntegerData) {
+      // Create histogram with EXACT integer x-values
+      const uniqueIntegers = Array.from(new Set(state.originalData)).sort((a, b) => a - b);
+      const histogram = uniqueIntegers.map(value => ({
+        x: Math.round(value), // FORCE integer x-values
+        original: 0,
+        bootstrap: 0,
+      }));
 
-    if (min === max) {
-      return [{
-        x: min,
-        original: 1.0,
-        bootstrap: 1.0,
-      }];
+      // Count original data at exact integer positions
+      state.originalData.forEach(val => {
+        const intVal = Math.round(val);
+        const bin = histogram.find(b => b.x === intVal);
+        if (bin) bin.original++;
+      });
+
+      // For bootstrap stats, map to nearest histogram bins
+      currentStats.forEach(statValue => {
+        const closestBin = histogram.reduce((closest, bin) => 
+          Math.abs(bin.x - statValue) < Math.abs(closest.x - statValue) ? bin : closest
+        );
+        if (closestBin) closestBin.bootstrap++;
+      });
+
+      return histogram.map(bin => ({
+        x: bin.x, // Clean integer
+        original: bin.original / state.originalData.length,
+        bootstrap: bin.bootstrap / (currentStats.length || 1),
+      }));
+    } else {
+      // CONTINUOUS BINS FOR NON-INTEGER MODE
+      const originalRange = { min: Math.min(...state.originalData), max: Math.max(...state.originalData) };
+      const statsRange = { min: Math.min(...currentStats), max: Math.max(...currentStats) };
+      
+      const globalMin = Math.min(originalRange.min, statsRange.min);
+      const globalMax = Math.max(originalRange.max, statsRange.max);
+      
+      if (globalMin === globalMax) {
+        return [{ x: globalMin, original: 1.0, bootstrap: 1.0 }];
+      }
+
+      const bins = 15;
+      const binWidth = (globalMax - globalMin) / bins;
+
+      const histogram = Array(bins).fill(0).map((_, i) => ({
+        x: globalMin + (i + 0.5) * binWidth,
+        original: 0,
+        bootstrap: 0,
+      }));
+
+      // Count ORIGINAL DATA values
+      state.originalData.forEach(value => {
+        const binIndex = Math.min(Math.floor((value - globalMin) / binWidth), bins - 1);
+        if (binIndex >= 0 && binIndex < bins) {
+          histogram[binIndex].original++;
+        }
+      });
+
+      // Count BOOTSTRAP STATISTICS
+      currentStats.forEach(statValue => {
+        const binIndex = Math.min(Math.floor((statValue - globalMin) / binWidth), bins - 1);
+        if (binIndex >= 0 && binIndex < bins) {
+          histogram[binIndex].bootstrap++;
+        }
+      });
+
+      // Convert to density
+      return histogram.map(bin => ({
+        x: bin.x,
+        original: bin.original / (state.originalData.length * binWidth),
+        bootstrap: bin.bootstrap / (currentStats.length * binWidth),
+      }));
     }
-
-    const bins = 15;
-    const binWidth = (max - min) / bins;
-
-    const histogram = Array(bins).fill(0).map((_, i) => ({
-      x: min + (i + 0.5) * binWidth, // bin center
-      original: 0,
-      bootstrap: 0,
-    }));
-
-    // Count original data
-    state.originalData.forEach(value => {
-      const binIndex = Math.min(Math.floor((value - min) / binWidth), bins - 1);
-      if (binIndex >= 0 && binIndex < bins) {
-        histogram[binIndex].original++;
-      }
-    });
-
-    // Count bootstrap stats  
-    currentStats.forEach(value => {
-      const binIndex = Math.min(Math.floor((value - min) / binWidth), bins - 1);
-      if (binIndex >= 0 && binIndex < bins) {
-        histogram[binIndex].bootstrap++;
-      }
-    });
-
-    // Convert to DENSITY (not frequency) - this is the key fix
-    return histogram.map(bin => ({
-      x: bin.x,
-      original: bin.original / (state.originalData.length * binWidth),
-      bootstrap: bin.bootstrap / (currentStats.length * binWidth),
-    }));
   };
 
-  // Calculate bias and MSE convergence
+  // Calculate bias and MSE convergence with MSE baseline
   const getConvergenceData = () => {
     const trueValue = params.statistic === 'mean' 
       ? state.originalData.reduce((a, b) => a + b, 0) / state.originalData.length
@@ -201,7 +230,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
               <ComposedChart data={histogramData} margin={{ top: 20, right: 30, left: 60, bottom: 80 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#444444" />
                 
-                {/* Confidence interval highlighting - FULL BACKGROUND area between bounds */}
+                {/* Confidence interval highlighting */}
                 {state.showCI && confidenceInterval && (
                   <ReferenceArea 
                     x1={confidenceInterval.lower} 
@@ -263,7 +292,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   opacity={0.7}
                 />
                 
-                {/* Normal fit line - following Python plot logic */}
+                {/* Normal fit line */}
                 {state.showNormalFit && (
                   <Line 
                     dataKey="normalFit" 
@@ -274,7 +303,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                   />
                 )}
                 
-                {/* RED DOTTED Confidence Interval vertical lines - FIXED */}
+                {/* Confidence Interval vertical lines */}
                 {state.showCI && confidenceInterval && (
                   <>
                     <ReferenceLine 
@@ -324,20 +353,15 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
             </ResponsiveContainer>
           </div>
           
-          {confidenceInterval && (
-            <div className="mt-2 text-xs space-y-1 text-white">
-              <div className="flex justify-between">
-                <span>Bootstrap Mean:</span>
-                <span className="font-mono">{formatNumber(confidenceInterval.mean, 3)}</span>
-              </div>
-              {state.showCI && (
-                <div className="flex justify-between">
-                  <span>{(params.confidenceLevel * 100).toFixed(0)}% CI:</span>
-                  <span className="font-mono">
-                    [{formatNumber(confidenceInterval.lower, 3)}, {formatNumber(confidenceInterval.upper, 3)}]
-                  </span>
-                </div>
-              )}
+          {/* Confidence interval display */}
+          {state.showCI && confidenceInterval && (
+            <div className="mt-4 p-3 bg-white/5 rounded-lg">
+              <p className="text-sm text-white">
+                <strong>{(params.confidenceLevel * 100).toFixed(0)}% Confidence Interval:</strong>
+                <span className="ml-2 font-mono">
+                  [{formatNumber(confidenceInterval.lower, 3)}, {formatNumber(confidenceInterval.upper, 3)}]
+                </span>
+              </p>
             </div>
           )}
         </CardContent>
@@ -345,10 +369,10 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
 
       {/* Bottom Row: Original vs Bootstrap Comparison and Convergence Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Original vs Bootstrap Comparison */}
+        {/* FIXED: Original vs Bootstrap Comparison with Integer Mode Support */}
         <Card className="glass-panel">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-white">Original vs Bootstrap Comparison</CardTitle>
+            <CardTitle className="text-lg font-semibold text-white">Original Data vs Bootstrap Statistics</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -360,9 +384,21 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     stroke="#ffffff"
                     fontSize={14}
                     fontWeight="bold"
-                    tickFormatter={(value) => typeof value === 'number' ? formatNumber(value, 1) : '0'}
+                    type="number"
+                    scale="linear"
+                    domain={params.forceIntegerData ? ['dataMin', 'dataMax'] : ['auto', 'auto']}
+                    ticks={params.forceIntegerData ? 
+                      Array.from(new Set(state.originalData.map(val => Math.round(val)))).sort((a,b) => a-b) : 
+                      undefined
+                    }
+                    tickFormatter={(value) => 
+                      params.forceIntegerData 
+                        ? `${Math.round(value)}` 
+                        : formatNumber(value, 1)
+                    }
+                    interval={0}
                     label={{ 
-                      value: 'Data Value', 
+                      value: 'Value', 
                       position: 'insideBottom', 
                       offset: -20, 
                       style: { textAnchor: 'middle', fill: '#ffffff', fontSize: '14px', fontWeight: 'bold' } 
@@ -389,7 +425,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     }}
                     formatter={(value: number, name: string) => [
                       formatNumber(value, 4),
-                      name === 'original' ? `Original Data (n=${state.originalData.length})` : `Bootstrap ${params.statistic}s (n=${state.currentIteration})`
+                      name === 'original' ? `Original Raw Data (n=${state.originalData.length})` : `Bootstrap ${params.statistic}s (n=${state.currentIteration})`
                     ]}
                   />
                   
@@ -398,7 +434,9 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     fill="rgba(128,128,128,0.5)" 
                     stroke="rgba(128,128,128,1)"
                     strokeWidth={1}
-                    name="Original Data"
+                    name="Original Raw Data"
+                    barSize={params.forceIntegerData ? 30 : 15}
+                    radius={[0, 0, 0, 0]}
                   />
                   <Bar 
                     dataKey="bootstrap" 
@@ -406,6 +444,8 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     stroke="rgba(255,165,0,1)"
                     strokeWidth={1}
                     name={`Bootstrap ${params.statistic}s`}
+                    barSize={params.forceIntegerData ? 30 : 15}
+                    radius={[0, 0, 0, 0]}
                   />
 
                   {/* Add mean lines */}
@@ -440,7 +480,7 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
           </CardContent>
         </Card>
 
-        {/* Convergence Analysis */}
+        {/* Convergence Analysis with MSE Baseline */}
         <Card className="glass-panel">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-white">Bias and MSE Convergence</CardTitle>
@@ -484,6 +524,20 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
                     formatter={(value: number, name: string) => [formatNumber(value, 4), name === 'bias' ? '|Bias|' : 'MSE']}
                   />
                   
+                  {/* MSE BASELINE REFERENCE LINE */}
+                  <ReferenceLine 
+                    y={getClassicMeanMSE()} 
+                    stroke="#FFD700" 
+                    strokeWidth={2}
+                    strokeDasharray="8 4"
+                    label={{
+                      value: `Classic MSE: ${formatNumber(getClassicMeanMSE(), 4)}`,
+                      position: "top",
+                      offset: 10,
+                      style: { fill: "#FFD700", fontSize: "12px", fontWeight: "bold" }
+                    }}
+                  />
+                  
                   <Line 
                     type="monotone" 
                     dataKey="bias" 
@@ -504,15 +558,22 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
               </ResponsiveContainer>
             </div>
             
+            {/* Convergence statistics display */}
             {convergenceData.length > 0 && (
-              <div className="mt-2 text-xs flex justify-between text-white">
-                <div>
-                  <span className="inline-block w-3 h-3 bg-[#4169E1] rounded-full mr-1"></span>
-                  |Bias|: {formatNumber(convergenceData[convergenceData.length - 1]?.bias, 4)}
-                </div>
-                <div>
-                  <span className="inline-block w-3 h-3 bg-[#DC143C] rounded-full mr-1"></span>
-                  MSE: {formatNumber(convergenceData[convergenceData.length - 1]?.mse, 4)}
+              <div className="mt-4 p-3 bg-white/5 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 text-sm text-white">
+                  <div>
+                    <p><strong>Current Bias:</strong></p>
+                    <p className="font-mono text-blue-400">
+                      {formatNumber(convergenceData[convergenceData.length - 1]?.bias || 0, 4)}
+                    </p>
+                  </div>
+                  <div>
+                    <p><strong>Current MSE:</strong></p>
+                    <p className="font-mono text-red-400">
+                      {formatNumber(convergenceData[convergenceData.length - 1]?.mse || 0, 4)}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
