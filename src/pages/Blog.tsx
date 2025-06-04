@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MoveRight, Sparkles, Zap, BookOpen, Users, Target, ArrowRight, Mail, MessageSquare, X } from 'lucide-react';
+import { MoveRight, Sparkles, Zap, BookOpen, Users, Target, ArrowRight, Mail, MessageSquare, X, Home } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -74,9 +74,20 @@ const Blog = () => {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-sm opacity-80">
-              <Zap className="h-4 w-4 text-accent" />
-              <span className="hidden sm:inline">Interactive Data Science</span>
+            <div className="flex items-center gap-4">
+              <Link 
+                to="/" 
+                className="group flex items-center gap-2 px-4 py-2 glass-panel rounded-full hover:border-accent/40 transition-all duration-300 hover:scale-105"
+              >
+                <Home className="h-4 w-4 text-accent/80 group-hover:text-accent transition-colors" />
+                <span className="text-sm font-medium group-hover:text-accent transition-colors">
+                  Back to Home
+                </span>
+              </Link>
+              <div className="flex items-center gap-2 text-sm opacity-80">
+                <Zap className="h-4 w-4 text-accent" />
+                <span className="hidden sm:inline">Interactive Data Science</span>
+              </div>
             </div>
           </div>
         </div>
