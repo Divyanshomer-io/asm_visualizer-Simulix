@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Landing from "./pages/Landing";
+import Blog from "./pages/Blog";
 import Simulator from "./pages/Simulator";
 import SimulatedAnnealingToy from "./pages/SimulatedAnnealingToy";
 import AliasMethod from "./pages/AliasMethod";
@@ -51,6 +52,11 @@ const App = () => (
             <ErrorBoundary>
               <Routes>
                 <Route path="/" element={<Landing />} />
+                <Route path="/blog" element={
+                  <ErrorBoundary>
+                    <Blog />
+                  </ErrorBoundary>
+                } />
                 <Route path="/simulator" element={
                   <ErrorBoundary>
                     <Simulator />

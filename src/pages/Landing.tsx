@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, BookOpen } from "lucide-react";
 import MobilePopup from "@/components/MobilePopup";
 
 const Landing = () => {
@@ -224,6 +224,14 @@ const Landing = () => {
             >
               <Atom className="h-5 w-5 transition-transform group-hover:rotate-180 duration-500" />
               <span>About Project</span>
+            </Link>
+
+            <Link 
+              to="/blog" 
+              className="group control-btn flex items-center justify-center gap-2 text-lg px-8 py-4 hover:border-accent/40"
+            >
+              <BookOpen className="h-5 w-5 transition-transform group-hover:scale-110 duration-300" />
+              <span>Blog</span>
             </Link>
           </div>
         </div>
