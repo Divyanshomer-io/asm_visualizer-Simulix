@@ -489,6 +489,12 @@ const Landing = () => {
             >
               Feedback
             </button>
+            <button
+              onClick={() => setShowContribution(true)}
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105 cursor-pointer"
+            >
+              Contribute
+            </button>
           </div>
         </div>
       </footer>
