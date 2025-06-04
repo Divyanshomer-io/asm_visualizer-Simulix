@@ -1,49 +1,11 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MoveRight, Sparkles, Zap, BookOpen, Users, Target, ArrowRight, Mail, MessageSquare, X, Home } from 'lucide-react';
+import { MoveRight, Sparkles, Zap, BookOpen, Users, Target, ArrowRight, MessageSquare, Home } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
+import FeedbackForm from '@/components/FeedbackForm';
 
 const Blog = () => {
   const [showFeedback, setShowFeedback] = useState(false);
-  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
-
-  const handleFeedbackSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-    
-    try {
-      const response = await fetch('https://formspree.io/f/mzzgzddo', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        setFeedbackSubmitted(true);
-        toast.success('Thank you for your feedback!');
-        setTimeout(() => {
-          setShowFeedback(false);
-          setFeedbackSubmitted(false);
-        }, 2000);
-      } else {
-        toast.error('Failed to send feedback. Please try again.');
-      }
-    } catch (error) {
-      toast.error('Failed to send feedback. Please try again.');
-    }
-  };
-
-  const closeFeedback = () => {
-    setShowFeedback(false);
-    setFeedbackSubmitted(false);
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
@@ -434,63 +396,7 @@ const Blog = () => {
       </section>
 
       {/* Feedback Modal */}
-      {showFeedback && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
-          <div className="relative glass-panel rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border-2 border-accent/30">
-            <button
-              onClick={closeFeedback}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-accent/20 transition-colors duration-200 group"
-            >
-              <X className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
-            </button>
-
-            {!feedbackSubmitted ? (
-              <form onSubmit={handleFeedbackSubmit} className="space-y-6">
-                <div className="text-center">
-                  <div className="flex justify-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-accent/30 to-blue-500/30 rounded-2xl flex items-center justify-center">
-                      <MessageSquare className="h-6 w-6 text-accent" />
-                    </div>
-                  </div>
-                  <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-accent via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    Send Feedback
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Help us improve Simulix with your thoughts and suggestions
-                  </p>
-                </div>
-
-                <Textarea
-                  name="feedback"
-                  required
-                  placeholder="Type your feedback here..."
-                  className="min-h-[120px] resize-none"
-                />
-
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-accent/30 to-blue-500/30 hover:from-accent/40 hover:to-blue-500/40 border border-accent/30 hover:border-accent/40"
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Send Feedback
-                </Button>
-              </form>
-            ) : (
-              <div className="text-center space-y-4">
-                <div className="flex justify-center mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-500/30 to-emerald-500/30 rounded-2xl flex items-center justify-center">
-                    <Sparkles className="h-8 w-8 text-green-400" />
-                  </div>
-                </div>
-                <h2 className="text-2xl font-bold text-green-400">Thank You!</h2>
-                <p className="text-muted-foreground">
-                  Your feedback has been sent successfully. We appreciate your input!
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <FeedbackForm showFeedback={showFeedback} setShowFeedback={setShowFeedback} />
 
       {/* Footer */}
       <footer className="w-full glass-panel border-t border-white/5 mt-16">
