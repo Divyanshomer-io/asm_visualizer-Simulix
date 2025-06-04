@@ -1,7 +1,7 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, School, User, BookOpen, Building } from "lucide-react";
+import { ArrowLeft, School, User, BookOpen, Building, Linkedin, Mail } from "lucide-react";
+
 
 const About = () => {
   return (
@@ -57,45 +57,74 @@ const About = () => {
             </p>
           </section>
           
-          {/* Author info */}
-          <section className="glass-panel rounded-xl p-8">
-            <h2 className="text-2xl font-medium mb-6">Project Information</h2>
-            
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-accent/30 rounded-lg flex items-center justify-center shrink-0 mt-1">
-                  <User className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium">Created by</h3>
-                  <p className="opacity-80">Divyanshu Lila</p>
-                  <p className="text-sm opacity-60">ID: 2022A3PS1056G</p>
-                  <p className="text-sm opacity-60">Mail: f20221056@goa.bits-pilani.ac.in</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-accent/30 rounded-lg flex items-center justify-center shrink-0 mt-1">
-                  <BookOpen className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium">Under Guidance Of</h3>
-                  <p className="opacity-80">Prof. Sravan Danda</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-accent/30 rounded-lg flex items-center justify-center shrink-0 mt-1">
-                  <School className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium">Institution</h3>
-                  <p className="opacity-80">BITS Pilani, K.K. Birla Goa Campus</p>
-                </div>
-              </div>
-              
-            </div>
-          </section>
+         {/* Author info */}
+<section className="glass-panel rounded-xl p-8">
+  <h2 className="text-2xl font-medium mb-6">Project Information</h2>
+  
+  <div className="space-y-6">
+    {/* Created by */}
+    <div className="flex items-start gap-4">
+      <div className="w-8 h-8 bg-accent/30 rounded-lg flex items-center justify-center shrink-0 mt-1">
+        <User className="h-4 w-4 text-slate-400" />
+      </div>
+      <div>
+        <h3 className="text-lg font-medium flex items-center gap-2">
+          Created by
+          <a
+            href="https://www.linkedin.com/in/divyanshu-lila"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 inline-flex items-center underline hover:text-blue-400"
+            title="LinkedIn Profile"
+          >
+            {/* LinkedIn SVG */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.761 0 5-2.239 5-5v-14c0-2.761-2.239-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm13.5 11.268h-3v-5.604c0-1.337-.026-3.061-1.865-3.061-1.865 0-2.151 1.454-2.151 2.959v5.706h-3v-10h2.881v1.367h.041c.401-.761 1.379-1.562 2.838-1.562 3.036 0 3.6 2 3.6 4.59v5.605z" />
+            </svg>
+          </a>
+        </h3>
+        <p className="opacity-80">Divyanshu Lila</p>
+        <p className="text-sm opacity-60">ID: 2022A3PS1056G</p>
+        <p className="text-sm opacity-60 flex items-center gap-1">
+          {/* Email Icon */}
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="M3 7l9 6 9-6" />
+          </svg>
+          <a
+            href="mailto:f20221056@goa.bits-pilani.ac.in"
+            className="underline hover:text-blue-400"
+          >
+            f20221056@goa.bits-pilani.ac.in
+          </a>
+        </p>
+      </div>
+    </div>
+    
+    {/* Under Guidance Of */}
+    <div className="flex items-start gap-4">
+      <div className="w-8 h-8 bg-accent/30 rounded-lg flex items-center justify-center shrink-0 mt-1">
+        <BookOpen className="h-4 w-4 text-slate-400" />
+      </div>
+      <div>
+        <h3 className="text-lg font-medium">Under Guidance Of</h3>
+        <p className="opacity-80">Prof. Sravan Danda</p>
+      </div>
+    </div>
+    
+    {/* Institution */}
+    <div className="flex items-start gap-4">
+      <div className="w-8 h-8 bg-accent/30 rounded-lg flex items-center justify-center shrink-0 mt-1">
+        <School className="h-4 w-4 text-slate-400" />
+      </div>
+      <div>
+        <h3 className="text-lg font-medium">Institution</h3>
+        <p className="opacity-80">BITS Pilani, K.K. Birla Goa Campus</p>
+      </div>
+    </div>
+  </div>
+</section>
+
           
           {/* Navigation buttons */}
           <div className="flex justify-center gap-4">
