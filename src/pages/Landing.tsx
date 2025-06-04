@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale } from "lucide-react";
+import MobilePopup from "@/components/MobilePopup";
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
@@ -150,6 +152,9 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
+      {/* Mobile Popup */}
+      <MobilePopup />
+      
       {/* Enhanced Header with Animation */}
       <header className="w-full glass-panel border-b border-white/5 sticky top-0 z-50 backdrop-blur-xl">
         <div className="container py-6 px-4 md:px-8">
