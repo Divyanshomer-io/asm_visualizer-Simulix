@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MoveRight, Sparkles, Zap, BookOpen, Users, Target, ArrowRight, MessageSquare, Home } from 'lucide-react';
+import { MoveRight, Sparkles, Zap, BookOpen, Users, Target, ArrowRight, MessageSquare, Home, Lightbulb } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FeedbackForm from '@/components/FeedbackForm';
+import ContributionForm from '@/components/ContributionForm';
 
 const Blog = () => {
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showContribution, setShowContribution] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
@@ -381,13 +383,23 @@ const Blog = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </Link>
                   
-                  <button 
-                    onClick={() => setShowFeedback(true)}
-                    className="group control-btn flex items-center justify-center gap-2 text-lg px-8 py-4 hover:border-accent/40"
-                  >
-                    <MessageSquare className="h-5 w-5 transition-transform group-hover:scale-110" />
-                    <span>Send Feedback</span>
-                  </button>
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => setShowFeedback(true)}
+                      className="group control-btn flex items-center justify-center gap-2 text-lg px-6 py-4 hover:border-accent/40"
+                    >
+                      <MessageSquare className="h-5 w-5 transition-transform group-hover:scale-110" />
+                      <span>Send Feedback</span>
+                    </button>
+                    
+                    <button 
+                      onClick={() => setShowContribution(true)}
+                      className="group control-btn flex items-center justify-center gap-2 text-lg px-6 py-4 hover:border-purple-400/40"
+                    >
+                      <Lightbulb className="h-5 w-5 transition-transform group-hover:scale-110" />
+                      <span>Contribute</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -397,6 +409,9 @@ const Blog = () => {
 
       {/* Feedback Modal */}
       <FeedbackForm showFeedback={showFeedback} setShowFeedback={setShowFeedback} />
+
+      {/* Contribution Modal */}
+      <ContributionForm showContribution={showContribution} setShowContribution={setShowContribution} />
 
       {/* Footer */}
       <footer className="w-full glass-panel border-t border-white/5 mt-16">
