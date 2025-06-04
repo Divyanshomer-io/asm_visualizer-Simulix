@@ -46,8 +46,8 @@ Title: ${title}
 Description/Abstract:
 ${description}
 
-Contribution Content:
-${content}
+// Contribution Content:
+// ${content}
 
 Relevant Links: ${links}
 
@@ -213,7 +213,7 @@ Additional Notes: ${notes}
               />
             </div>
 
-            {requiresFileUpload(contributionType) && (
+{/*             {requiresFileUpload(contributionType) && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="content" className="text-sm font-medium">
@@ -258,7 +258,7 @@ Additional Notes: ${notes}
                   className="min-h-[120px] resize-none bg-background/50 border-white/10 focus:border-accent/40"
                 />
               </div>
-            )}
+            )} */}
 
             <div className="space-y-2">
               <Label htmlFor="links" className="text-sm font-medium">
