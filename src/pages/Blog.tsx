@@ -346,28 +346,28 @@ const Blog = () => {
                   <div className="glass-panel p-6 rounded-lg border border-accent/20">
                     <h4 className="text-xl font-semibold mb-3 text-accent">Try the Visualizations</h4>
                     <p className="opacity-90 leading-relaxed mb-4">
-                      Dive into our library and start experimenting with data science concepts.
+                      Explore our comprehensive library of interactive data science visualizations, each crafted to deepen your conceptual understanding. Actively engage with the tools by adjusting parameters and observing real-time outcomes—an approach that builds practical intuition and mastery over even the most complex topics.
                     </p>
                   </div>
                   
                   <div className="glass-panel p-6 rounded-lg border border-accent/20">
                     <h4 className="text-xl font-semibold mb-3 text-accent">Give Feedback</h4>
                     <p className="opacity-90 leading-relaxed mb-4">
-                      Found a bug or have an idea? We value your input and use it to improve the platform.
+                      Your insights and observations are invaluable to us. Whether you encounter an issue or have an innovative suggestion, we encourage you to share your feedback. Your input directly shapes the ongoing enhancement of Simulix, ensuring the platform remains effective, user-friendly, and impactful for all learners.
                     </p>
                   </div>
                   
                   <div className="glass-panel p-6 rounded-lg border border-accent/20">
                     <h4 className="text-xl font-semibold mb-3 text-accent">Contribute</h4>
                     <p className="opacity-90 leading-relaxed mb-4">
-                      Interested in coding, writing, or outreach? Join us in building new visualizations and educational content.
+                      Become an essential part of the Simulix community by sharing your expertise. Whether you’re interested in coding, content development, or outreach, your contributions help drive the evolution of our educational resources and extend their reach to a broader audience.
                     </p>
                   </div>
                   
                   <div className="glass-panel p-6 rounded-lg border border-accent/20">
                     <h4 className="text-xl font-semibold mb-3 text-accent">Spread the Word</h4>
                     <p className="opacity-90 leading-relaxed mb-4">
-                      Share Simulix with classmates, colleagues, or anyone eager to learn.
+                      Support the growth of the Simulix community by introducing our platform to peers, educators, and anyone passionate about data science. Together, we can foster a collaborative and empowering learning environment that benefits learners worldwide.
                     </p>
                   </div>
                 </div>
