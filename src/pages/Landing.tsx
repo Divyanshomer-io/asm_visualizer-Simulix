@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, BookOpen, MessageSquare } from "lucide-react";
 import MobilePopup from "@/components/MobilePopup";
 import FeedbackForm from "@/components/FeedbackForm";
+import ContributionForm from '@/components/ContributionForm';
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showContribution, setShowContribution] = useState(false);
   const keywords = ["Optimization", "Inference", "Regression", "Statistics", "Algorithms", "Visualization"];
   
   useEffect(() => {
@@ -54,6 +56,41 @@ const Landing = () => {
     setShowFeedback(false);
     setFeedbackSubmitted(false);
   };
+
+  const handleContributionSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  const form = e.target as HTMLFormElement;
+  const formData = new FormData(form);
+
+  try {
+    const response = await fetch('https://formspree.io/f/mzzgzddo', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      setContributionSubmitted(true);
+      toast.success('Thank you for your contribution!');
+      setTimeout(() => {
+        setShowContribution(false);
+        setContributionSubmitted(false);
+      }, 2000);
+    } else {
+      toast.error('Failed to send contribution. Please try again.');
+    }
+  } catch (error) {
+    toast.error('Failed to send contribution. Please try again.');
+  }
+};
+
+const closeContribution = () => {
+  setShowContribution(false);
+  setContributionSubmitted(false);
+};
+
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -510,6 +547,8 @@ const Landing = () => {
 
       {/* Feedback Modal */}
       <FeedbackForm showFeedback={showFeedback} setShowFeedback={setShowFeedback} />
+      {/* Contribution Modal */}
+      <ContributionForm showContribution={showContribution} setShowContribution={setShowContribution} />
     </div>
   );
 };
