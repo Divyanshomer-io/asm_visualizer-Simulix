@@ -1,15 +1,19 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, BookOpen, MessageSquare } from "lucide-react";
 import MobilePopup from "@/components/MobilePopup";
 import FeedbackForm from "@/components/FeedbackForm";
 import ContributionForm from '@/components/ContributionForm';
+import { toast } from 'sonner';
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [showContribution, setShowContribution] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [contributionSubmitted, setContributionSubmitted] = useState(false);
   const keywords = ["Optimization", "Inference", "Regression", "Statistics", "Algorithms", "Visualization"];
   
   useEffect(() => {
