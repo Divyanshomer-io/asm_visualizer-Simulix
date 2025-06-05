@@ -37,21 +37,21 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ showContribution, s
 CONTRIBUTION SUBMISSION
 ======================
 
-Name: ${name}
-Organization/Institute: ${organization}
-Contact Info: ${contactInfo || 'Not provided'}
-Type of Contribution: ${type}
-Title: ${title}
+// Name: ${name}
+// Organization/Institute: ${organization}
+// Contact Info: ${contactInfo || 'Not provided'}
+// Type of Contribution: ${type}
+// Title: ${title}
 
-Description/Abstract:
+// Description/Abstract:
 ${description}
 
 // Contribution Content:
 // ${content}
 
-Relevant Links: ${links}
+// Relevant Links: ${links}
 
-Additional Notes: ${notes}
+// Additional Notes: ${notes}
     `;
     
     // Replace the original description with formatted message
