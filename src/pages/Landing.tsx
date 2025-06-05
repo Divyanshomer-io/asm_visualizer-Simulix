@@ -91,7 +91,6 @@ const closeContribution = () => {
   setContributionSubmitted(false);
 };
 
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -240,21 +239,39 @@ const closeContribution = () => {
         <div className="container py-6 px-4 md:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="relative">
-                <span
-                  className="simulix-logo text-3xl md:text-4xl font-black tracking-tight transition-all duration-500 hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #fff 0%, #38bdf8 50%, #818cf8 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    filter: 'drop-shadow(0 2px 8px rgba(56, 189, 248, 0.3))',
-                  }}
-                >
-                  Simulix
-                </span>
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur opacity-0 hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+              <div className="flex items-center gap-4">
+                {/* Logo */}
+                <div className="relative group">
+                  <div className="absolute -inset-2 bg-gradient-to-r from-accent/20 via-blue-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                  <img 
+                    src="/social-preview.png" 
+                    alt="Simulix Logo" 
+                    className="relative h-12 w-12 md:h-14 md:w-14 object-contain transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 filter drop-shadow-lg group-hover:drop-shadow-2xl group-hover:brightness-110"
+                    style={{
+                      filter: 'drop-shadow(0 4px 12px rgba(56, 189, 248, 0.3)) brightness(1.1)'
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
+                </div>
+                
+                {/* Simulix Text */}
+                <div className="relative">
+                  <span
+                    className="simulix-logo text-3xl md:text-4xl font-black tracking-tight transition-all duration-500 hover:scale-105"
+                    style={{
+                      background: 'linear-gradient(135deg, #fff 0%, #38bdf8 50%, #818cf8 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      filter: 'drop-shadow(0 2px 8px rgba(56, 189, 248, 0.3))',
+                    }}
+                  >
+                    Simulix
+                  </span>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur opacity-0 hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+                </div>
               </div>
+              
               <div className="hidden md:flex items-center gap-2 px-4 py-2 glass-panel rounded-full">
                 <Sparkles className="h-4 w-4 text-accent animate-pulse" />
                 <span className="text-sm font-medium">
