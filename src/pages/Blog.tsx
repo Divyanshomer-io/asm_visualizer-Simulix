@@ -319,8 +319,7 @@ const Blog = () => {
                 <div className="glass-panel p-6 rounded-lg border border-accent/20 mt-8">
                   <h4 className="text-xl font-semibold mb-4 text-accent">A Community of Learners</h4>
                   <p className="opacity-90 leading-relaxed">
-                    Simulix is more than a tool—it's a growing community. Share feedback, suggest new features, or even 
-                    contribute content and code. We believe learning is a collaborative journey.
+                    Simulix is more than just a visualization platform—it's a vibrant, collaborative community dedicated to making data science and applied mathematics accessible to all. Users are encouraged to share feedback, suggest new features, and contribute content or code, fostering a spirit of collective growth and improvement. Whether you're a student, educator, or professional, your insights and ideas help shape the evolution of Simulix. We regularly incorporate community suggestions to enhance our tools and educational resources. By participating, you not only deepen your own understanding but also support the learning journeys of others. Together, we believe that knowledge grows best when shared and explored as a community.
                   </p>
                 </div>
               </div>
