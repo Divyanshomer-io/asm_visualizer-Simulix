@@ -207,7 +207,7 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
         <h4 className="text-md font-semibold">Training</h4>
         
         <div className="space-y-3">
-          <Button
+{/*           <Button
             onClick={() => onStartTraining(true)}
             disabled={state.isTraining}
             variant="outline"
@@ -215,7 +215,7 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
           >
             <Zap className="h-4 w-4 mr-2" />
             Fast Run (3 epochs)
-          </Button>
+          </Button> */}
           
           {!state.isTraining ? (
             <Button
