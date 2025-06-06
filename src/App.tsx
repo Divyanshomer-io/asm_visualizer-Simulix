@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +16,7 @@ import NeuralNetwork from "./pages/NeuralNetwork";
 import RandomForest from "./pages/RandomForest";
 import DeepRL from "./pages/DeepRL";
 import BiasVarianceTradeoff from "./pages/BiasVarianceTradeoff";
+import LowRankVAE from "./pages/LowRankVAE";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
@@ -105,6 +105,11 @@ const App = () => (
                 <Route path="/bias-variance" element={
                   <ErrorBoundary>
                     <BiasVarianceTradeoff />
+                  </ErrorBoundary>
+                } />
+                <Route path="/low-rank-vae" element={
+                  <ErrorBoundary>
+                    <LowRankVAE />
                   </ErrorBoundary>
                 } />
                 <Route path="/about" element={
