@@ -84,7 +84,7 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
             <Label className="text-sm font-medium">
               Latent Dimension: {params.latentDim}
             </Label>
-            <InfoTooltip {...VAETooltips.latentDimension} />
+            <InfoTooltip {...VAETooltips.latentDimension} side="right"/>
           </div>
           <Slider
             value={[params.latentDim]}
@@ -108,7 +108,7 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Label className="text-sm font-medium">Regularization</Label>
-            <InfoTooltip {...VAETooltips.nuclearNorm} />
+            <InfoTooltip {...VAETooltips.nuclearNorm} side="right"/>
           </div>
           <Select
             value={params.regularization}
@@ -134,7 +134,7 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
             <Label className="text-sm font-medium">
               Epochs: {params.epochs}
             </Label>
-            <InfoTooltip {...VAETooltips.epochs} />
+            <InfoTooltip {...VAETooltips.epochs} ="epochs" />
           </div>
           <Slider
             value={[params.epochs]}
