@@ -128,13 +128,13 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
           </Select>
         </div>
 
-        {/* Epochs */}
+{/* Epochs */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Label className="text-sm font-medium">
               Epochs: {params.epochs}
             </Label>
-            <InfoTooltip {...VAETooltips.epochs} ="epochs" />
+            <InfoTooltip {...VAETooltips.epochs} side="right" />
           </div>
           <Slider
             value={[params.epochs]}
