@@ -1,279 +1,230 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Design System Variables */
-:root {
-  /* Colors */
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 84% 4.9%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 91.2% 59.8%;
-  --accent-foreground: 222.2 84% 4.9%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
-  --radius: 0.75rem;
-  
-  /* Glassmorphism Variables */
-  --glass-bg: rgba(44, 62, 80, 0.95);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-  --glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.25);
-}
+@layer base {
+  :root {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 84% 4.9%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 91.2% 59.8%;
-  --accent-foreground: 222.2 84% 4.9%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
-}
+    --card: 222 47% 13%;
+    --card-foreground: 210 40% 98%;
 
-/* Base Styles */
-* {
-  border-color: hsl(var(--border));
-}
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: 'Inter', sans-serif;
-  font-feature-settings: "cv11", "ss01";
-  font-variation-settings: "opsz" 32;
-  overflow-x: hidden;
-}
+    --primary: 210 100% 63%;
+    --primary-foreground: 222 47% 11%;
 
-/* Glass Panel Component */
-.glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 98%;
 
-.glass-panel:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: var(--glass-shadow-hover);
-}
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 75%;
 
-/* Enhanced InfoBox Styles */
-.info-box {
-  --box-width: 300px;
-  --box-height: 200px;
-  width: min(var(--box-width), 90vw);
-  min-height: var(--box-height);
-  max-height: 400px;
-  padding: 1.75rem;
-  background: var(--glass-bg);
-  border-radius: 16px;
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: var(--glass-shadow);
-  color: #E5E7EB;
-  display: flex;
-  flex-direction: column;
-  margin: 1rem;
-  overflow-y: auto;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
+    --accent: 220 70% 50%;
+    --accent-foreground: 210 40% 98%;
 
-.info-box:hover,
-.info-box:focus-within {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: var(--glass-shadow-hover);
-  outline: none;
-}
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
 
-.info-box-title {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #3B82F6;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  padding-bottom: 0.5rem;
-}
+    --border: 217 32% 18%;
+    --input: 217 32% 18%;
+    --ring: 212 27% 84%;
 
-.info-box-content {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  overflow: auto;
-}
-
-/* Enhanced InfoTooltip Styles */
-.info-tooltip-trigger {
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  background: #3B82F6;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: help;
-  transition: all 0.2s ease;
-}
-
-.info-tooltip-trigger:hover,
-.info-tooltip-trigger:focus {
-  background: #2563EB;
-  transform: scale(1.1);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-}
-
-.info-tooltip-box {
-  position: absolute;
-  z-index: 9999;
-  padding: 1.75rem;
-  border-radius: 16px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: var(--glass-shadow);
-  transition: all 0.2s ease;
-  overflow-y: auto;
-}
-
-.info-tooltip-info {
-  background: rgba(44, 62, 80, 0.95);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: #DBEAFE;
-}
-
-.info-tooltip-warning {
-  background: rgba(69, 26, 3, 0.95);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #FEF3C7;
-}
-
-.info-tooltip-technical {
-  background: rgba(17, 24, 39, 0.95);
-  border: 1px solid rgba(156, 163, 175, 0.3);
-  color: #F3F4F6;
-}
-
-.info-tooltip-title {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #3B82F6;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  padding-bottom: 0.5rem;
-}
-
-.info-tooltip-content {
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.info-tooltip-arrow {
-  position: absolute;
-  width: 0.5rem;
-  height: 0.5rem;
-  transform: rotate(45deg);
-  border: inherit;
-  background: inherit;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .info-box {
-    --box-width: 95vw;
-    padding: 1rem;
-  }
-  
-  .info-tooltip-box {
-    padding: 1rem;
+    --radius: 0.75rem;
   }
 }
 
-/* Custom scrollbar for info boxes */
-.info-box::-webkit-scrollbar,
-.info-tooltip-box::-webkit-scrollbar {
-  width: 4px;
+@layer base {
+  * {
+    @apply border-border selection:bg-accent/20 selection:text-white;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
 }
 
-.info-box::-webkit-scrollbar-track,
-.info-tooltip-box::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
+@layer utilities {
+  .glass-panel {
+    @apply bg-glass border border-white/10 backdrop-blur-lg shadow-xl;
+  }
+  
+  .control-btn {
+    @apply px-4 py-2 rounded-lg glass-panel transition-all duration-300
+    hover:bg-accent/20 hover:border-accent/30 active:scale-95;
+  }
+  
+  .control-btn-primary {
+    @apply control-btn bg-accent/30 border-accent/40 
+    hover:bg-accent/40 hover:border-accent/50;
+  }
+  
+  .control-btn-secondary {
+    @apply px-4 py-2 rounded-md bg-rose-600/80 hover:bg-rose-700/90 text-white transition-colors flex items-center gap-2;
+  }
+  
+  .input-field {
+    @apply bg-secondary/50 border border-white/10 rounded-lg px-3 py-2
+    focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all;
+  }
+  
+  .canvas-container {
+    touch-action: none;
+  }
+  
+  .city-point {
+    @apply absolute w-3 h-3 rounded-full bg-tsp-city shadow-glow
+    transform -translate-x-1.5 -translate-y-1.5 z-10;
+  }
+  
+  .city-pulse {
+    @apply absolute w-8 h-8 rounded-full border border-tsp-city/50
+    transform -translate-x-4 -translate-y-4 animate-pulse-ring;
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+  
+  .shadow-subtle {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .path-current {
+    stroke: theme('colors.tsp.current');
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    filter: drop-shadow(0 0 3px theme('colors.tsp.current'));
+  }
+  
+  .path-best {
+    stroke: theme('colors.tsp.best');
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    filter: drop-shadow(0 0 2px theme('colors.tsp.best'));
+  }
+  
+  .grid-lines {
+    stroke: theme('colors.tsp.grid');
+    stroke-width: 1px;
+  }
+  
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+  
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-br from-white via-white/90 to-white/70 bg-clip-text text-transparent;
+  }
+  
+  .text-gradient-primary {
+    @apply bg-gradient-to-br from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
+  }
 
-.info-box::-webkit-scrollbar-thumb,
-.info-tooltip-box::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.5);
-  border-radius: 2px;
-}
+  /* Enhanced Tooltip Styling - Maximum Overlap */
+  .tooltip-content {
+    max-width: 350px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    background: rgba(15, 23, 42, 0.98) !important;
+    color: white;
+    border-radius: 8px;
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(8px);
+    pointer-events: auto;
+    overflow: visible;
+    z-index: 50;
+  }
 
-.info-box::-webkit-scrollbar-thumb:hover,
-.info-tooltip-box::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.7);
-}
+  .tooltip-content strong {
+    color: #60a5fa;
+  }
 
-/* Simulix Logo */
-.simulix-logo {
-  font-family: 'Inter', sans-serif;
-  font-weight: 900;
-  letter-spacing: -0.025em;
-}
+  .tooltip-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
 
-/* Utility Classes */
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-}
+  .tooltip-content ul {
+    margin: 8px 0;
+    padding-left: 16px;
+  }
 
-/* Smooth animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+  .tooltip-content li {
+    margin: 4px 0;
+  }
 
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+  .plot-container {
+    position: relative;
+    overflow: visible !important;
+    isolation: isolate;
+  }
+
+  .adjacent-box {
+    z-index: 0 !important;
+    position: relative;
+  }
+  
+  .info-icon {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    z-index: 1;
+    position: relative;
+  }
+
+  .info-icon:hover {
+    opacity: 1;
+  }
+
+  /* Ensure tooltip portal has absolute highest z-index */
+  [data-radix-popper-content-wrapper] {
+    z-index: 99999 !important;
+    position: fixed !important;
+  }
+
+  /* Tooltip portal container */
+  [data-radix-portal] {
+    z-index: 99999 !important;
+  }
+
+  /* Override any potential z-index conflicts */
+  body > div[data-radix-portal] {
+    z-index: 99999 !important;
+  }
+
+  /* Custom chart tooltip styling */
+  .custom-tooltip {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.4;
+    min-width: 150px;
+    max-width: 300px;
+    z-index: 1001 !important;
+  }
+
+  .custom-tooltip div {
+    white-space: nowrap;
+  }
 }
