@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Info } from "lucide-react";
 
@@ -51,7 +52,12 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
       {isVisible && (
         <div 
           className={`absolute z-[9999] p-3 rounded-lg border shadow-xl ${tooltipVariants[variant]} ${positionClasses[side]}`}
-          style={{ maxWidth: `${maxWidth}px` }}
+          style={{ 
+            width: `${Math.min(maxWidth, 300)}px`,
+            minHeight: '120px',
+            maxHeight: '250px',
+            overflowY: 'auto'
+          }}
         >
           {title && (
             <div className="font-semibold text-sm mb-2 border-b border-current/30 pb-1">
