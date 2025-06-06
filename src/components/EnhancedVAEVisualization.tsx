@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { VAEState, VAEParams } from '@/utils/lowRankVAE';
@@ -11,7 +10,7 @@ interface EnhancedVAEVisualizationProps {
   params: VAEParams;
   isTraining: boolean;
   onTrainingUpdate: (epoch: number, quality: number, metrics: any) => void;
-  resetKey?: number; // Add resetKey prop for forcing reset
+  resetKey?: number;
 }
 
 const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({ 
@@ -61,7 +60,7 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
 
       setCurrentEpoch(epoch);
       
-      // Calculate current reconstruction parameters
+      // Calculate current reconstruction parameters using corrected logic
       const reconParams = RealisticVAEReconstructor.calculateReconstructionFidelity(
         epoch,
         params.epochs,
@@ -84,7 +83,7 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
       
       setLiveMetrics(currentMetrics);
       
-      // Generate progressive reconstructions
+      // Generate progressive reconstructions with corrected quality
       if (state.originalImages.length > 0) {
         const progressiveReconstructions = state.originalImages.map(digitPixels =>
           RealisticVAEReconstructor.applyRealisticBlur(digitPixels, reconParams, epoch)
@@ -110,7 +109,7 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
     klLoss: Number((liveMetrics.klLosses[index] || 0).toFixed(2)),
     regLoss: Number((liveMetrics.regularizationLosses[index] || 0).toFixed(2)),
     latentRank: Math.round(liveMetrics.latentRanks[index] || 0)
-  })).slice(0, currentEpoch) : []; // Only show data up to current epoch for real-time effect
+  })).slice(0, currentEpoch) : [];
 
   const qualityHistory = enhancedTrainingData.map((data, index) => ({
     epoch: data.epoch,
@@ -135,6 +134,26 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
     return 'Good';
   };
 
+  // Get expected results for current parameters (for display when not training)
+  const getExpectedResults = () => {
+    if (!isTraining && currentEpoch === 0) {
+      const finalEpochParams = RealisticVAEReconstructor.calculateReconstructionFidelity(
+        params.epochs,
+        params.epochs,
+        params.latentDim,
+        params.regularization,
+        params.regularization === 'nuc' ? params.lambdaNuc : params.lambdaMajorizer
+      );
+      return {
+        expectedQuality: finalEpochParams.reconstructionFidelity * 100,
+        expectedRank: finalEpochParams.expectedRank
+      };
+    }
+    return null;
+  };
+
+  const expectedResults = getExpectedResults();
+
   // Custom tooltip for charts
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -154,7 +173,60 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Real-time Quality Indicator */}
+      {/* Parameter Preview (when not training) */}
+      {!isTraining && expectedResults && (
+        <div className="glass-panel p-6 rounded-xl">
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-accent">Expected Results Preview</h3>
+            <InfoTooltip 
+              content="Preview of expected training results based on current parameter configuration. Start training to see actual progression."
+              variant="info"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-background/20 p-4 rounded-lg text-center">
+              <div className="text-xs text-muted-foreground">Expected Quality</div>
+              <div className={`text-2xl font-mono ${getQualityColor(expectedResults.expectedQuality)}`}>
+                {expectedResults.expectedQuality.toFixed(0)}%
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {getQualityLabel(expectedResults.expectedQuality)}
+              </div>
+            </div>
+            <div className="bg-background/20 p-4 rounded-lg text-center">
+              <div className="text-xs text-muted-foreground">Expected Rank</div>
+              <div className="text-2xl font-mono text-red-400">
+                {expectedResults.expectedRank}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                of {params.latentDim}
+              </div>
+            </div>
+            <div className="bg-background/20 p-4 rounded-lg text-center">
+              <div className="text-xs text-muted-foreground">Compression</div>
+              <div className="text-2xl font-mono text-blue-400">
+                {((params.latentDim / 784) * 100).toFixed(1)}%
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {params.latentDim}/784 dims
+              </div>
+            </div>
+            <div className="bg-background/20 p-4 rounded-lg text-center">
+              <div className="text-xs text-muted-foreground">Regularization</div>
+              <div className="text-2xl font-mono text-orange-400">
+                {params.regularization === 'nuc' ? params.lambdaNuc : 
+                 params.regularization === 'majorizer' ? params.lambdaMajorizer.toFixed(2) : 'None'}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {params.regularization}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Real-time Quality Indicator (during training) */}
       {isTraining && (
         <div className="glass-panel p-6 rounded-xl">
           <div className="flex items-center gap-2 mb-4">
@@ -354,7 +426,8 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
             <h4 className="font-medium text-orange-400 mb-2">Regularization Impact</h4>
             <p className="text-2xl font-mono text-orange-400">
               {params.regularization === 'none' ? 'None' : 
-               params.regularization === 'nuc' ? 'High' : 'Medium'}
+               params.regularization === 'nuc' ? (params.lambdaNuc <= 100 ? 'Low' : params.lambdaNuc <= 300 ? 'Medium' : 'High') : 
+               params.lambdaMajorizer <= 0.1 ? 'Low' : params.lambdaMajorizer <= 0.5 ? 'Medium' : 'High'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {params.regularization === 'nuc' ? `λ=${params.lambdaNuc}` :
@@ -364,12 +437,12 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
           <div className="bg-background/20 p-4 rounded-lg">
             <h4 className="font-medium text-green-400 mb-2">Expected Quality</h4>
             <p className="text-2xl font-mono text-green-400">
-              {params.regularization === 'none' ? 'High' :
-               (params.regularization === 'nuc' && params.lambdaNuc > 200) ||
-               (params.regularization === 'majorizer' && params.lambdaMajorizer > 0.5) ? 'Low' : 'Medium'}
+              {expectedResults ? `${expectedResults.expectedQuality.toFixed(0)}%` : 
+               isTraining ? `${(reconstructionQuality * 100).toFixed(0)}%` : 'Start Training'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Based on current parameters
+              {expectedResults ? getQualityLabel(expectedResults.expectedQuality) : 
+               isTraining ? getQualityLabel(reconstructionQuality * 100) : 'Based on parameters'}
             </p>
           </div>
         </div>
