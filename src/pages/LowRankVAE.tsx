@@ -1,12 +1,12 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Brain, BarChart3, Settings } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Home, Brain } from 'lucide-react';
 import LowRankVAEControls from '@/components/LowRankVAEControls';
-import LowRankVAEVisualization from '@/components/LowRankVAEVisualization';
+import EnhancedVAEVisualization from '@/components/EnhancedVAEVisualization';
 import LowRankVAEEducation from '@/components/LowRankVAEEducation';
 import { VAEState, VAEParams, generateSyntheticMNIST } from '@/utils/lowRankVAE';
-import { VAEReconstructionSimulator } from '@/utils/vaeReconstructionSimulator';
+import { RealisticVAEReconstructor } from '@/utils/realisticVAEReconstructor';
 import { toast } from 'sonner';
 
 const LowRankVAE = () => {
@@ -31,7 +31,7 @@ const LowRankVAE = () => {
     regularization: 'nuc',
     lambdaNuc: 100,
     lambdaMajorizer: 0.09,
-    epochs: 10, // Increased default to 10
+    epochs: 10,
     batchSize: 128,
     learningRate: 0.001
   });
@@ -41,6 +41,19 @@ const LowRankVAE = () => {
   const handleParamsChange = useCallback((newParams: Partial<VAEParams>) => {
     setParams(prev => ({ ...prev, ...newParams }));
   }, []);
+
+  const handleTrainingUpdate = useCallback((epoch: number, quality: number, metrics: any) => {
+    setState(prev => ({
+      ...prev,
+      epoch,
+      reconstructionQuality: quality,
+      trainingProgress: (epoch / params.epochs) * 100,
+      status: `Training... Epoch ${epoch}/${params.epochs} (Quality: ${(quality * 100).toFixed(0)}%)`,
+      trainLoss: metrics.totalLosses ? metrics.totalLosses.slice(0, epoch) : prev.trainLoss,
+      valLoss: metrics.totalLosses ? metrics.totalLosses.slice(0, epoch).map((loss: number) => loss + 2 + Math.random() * 3) : prev.valLoss,
+      latentRanks: metrics.latentRanks ? metrics.latentRanks.slice(0, epoch) : prev.latentRanks
+    }));
+  }, [params.epochs]);
 
   const startTraining = useCallback(async (isFastRun: boolean = false) => {
     if (state.isTraining) {
@@ -72,7 +85,7 @@ const LowRankVAE = () => {
       valLoss: [],
       latentRanks: [],
       trainingProgress: 0,
-      status: 'Initializing training with synthetic MNIST data...',
+      status: 'Initializing enhanced training with realistic VAE dynamics...',
       originalImages: trainingData.originalImages,
       reconstructions: trainingData.reconstructions,
       latentVectors: trainingData.latentVectors,
@@ -80,77 +93,7 @@ const LowRankVAE = () => {
       reconstructionQuality: 0.1
     }));
 
-    toast.success('Training started with progressive reconstruction quality!');
-    
-    // Progressive training simulation
-    const epochDuration = isFastRun ? 1000 : 1500;
-    let currentEpoch = 0;
-
-    const simulateEpoch = () => {
-      if (currentEpoch >= trainingParams.epochs) {
-        setState(prev => ({
-          ...prev,
-          isTraining: false,
-          status: '✅ Training completed successfully!',
-          trainingProgress: 100
-        }));
-        toast.success('Training completed! Notice the reconstruction quality improvement.');
-        return;
-      }
-
-      currentEpoch++;
-
-      // Calculate progressive reconstruction quality
-      const quality = VAEReconstructionSimulator.getReconstructionQuality(
-        currentEpoch,
-        trainingParams.epochs,
-        trainingParams.regularization,
-        trainingParams.regularization === 'nuc' ? trainingParams.lambdaNuc : trainingParams.lambdaMajorizer
-      );
-
-      // Generate progressively better reconstructions
-      const updatedReconstructions = trainingData.originalImages.map(original => 
-        VAEReconstructionSimulator.generateBlurredReconstruction(original, quality)
-      );
-
-      // Simulate realistic training metrics
-      const baseTrainLoss = 50 * Math.exp(-currentEpoch / 8);
-      const regularizationPenalty = trainingParams.regularization === 'nuc' 
-        ? trainingParams.lambdaNuc * Math.exp(-currentEpoch / 10)
-        : trainingParams.lambdaMajorizer * 10 * Math.exp(-currentEpoch / 10);
-      
-      const trainLoss = Math.max(5, baseTrainLoss + regularizationPenalty + Math.random() * 2);
-      const valLoss = trainLoss + 2 + Math.random() * 3;
-
-      // Calculate latent rank reduction
-      const initialRank = trainingParams.latentDim * 0.8;
-      let targetRank = initialRank;
-      
-      if (trainingParams.regularization === 'nuc') {
-        targetRank = Math.max(1, 10 - trainingParams.lambdaNuc / 50);
-      } else if (trainingParams.regularization === 'majorizer') {
-        targetRank = Math.max(2, 15 - trainingParams.lambdaMajorizer * 20);
-      }
-      
-      const progress = 1 - Math.exp(-currentEpoch / 10);
-      const currentRank = initialRank - (initialRank - targetRank) * progress + (Math.random() - 0.5);
-
-      setState(prev => ({
-        ...prev,
-        epoch: currentEpoch,
-        trainLoss: [...prev.trainLoss, trainLoss],
-        valLoss: [...prev.valLoss, valLoss],
-        latentRanks: [...prev.latentRanks, Math.max(1, currentRank)],
-        reconstructions: updatedReconstructions,
-        trainingProgress: (currentEpoch / trainingParams.epochs) * 100,
-        status: `Training... Epoch ${currentEpoch}/${trainingParams.epochs} (Quality: ${(quality * 100).toFixed(0)}%)`,
-        reconstructionQuality: quality
-      }));
-
-      trainingRef.current = setTimeout(simulateEpoch, epochDuration);
-    };
-
-    setTimeout(simulateEpoch, 500);
+    toast.success('Enhanced training started with realistic parameter dynamics!');
   }, [params, state.isTraining]);
 
   const stopTraining = useCallback(() => {
@@ -198,7 +141,7 @@ const LowRankVAE = () => {
               <div className="hidden md:flex items-center gap-2 px-4 py-2 glass-panel rounded-full">
                 <Brain className="h-4 w-4 text-accent animate-pulse" />
                 <span className="text-sm font-medium">
-                  <span className="text-accent">Low-Rank VAE</span> with Progressive Reconstruction
+                  <span className="text-accent">Enhanced Low-Rank VAE</span> with Realistic Training Dynamics
                 </span>
               </div>
             </div>
@@ -217,51 +160,53 @@ const LowRankVAE = () => {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content - Single Page Layout */}
       <main className="container px-4 md:px-8 py-8">
-        <Tabs defaultValue="visualization" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 glass-panel mb-8">
-            <TabsTrigger value="visualization" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Visualization
-            </TabsTrigger>
-            <TabsTrigger value="education" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Learn About VAEs
-            </TabsTrigger>
-          </TabsList>
+        {/* Top Section: Controls and Visualization */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+          {/* Controls Panel - Right Side */}
+          <div className="lg:col-span-1 lg:order-2">
+            <LowRankVAEControls
+              params={params}
+              state={state}
+              onParamsChange={handleParamsChange}
+              onStartTraining={startTraining}
+              onStopTraining={stopTraining}
+            />
+          </div>
 
-          <TabsContent value="visualization" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Controls Panel */}
-              <div className="lg:col-span-1">
-                <LowRankVAEControls
-                  params={params}
-                  state={state}
-                  onParamsChange={handleParamsChange}
-                  onStartTraining={startTraining}
-                  onStopTraining={stopTraining}
-                />
-              </div>
+          {/* Visualization Panel - Left Side */}
+          <div className="lg:col-span-3 lg:order-1">
+            <EnhancedVAEVisualization 
+              state={state} 
+              params={params}
+              isTraining={state.isTraining}
+              onTrainingUpdate={handleTrainingUpdate}
+            />
+          </div>
+        </div>
 
-              {/* Visualization Panel */}
-              <div className="lg:col-span-3">
-                <LowRankVAEVisualization state={state} params={params} />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="education">
-            <LowRankVAEEducation />
-          </TabsContent>
-        </Tabs>
+        {/* Educational Content Section */}
+        <div className="border-t border-white/10 pt-12">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-center mb-4">
+              <span className="text-accent">Learn About</span> Variational Autoencoders
+            </h2>
+            <p className="text-center text-muted-foreground max-w-2xl mx-auto">
+              Understand the theory, mathematics, and practical applications of Low-Rank VAEs 
+              with our comprehensive educational content below.
+            </p>
+          </div>
+          
+          <LowRankVAEEducation />
+        </div>
       </main>
 
       {/* Footer */}
       <footer className="w-full glass-panel border-t border-white/5 mt-auto">
         <div className="container py-4 px-4 md:px-8 text-center">
           <p className="text-sm opacity-70">
-            Low-Rank Variational Autoencoder with Progressive Reconstruction Quality
+            Enhanced Low-Rank Variational Autoencoder with Realistic Training Dynamics and Parameter Impact Analysis
           </p>
         </div>
       </footer>

@@ -23,7 +23,15 @@ export interface VAEState {
   trainingProgress: number;
   status: string;
   digitLabels: number[]; // Actual digit labels for display
-  reconstructionQuality?: number; // NEW: Track reconstruction quality
+  reconstructionQuality?: number; // Track reconstruction quality
+  // Enhanced metrics
+  liveMetrics?: {
+    currentLoss?: number;
+    currentRank?: number;
+    reconLoss?: number;
+    klLoss?: number;
+    regLoss?: number;
+  };
 }
 
 export interface TrainingData {
