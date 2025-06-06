@@ -84,7 +84,7 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
             <Label className="text-sm font-medium">
               Latent Dimension: {params.latentDim}
             </Label>
-            <InfoTooltip {...VAETooltips.latentDimension} side="right" maxwidth="150"/>
+            <InfoTooltip {...VAETooltips.latentDimension} side="right" maxwidth="50"/>
           </div>
           <Slider
             value={[params.latentDim]}
