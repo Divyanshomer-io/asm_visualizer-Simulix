@@ -194,6 +194,15 @@ const closeContribution = () => {
       tags: ["Machine Learning", "Reinforcement Learning", "Q-Learning"],
       gradient: "from-purple-500/20 to-pink-500/20"
     },
+    {
+      id: "low-rank-vae",
+      title: "Low-Rank VAE Compression",
+      description: "Real-time Variational Autoencoder training with nuclear norm and log-determinant majorizer regularization for latent space compression.",
+      path: "/low-rank-vae",
+      icon: <Layers className="h-6 w-6" />,
+      tags: ["Deep Learning", "VAE", "Compression", "Regularization"],
+      gradient: "from-amber-500/20 to-orange-500/20"
+    },
   ];
 
   // Filter visualizations based on search query
