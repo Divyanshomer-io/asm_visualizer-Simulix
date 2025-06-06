@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, BookOpen, MessageSquare } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, BookOpen, MessageSquare, Layers } from "lucide-react";
 import MobilePopup from "@/components/MobilePopup";
 import FeedbackForm from "@/components/FeedbackForm";
 import ContributionForm from '@/components/ContributionForm';
