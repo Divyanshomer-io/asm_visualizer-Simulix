@@ -1,11 +1,13 @@
-import React from 'react';
-import { Play, Square, Zap } from 'lucide-react';
+
+import React, { useState, useCallback } from 'react';
+import { Play, Square, Zap, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { VAEState, VAEParams } from '@/utils/lowRankVAE';
+import InfoTooltip, { VAETooltips } from '@/components/InfoTooltip';
 
 interface LowRankVAEControlsProps {
   params: VAEParams;
@@ -13,16 +15,45 @@ interface LowRankVAEControlsProps {
   onParamsChange: (params: Partial<VAEParams>) => void;
   onStartTraining: (isFastRun?: boolean) => void;
   onStopTraining: () => void;
+  onReset?: () => void;
 }
+
+// Default parameter values
+const DEFAULT_PARAMS: VAEParams = {
+  latentDim: 50,
+  regularization: 'nuc',
+  lambdaNuc: 100,
+  lambdaMajorizer: 0.09,
+  epochs: 10,
+  batchSize: 128,
+  learningRate: 0.001
+};
 
 const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
   params,
   state,
   onParamsChange,
   onStartTraining,
-  onStopTraining
+  onStopTraining,
+  onReset
 }) => {
+  const [resetKey, setResetKey] = useState(0);
   
+  const handleReset = useCallback(() => {
+    // Reset parameters to defaults
+    onParamsChange(DEFAULT_PARAMS);
+    
+    // Call parent reset if provided
+    if (onReset) {
+      onReset();
+    }
+    
+    // Force component re-render
+    setResetKey(prev => prev + 1);
+    
+    console.log('🔄 Interface reset to default state');
+  }, [onParamsChange, onReset]);
+
   const getEstimatedTime = (epochs: number) => {
     if (epochs <= 5) return "~30-60 seconds";
     if (epochs <= 15) return "~2-4 minutes";
@@ -37,8 +68,10 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
     return 'Medium';
   };
 
+  const getCompressionRatio = () => ((params.latentDim / 784) * 100).toFixed(1);
+
   return (
-    <div className="glass-panel p-6 rounded-xl space-y-6">
+    <div key={resetKey} className="glass-panel p-6 rounded-xl space-y-6">
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-accent flex items-center gap-2">
           <Zap className="h-5 w-5" />
@@ -47,9 +80,12 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
 
         {/* Latent Dimension */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">
-            Latent Dimension: {params.latentDim}
-          </Label>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium">
+              Latent Dimension: {params.latentDim}
+            </Label>
+            <InfoTooltip {...VAETooltips.latentDimension} />
+          </div>
           <Slider
             value={[params.latentDim]}
             onValueChange={([value]) => onParamsChange({ latentDim: value })}
@@ -64,13 +100,16 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
             <span>100</span>
           </div>
           <div className="text-xs text-muted-foreground">
-            Compression: {((params.latentDim / 784) * 100).toFixed(1)}%
+            Compression: <span className="text-accent">{getCompressionRatio()}%</span>
           </div>
         </div>
 
         {/* Regularization */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Regularization</Label>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium">Regularization</Label>
+            <InfoTooltip {...VAETooltips.nuclearNorm} />
+          </div>
           <Select
             value={params.regularization}
             onValueChange={(value: 'nuc' | 'majorizer' | 'none') => 
@@ -89,11 +128,14 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
           </Select>
         </div>
 
-        {/* Epochs - UPDATED TO 50 MAXIMUM */}
+        {/* Epochs */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">
-            Epochs: {params.epochs}
-          </Label>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium">
+              Epochs: {params.epochs}
+            </Label>
+            <InfoTooltip {...VAETooltips.epochs} />
+          </div>
           <Slider
             value={[params.epochs]}
             onValueChange={([value]) => onParamsChange({ epochs: value })}
@@ -229,6 +271,31 @@ const LowRankVAEControls: React.FC<LowRankVAEControlsProps> = ({
               <div>Current Quality: <span className="text-accent">{(state.reconstructionQuality * 100).toFixed(0)}%</span></div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Reset Section */}
+      <div className="reset-section bg-red-500/10 border border-red-500/20 p-4 rounded-lg">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium text-red-400">Reset Interface</h4>
+          <InfoTooltip 
+            content="Restore all parameters, plots, and training data to initial state. This will clear all training progress and reset parameters to defaults."
+            variant="warning"
+          />
+        </div>
+        
+        <Button
+          onClick={handleReset}
+          disabled={state.isTraining}
+          variant="outline"
+          className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Reset to Default
+        </Button>
+        
+        <div className="text-xs text-gray-400 mt-2 text-center">
+          Clears all training progress and resets parameters
         </div>
       </div>
     </div>

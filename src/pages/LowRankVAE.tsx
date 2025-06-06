@@ -10,6 +10,8 @@ import { RealisticVAEReconstructor } from '@/utils/realisticVAEReconstructor';
 import { toast } from 'sonner';
 
 const LowRankVAE = () => {
+  const [resetKey, setResetKey] = useState(0);
+  
   const [state, setState] = useState<VAEState>({
     isTraining: false,
     epoch: 0,
@@ -54,6 +56,48 @@ const LowRankVAE = () => {
       latentRanks: metrics.latentRanks ? metrics.latentRanks.slice(0, epoch) : prev.latentRanks
     }));
   }, [params.epochs]);
+
+  // Enhanced reset function
+  const handleReset = useCallback(() => {
+    // Stop any ongoing training
+    if (trainingRef.current) {
+      clearTimeout(trainingRef.current);
+      trainingRef.current = null;
+    }
+
+    // Reset all state to initial values
+    setState({
+      isTraining: false,
+      epoch: 0,
+      totalEpochs: 10,
+      trainLoss: [],
+      valLoss: [],
+      latentRanks: [],
+      reconstructions: [],
+      originalImages: [],
+      latentVectors: [],
+      trainingProgress: 0,
+      status: 'Ready - Interface Reset',
+      digitLabels: [],
+      reconstructionQuality: 0
+    });
+
+    // Reset parameters to defaults
+    setParams({
+      latentDim: 50,
+      regularization: 'nuc',
+      lambdaNuc: 100,
+      lambdaMajorizer: 0.09,
+      epochs: 10,
+      batchSize: 128,
+      learningRate: 0.001
+    });
+
+    // Force component re-render with new key
+    setResetKey(prev => prev + 1);
+
+    toast.success('🔄 Interface reset to default state');
+  }, []);
 
   const startTraining = useCallback(async (isFastRun: boolean = false) => {
     if (state.isTraining) {
@@ -172,6 +216,7 @@ const LowRankVAE = () => {
               onParamsChange={handleParamsChange}
               onStartTraining={startTraining}
               onStopTraining={stopTraining}
+              onReset={handleReset}
             />
           </div>
 
@@ -182,6 +227,7 @@ const LowRankVAE = () => {
               params={params}
               isTraining={state.isTraining}
               onTrainingUpdate={handleTrainingUpdate}
+              resetKey={resetKey}
             />
           </div>
         </div>

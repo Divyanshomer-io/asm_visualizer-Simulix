@@ -4,25 +4,42 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { VAEState, VAEParams } from '@/utils/lowRankVAE';
 import { ImageReconstructionGrid } from './MNISTImageRenderer';
 import { RealisticVAEReconstructor, VAETrainingDynamics, TrainingMetrics } from '@/utils/realisticVAEReconstructor';
+import InfoTooltip, { VAETooltips } from '@/components/InfoTooltip';
 
 interface EnhancedVAEVisualizationProps {
   state: VAEState;
   params: VAEParams;
   isTraining: boolean;
   onTrainingUpdate: (epoch: number, quality: number, metrics: any) => void;
+  resetKey?: number; // Add resetKey prop for forcing reset
 }
 
 const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({ 
   state, 
   params, 
   isTraining,
-  onTrainingUpdate 
+  onTrainingUpdate,
+  resetKey = 0
 }) => {
   const [currentEpoch, setCurrentEpoch] = useState(0);
   const [reconstructionQuality, setReconstructionQuality] = useState(0.1);
   const [liveMetrics, setLiveMetrics] = useState<TrainingMetrics | null>(null);
   const [currentReconstructions, setCurrentReconstructions] = useState<number[][][]>([]);
   const trainingRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Reset state when resetKey changes
+  useEffect(() => {
+    if (resetKey > 0) {
+      setCurrentEpoch(0);
+      setReconstructionQuality(0.1);
+      setLiveMetrics(null);
+      setCurrentReconstructions([]);
+      if (trainingRef.current) {
+        clearTimeout(trainingRef.current);
+        trainingRef.current = null;
+      }
+    }
+  }, [resetKey]);
 
   // Generate enhanced training dynamics when training starts
   useEffect(() => {
@@ -78,9 +95,9 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
       // Notify parent component
       onTrainingUpdate(epoch, reconParams.reconstructionFidelity, currentMetrics);
       
-      // Realistic epoch timing
-      const epochDuration = params.epochs <= 5 ? 800 : 
-                           params.epochs <= 15 ? 1200 : 1500;
+      // Realistic epoch timing with faster updates for better real-time feel
+      const epochDuration = params.epochs <= 5 ? 600 : 
+                           params.epochs <= 15 ? 900 : 1200;
       await new Promise(resolve => setTimeout(resolve, epochDuration));
     }
   }, [params, isTraining, state.originalImages, onTrainingUpdate]);
@@ -93,7 +110,7 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
     klLoss: Number((liveMetrics.klLosses[index] || 0).toFixed(2)),
     regLoss: Number((liveMetrics.regularizationLosses[index] || 0).toFixed(2)),
     latentRank: Math.round(liveMetrics.latentRanks[index] || 0)
-  })) : [];
+  })).slice(0, currentEpoch) : []; // Only show data up to current epoch for real-time effect
 
   const qualityHistory = enhancedTrainingData.map((data, index) => ({
     epoch: data.epoch,
@@ -118,12 +135,35 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
     return 'Good';
   };
 
+  // Custom tooltip for charts
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-gray-900 border border-gray-600 rounded-lg p-3 shadow-lg">
+          <p className="text-gray-300 font-medium">{`Epoch ${label}`}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ color: entry.color }}>
+              {`${entry.dataKey}: ${entry.value}`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-6">
       {/* Real-time Quality Indicator */}
       {isTraining && (
         <div className="glass-panel p-6 rounded-xl">
-          <h3 className="text-lg font-semibold mb-4 text-accent">Real-time Training Progress</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-accent">Real-time Training Progress</h3>
+            <InfoTooltip 
+              content="Live metrics updating every epoch showing reconstruction quality, loss components, and training progression in real-time."
+              variant="info"
+            />
+          </div>
           
           <div className="space-y-4">
             {/* Quality Progress Bar */}
@@ -186,14 +226,17 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
 
       {/* Enhanced Image Reconstruction */}
       <div className="glass-panel p-6 rounded-xl">
-        <h3 className="text-lg font-semibold mb-4 text-accent">
-          Progressive MNIST Reconstruction
-          {isTraining && (
-            <span className="ml-2 text-sm text-muted-foreground">
-              (Live Updates - Epoch {currentEpoch})
-            </span>
-          )}
-        </h3>
+        <div className="flex items-center gap-2 mb-4">
+          <h3 className="text-lg font-semibold text-accent">
+            Progressive MNIST Reconstruction
+            {isTraining && (
+              <span className="ml-2 text-sm text-muted-foreground">
+                (Live Updates - Epoch {currentEpoch})
+              </span>
+            )}
+          </h3>
+          <InfoTooltip {...VAETooltips.mnistReconstruction} />
+        </div>
         
         <ImageReconstructionGrid
           originalImages={state.originalImages}
@@ -206,24 +249,53 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Loss Components Chart */}
         <div className="glass-panel p-6 rounded-xl">
-          <h3 className="text-lg font-semibold mb-4 text-accent">Loss Components</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-accent">Loss Components</h3>
+            <InfoTooltip {...VAETooltips.lossComponents} />
+          </div>
           {enhancedTrainingData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={enhancedTrainingData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="epoch" stroke="#9CA3AF" />
                 <YAxis stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px'
-                  }} 
+                <Tooltip content={<CustomTooltip />} />
+                <Line 
+                  type="monotone" 
+                  dataKey="totalLoss" 
+                  stroke="#3B82F6" 
+                  strokeWidth={2} 
+                  name="Total Loss"
+                  dot={{ r: 3, fill: '#3B82F6' }}
+                  connectNulls={false}
                 />
-                <Line type="monotone" dataKey="totalLoss" stroke="#3B82F6" strokeWidth={2} name="Total Loss" />
-                <Line type="monotone" dataKey="reconLoss" stroke="#10B981" strokeWidth={2} name="Reconstruction" />
-                <Line type="monotone" dataKey="klLoss" stroke="#8B5CF6" strokeWidth={2} name="KL Divergence" />
-                <Line type="monotone" dataKey="regLoss" stroke="#F59E0B" strokeWidth={2} name="Regularization" />
+                <Line 
+                  type="monotone" 
+                  dataKey="reconLoss" 
+                  stroke="#10B981" 
+                  strokeWidth={2} 
+                  name="Reconstruction"
+                  dot={{ r: 3, fill: '#10B981' }}
+                  connectNulls={false}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="klLoss" 
+                  stroke="#8B5CF6" 
+                  strokeWidth={2} 
+                  name="KL Divergence"
+                  dot={{ r: 3, fill: '#8B5CF6' }}
+                  connectNulls={false}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="regLoss" 
+                  stroke="#F59E0B" 
+                  strokeWidth={2} 
+                  name="Regularization"
+                  dot={{ r: 3, fill: '#F59E0B' }}
+                  connectNulls={false}
+                />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -235,20 +307,17 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
 
         {/* Quality Evolution Chart */}
         <div className="glass-panel p-6 rounded-xl">
-          <h3 className="text-lg font-semibold mb-4 text-accent">Quality Evolution</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-accent">Quality Evolution</h3>
+            <InfoTooltip {...VAETooltips.qualityEvolution} />
+          </div>
           {qualityHistory.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={qualityHistory}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="epoch" stroke="#9CA3AF" />
                 <YAxis domain={[0, 100]} stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px'
-                  }} 
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Line 
                   type="monotone" 
                   dataKey="quality" 
@@ -256,6 +325,7 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
                   strokeWidth={3}
                   name="Reconstruction Quality (%)"
                   dot={{ r: 3, fill: '#EF4444' }}
+                  connectNulls={false}
                 />
               </LineChart>
             </ResponsiveContainer>
