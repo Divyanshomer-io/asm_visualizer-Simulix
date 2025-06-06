@@ -1,10 +1,10 @@
-
 interface ReconstructionParams {
   reconstructionFidelity: number;
   blurRadius: number;
   noiseLevel: number;
   contrastLoss: number;
   artifactStrength: number;
+  expectedRank: number;
 }
 
 interface TrainingMetrics {
@@ -21,6 +21,148 @@ interface TrainingMetrics {
   regLoss?: number;
 }
 
+interface QualityMetrics {
+  quality: number;
+  expectedRank: number;
+  blurLevel: number;
+  artifacts: number;
+}
+
+// Enhanced realistic quality calculation based on research literature
+class RealisticVAECalculator {
+  static calculateReconstructionQuality(
+    epoch: number,
+    totalEpochs: number,
+    latentDim: number,
+    regularization: string,
+    lambdaValue: number
+  ): QualityMetrics {
+    
+    // Base progression: sigmoid curve for realistic training
+    const epochProgress = Math.min(epoch / totalEpochs, 1);
+    const baseQuality = 0.2 + (0.7 * (1 / (1 + Math.exp(-8 * (epochProgress - 0.5)))));
+    
+    // Latent dimension impact (based on MNIST research - optimal around 15-50)
+    const latentOptimal = 25; // Sweet spot for MNIST
+    const latentPenalty = Math.abs(latentDim - latentOptimal) / 100;
+    const latentFactor = Math.max(0.7, 1 - latentPenalty);
+    
+    // Regularization-specific quality impact (calibrated to research)
+    let regPenalty = 0;
+    if (regularization === 'nuc') {
+      // Nuclear norm: Gentle degradation up to λ=200, then steeper
+      if (lambdaValue <= 100) {
+        regPenalty = lambdaValue * 0.001; // 0-10% penalty
+      } else if (lambdaValue <= 300) {
+        regPenalty = 0.1 + (lambdaValue - 100) * 0.002; // 10-50% penalty
+      } else {
+        regPenalty = 0.5 + (lambdaValue - 300) * 0.001; // 50-70% penalty
+      }
+    } else if (regularization === 'majorizer') {
+      // Log-det majorizer: More gradual degradation with calibrated mapping
+      const majorizerQualityMap: { [key: number]: { quality: number; rank: number } } = {
+        0.01: { quality: 0.85, rank: 0.9 },
+        0.05: { quality: 0.75, rank: 0.7 },
+        0.1: { quality: 0.65, rank: 0.5 },
+        0.3: { quality: 0.45, rank: 0.3 },
+        0.5: { quality: 0.35, rank: 0.2 },
+        1.0: { quality: 0.25, rank: 0.1 }
+      };
+      
+      const keys = Object.keys(majorizerQualityMap).map(k => parseFloat(k));
+      const closestKey = keys.reduce((prev, curr) => 
+        Math.abs(curr - lambdaValue) < Math.abs(prev - lambdaValue) ? curr : prev
+      );
+      
+      regPenalty = 1 - majorizerQualityMap[closestKey].quality;
+    }
+    
+    // Final quality with realistic bounds
+    const finalQuality = Math.max(0.05, 
+      baseQuality * latentFactor * (1 - regPenalty)
+    );
+    
+    return {
+      quality: finalQuality,
+      expectedRank: this.calculateExpectedRank(latentDim, regularization, lambdaValue),
+      blurLevel: (1 - finalQuality) * 0.8,
+      artifacts: regPenalty * 0.5
+    };
+  }
+  
+  // Realistic rank calculation based on regularization strength
+  static calculateExpectedRank(latentDim: number, regularization: string, lambdaValue: number): number {
+    if (regularization === 'none') {
+      return Math.floor(latentDim * 0.85); // High rank without regularization
+    }
+    
+    if (regularization === 'nuc') {
+      // Nuclear norm aggressively reduces rank
+      const reductionFactor = Math.min(0.95, lambdaValue / 250);
+      return Math.max(1, Math.floor(latentDim * (1 - reductionFactor)));
+    }
+    
+    if (regularization === 'majorizer') {
+      // Log-det majorizer: More gradual rank reduction with calibrated mapping
+      const majorizerQualityMap: { [key: number]: { quality: number; rank: number } } = {
+        0.01: { quality: 0.85, rank: 0.9 },
+        0.05: { quality: 0.75, rank: 0.7 },
+        0.1: { quality: 0.65, rank: 0.5 },
+        0.3: { quality: 0.45, rank: 0.3 },
+        0.5: { quality: 0.35, rank: 0.2 },
+        1.0: { quality: 0.25, rank: 0.1 }
+      };
+      
+      const keys = Object.keys(majorizerQualityMap).map(k => parseFloat(k));
+      const closestKey = keys.reduce((prev, curr) => 
+        Math.abs(curr - lambdaValue) < Math.abs(prev - lambdaValue) ? curr : prev
+      );
+      
+      return Math.max(2, Math.floor(latentDim * majorizerQualityMap[closestKey].rank));
+    }
+    
+    return latentDim;
+  }
+}
+
+// Corrected loss calculation matching research patterns
+class VAELossCalculator {
+  static calculateRealisticLosses(
+    epoch: number,
+    totalEpochs: number,
+    latentDim: number,
+    regularization: string,
+    lambdaNuc: number,
+    lambdaMajorizer: number
+  ): { total: number; reconstruction: number; kl: number; regularization: number } {
+    
+    // Base reconstruction loss (MSE) - starts high, decreases exponentially
+    const reconLoss = Math.max(5, 35 * Math.exp(-epoch / 8) + Math.random() * 2);
+    
+    // KL divergence loss - starts moderate, stabilizes
+    const klLoss = Math.max(0.5, 8 * Math.exp(-epoch / 12) + Math.random() * 0.5);
+    
+    // Regularization loss based on actual penalty strength
+    let regLoss = 0;
+    if (regularization === 'nuc') {
+      // Nuclear norm penalty decreases as rank stabilizes
+      const rankStabilization = Math.min(1, epoch / (totalEpochs * 0.7));
+      regLoss = (lambdaNuc / 50) * Math.exp(-epoch / 15) * (1 - rankStabilization);
+    } else if (regularization === 'majorizer') {
+      // Log-det majorizer penalty
+      const rankStabilization = Math.min(1, epoch / (totalEpochs * 0.8));
+      regLoss = (lambdaMajorizer * 25) * Math.exp(-epoch / 12) * (1 - rankStabilization);
+    }
+    
+    return {
+      total: reconLoss + klLoss + regLoss,
+      reconstruction: reconLoss,
+      kl: klLoss,
+      regularization: regLoss
+    };
+  }
+}
+
 export class RealisticVAEReconstructor {
   static calculateReconstructionFidelity(
     epoch: number,
@@ -30,36 +172,17 @@ export class RealisticVAEReconstructor {
     lambdaValue: number
   ): ReconstructionParams {
     
-    // Base progression: slow start, rapid middle, plateau end
-    const epochProgress = epoch / totalEpochs;
-    const sigmoidProgress = 1 / (1 + Math.exp(-6 * (epochProgress - 0.5)));
-    
-    // Compression penalty based on latent dimension
-    const compressionRatio = latentDim / 784; // 784 = 28x28
-    const compressionPenalty = Math.max(0, (0.1 - compressionRatio) * 5);
-    
-    // Regularization-specific quality impact
-    let regularizationPenalty = 0;
-    if (regularization === 'nuc') {
-      // Nuclear norm: Harsh penalty for high lambda
-      regularizationPenalty = Math.min(0.6, Math.pow(lambdaValue / 100, 1.2) * 0.3);
-    } else if (regularization === 'majorizer') {
-      // Log-det: Smoother but still significant penalty
-      regularizationPenalty = Math.min(0.4, Math.pow(lambdaValue, 1.5) * 0.25);
-    }
-    
-    // Final quality calculation (0.1 = very poor, 0.95 = excellent)
-    const baseQuality = 0.15 + (sigmoidProgress * 0.8);
-    const finalQuality = Math.max(0.1, 
-      baseQuality - compressionPenalty - regularizationPenalty
+    const qualityMetrics = RealisticVAECalculator.calculateReconstructionQuality(
+      epoch, totalEpochs, latentDim, regularization, lambdaValue
     );
     
     return {
-      reconstructionFidelity: finalQuality,
-      blurRadius: (1 - finalQuality) * 3, // 0-3 pixel blur
-      noiseLevel: (1 - finalQuality) * 0.15, // 0-15% noise
-      contrastLoss: (1 - finalQuality) * 0.4, // 0-40% contrast reduction
-      artifactStrength: regularizationPenalty * 0.3 // Compression artifacts
+      reconstructionFidelity: qualityMetrics.quality,
+      blurRadius: qualityMetrics.blurLevel * 3, // 0-2.4 pixel blur
+      noiseLevel: (1 - qualityMetrics.quality) * 0.15, // 0-15% noise
+      contrastLoss: (1 - qualityMetrics.quality) * 0.4, // 0-40% contrast reduction
+      artifactStrength: qualityMetrics.artifacts * 0.3, // Compression artifacts
+      expectedRank: qualityMetrics.expectedRank
     };
   }
   
@@ -91,7 +214,27 @@ export class RealisticVAEReconstructor {
       this.applyEarlyEpochDegradation(result, 3 - epoch);
     }
     
+    // Ensure digits remain recognizable unless extremely over-regularized
+    if (params.reconstructionFidelity > 0.15) {
+      this.preserveStructure(result, originalPixels, params.reconstructionFidelity);
+    }
+    
     return result.map(row => row.map(v => Math.max(0, Math.min(1, v))));
+  }
+  
+  private static preserveStructure(
+    blurred: number[][], 
+    original: number[][], 
+    quality: number
+  ): void {
+    // Preserve key structural elements even in degraded reconstructions
+    for (let i = 0; i < 28; i++) {
+      for (let j = 0; j < 28; j++) {
+        if (original[i][j] > 0.7) { // Strong original pixels
+          blurred[i][j] = Math.max(blurred[i][j], original[i][j] * quality * 0.8);
+        }
+      }
+    }
   }
   
   private static applyGaussianBlur(pixels: number[][], radius: number) {
@@ -227,42 +370,28 @@ export class VAETrainingDynamics {
     const regularizationLosses: number[] = [];
     const latentRanks: number[] = [];
     
-    // Initial loss components
-    let baseReconLoss = 45 + Math.random() * 10; // Start high (45-55)
-    let baseKLLoss = 15 + Math.random() * 5;     // KL component
-    let currentRank = latentDim * 0.9;           // Start near full rank
+    // Get target rank for this configuration
+    const targetRank = RealisticVAECalculator.calculateExpectedRank(latentDim, regularization, lambdaValue);
+    let currentRank = latentDim * 0.9; // Start near full rank
     
     for (let epoch = 1; epoch <= epochs; epoch++) {
-      // Reconstruction loss: Exponential decay with noise
-      baseReconLoss = Math.max(8, 
-        baseReconLoss * Math.exp(-0.15) + (Math.random() - 0.5) * 2
+      // Use the corrected loss calculation
+      const lossComponents = VAELossCalculator.calculateRealisticLosses(
+        epoch, epochs, latentDim, regularization, 
+        regularization === 'nuc' ? lambdaValue : 100,
+        regularization === 'majorizer' ? lambdaValue : 0.09
       );
       
-      // KL loss: Faster initial decrease, then plateau
-      const klDecayRate = epoch < epochs/3 ? 0.25 : 0.05;
-      baseKLLoss = Math.max(2, 
-        baseKLLoss * Math.exp(-klDecayRate) + (Math.random() - 0.5) * 0.5
-      );
-      
-      // Regularization loss
-      let regLoss = 0;
-      if (regularization === 'nuc') {
-        regLoss = lambdaValue * Math.exp(-epoch / 10) * (currentRank / latentDim);
-      } else if (regularization === 'majorizer') {
-        regLoss = lambdaValue * 20 * Math.exp(-epoch / 8) * (currentRank / latentDim);
-      }
-      
-      // Rank evolution (gradual decrease)
-      const targetRank = this.calculateTargetRank(regularization, lambdaValue, latentDim);
+      // Rank evolution (gradual decrease towards target)
       const rankProgress = 1 - Math.exp(-epoch / 12);
       currentRank = currentRank - (currentRank - targetRank) * rankProgress * 0.1;
       currentRank += (Math.random() - 0.5) * 0.5; // Add noise
       
       // Store metrics
-      reconstructionLosses.push(baseReconLoss);
-      klLosses.push(baseKLLoss);
-      regularizationLosses.push(regLoss);
-      losses.push(baseReconLoss + baseKLLoss + regLoss);
+      reconstructionLosses.push(lossComponents.reconstruction);
+      klLosses.push(lossComponents.kl);
+      regularizationLosses.push(lossComponents.regularization);
+      losses.push(lossComponents.total);
       latentRanks.push(Math.max(1, currentRank));
     }
     
@@ -274,28 +403,6 @@ export class VAETrainingDynamics {
       latentRanks,
       convergenceEpoch: this.findConvergencePoint(losses)
     };
-  }
-  
-  private static calculateTargetRank(
-    regularization: string,
-    lambdaValue: number,
-    latentDim: number
-  ): number {
-    if (regularization === 'none') return latentDim * 0.8;
-    
-    if (regularization === 'nuc') {
-      // Nuclear norm: aggressive rank reduction
-      const reduction = Math.min(0.95, lambdaValue / 200);
-      return Math.max(1, latentDim * (1 - reduction));
-    }
-    
-    if (regularization === 'majorizer') {
-      // Log-det: moderate rank reduction
-      const reduction = Math.min(0.8, lambdaValue * 0.6);
-      return Math.max(2, latentDim * (1 - reduction));
-    }
-    
-    return latentDim;
   }
   
   private static findConvergencePoint(losses: number[]): number {
