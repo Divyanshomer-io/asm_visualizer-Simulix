@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Brain } from 'lucide-react';
+import { Home, Brain, ArrowLeft } from 'lucide-react';
 import LowRankVAEControls from '@/components/LowRankVAEControls';
 import EnhancedVAEVisualization from '@/components/EnhancedVAEVisualization';
 import LowRankVAEEducation from '@/components/LowRankVAEEducation';
@@ -163,46 +163,25 @@ const LowRankVAE = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
-      {/* Header */}
-      <header className="w-full glass-panel border-b border-white/5 sticky top-0 z-50 backdrop-blur-xl">
-        <div className="container py-6 px-4 md:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/" className="relative">
-                <span
-                  className="simulix-logo text-3xl md:text-4xl font-black tracking-tight transition-all duration-500 hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #fff 0%, #38bdf8 50%, #818cf8 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    filter: 'drop-shadow(0 2px 8px rgba(56, 189, 248, 0.3))',
-                  }}
-                >
-                  Simulix
-                </span>
-              </Link>
-              <div className="hidden md:flex items-center gap-2 px-4 py-2 glass-panel rounded-full">
-                <Brain className="h-4 w-4 text-accent animate-pulse" />
-                <span className="text-sm font-medium">
-                  <span className="text-accent">Enhanced Low-Rank VAE</span> with Realistic Training Dynamics
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link 
-                to="/" 
-                className="group flex items-center gap-2 px-4 py-2 glass-panel rounded-full hover:border-accent/40 transition-all duration-300 hover:scale-105"
-              >
-                <Home className="h-4 w-4 text-accent/80 group-hover:text-accent transition-colors" />
-                <span className="text-sm font-medium group-hover:text-accent transition-colors">
-                  Back to Home
-                </span>
-              </Link>
-            </div>
+          {/* Header */}
+      <header className="w-full glass-panel border-b border-white/5 mb-8">
+        <div className="container py-6 px-4 md:px-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-light tracking-tight">
+              Low-Rank VAE Visualization
+              <span className="text-sm ml-3 opacity-70 font-normal">
+                Enhanced Low-Rank VAE with Synthetic Training Dynamics
+              </span>
+            </h1>
+            <p className="text-sm opacity-70"></p>
           </div>
+          <Link to="/" className="control-btn flex items-center gap-2 text-sm">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Visualizations
+          </Link>
         </div>
       </header>
+    
 
       {/* Main Content - Single Page Layout */}
       <main className="container px-4 md:px-8 py-8">
