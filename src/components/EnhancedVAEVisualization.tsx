@@ -235,7 +235,7 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
               </span>
             )}
           </h3>
-          <InfoTooltip {...VAETooltips.mnistReconstruction} />
+          <InfoTooltip {...VAETooltips.mnistReconstruction} side="left"/>
         </div>
         
         <ImageReconstructionGrid
@@ -251,7 +251,7 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
         <div className="glass-panel p-6 rounded-xl">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-lg font-semibold text-accent">Loss Components</h3>
-            <InfoTooltip {...VAETooltips.lossComponents} />
+            <InfoTooltip {...VAETooltips.lossComponents} side="left"/>
           </div>
           {enhancedTrainingData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
