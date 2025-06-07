@@ -55,6 +55,8 @@ Simulix offers a comprehensive suite of interactive modules, each crafted for ex
 - **Neural Network Visualizer**  
   Build and train simple feedforward neural networks. Visualize layer activations, weight updates, and loss curves as you tune hyperparameters and train on sample data.
 
+  add many more...
+
 ---
 
 ## 💡 Why Use Simulix?
