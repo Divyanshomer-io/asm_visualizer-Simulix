@@ -2,8 +2,7 @@
 
 [![Visit Website](https://img.shields.io/badge/visit-website-brightgreen)](https://simulix.vercel.app/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Divyanshu%20Lila-blue?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/divyanshu-lila)
-[![Give Feedback](https://img.shields.io/badge/submit-feedback-orange?style=for-the-badge)](https://simulix.vercel.app/feedback)
-[![Contribute](https://img.shields.io/badge/submit-contribution-yellow?style=for-the-badge)](https://simulix.vercel.app/contribute)
+[![Read Blog](https://img.shields.io/badge/read-blog-orange?style=for-the-badge)](https://simulix.vercel.app/blog)
 
 **Simulix** is an interactive web platform designed to make applied statistical mathematics and data science concepts accessible, visual, and engaging for students, educators, and beginners. Through hands-on visualizations, educational guides, and real-time experimentation, Simulix bridges the gap between theory and practical understanding.
 
