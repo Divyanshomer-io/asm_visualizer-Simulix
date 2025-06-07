@@ -6,7 +6,7 @@
 
 **Simulix** is an interactive web platform designed to make applied statistical mathematics and data science concepts accessible, visual, and engaging for students, educators, and beginners. Through hands-on visualizations, educational guides, and real-time experimentation, Simulix bridges the gap between theory and practical understanding.
 
-🌐 **Access the Platform**: [https://preview--simulix.lovable.app/](https://simulix.vercel.app/)
+🌐 **Access the Platform**: [Simulix](https://simulix.vercel.app/)
 
 ---
 
