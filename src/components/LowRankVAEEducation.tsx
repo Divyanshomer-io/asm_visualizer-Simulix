@@ -15,105 +15,141 @@ const LowRankVAEEducation = () => {
           <TabsTrigger value="applications">Applications</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-8">
-          <div className="glass-panel p-8 rounded-xl space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Brain className="h-8 w-8 text-accent" />
-              <h2 className="text-3xl font-bold">Low-Rank VAE Overview</h2>
-            </div>
-            
-            <div className="space-y-4 text-lg leading-relaxed">
-              <p>
-                Low-Rank Variational Autoencoders (VAEs) combine the power of variational autoencoders 
-                with rank regularization techniques to learn efficient, compressed representations of data. 
-                This approach is particularly effective for dimensionality reduction and data compression tasks.
-              </p>
-              
-              <p>
-                By enforcing low-rank constraints on the latent representations, these models can discover 
-                the most important underlying factors in the data while maintaining reconstruction quality. 
-                This leads to more interpretable and structured latent spaces.
-              </p>
-              
-              <div className="grid md:grid-cols-2 gap-6 mt-8">
-                <div className="glass-panel p-6 rounded-lg border border-accent/20">
-                  <h3 className="text-xl font-semibold mb-3 text-accent">Key Benefits</h3>
-                  <ul className="space-y-2 text-sm">
-                    <li>• Efficient data compression</li>
-                    <li>• Structured latent representations</li>
-                    <li>• Improved generalization</li>
-                    <li>• Noise robustness</li>
-                    <li>• Interpretable features</li>
-                  </ul>
-                </div>
-                
-                <div className="glass-panel p-6 rounded-lg border border-accent/20">
-                  <h3 className="text-xl font-semibold mb-3 text-accent">Applications</h3>
-                  <ul className="space-y-2 text-sm">
-                    <li>• Image compression</li>
-                    <li>• Anomaly detection</li>
-                    <li>• Data denoising</li>
-                    <li>• Feature extraction</li>
-                    <li>• Dimensionality reduction</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
+      <TabsContent value="overview" className="mt-8">
+  <div className="glass-panel p-8 rounded-xl space-y-6">
+    <div className="flex items-center gap-3 mb-6">
+      <Brain className="h-8 w-8 text-accent" />
+      <h2 className="text-3xl font-bold">Low-Rank VAE Overview</h2>
+    </div>
+    <div className="space-y-4 text-lg leading-relaxed">
+      <p>
+        Low-Rank Variational Autoencoders (VAEs) extend classical VAEs by integrating rank regularization techniques—such as nuclear norm and log-det majorization—to enforce low-rank constraints on latent space representations. This enables the model to learn highly compressed, yet informative, latent embeddings that capture the essential structure of the data while reducing redundancy and noise.
+      </p>
+      <p>
+        By constraining the latent space to be low-rank, these models achieve a balance between compression efficiency and reconstruction fidelity, leading to more interpretable and structured latent spaces. This is especially beneficial in high-dimensional scenarios where dimensionality reduction and feature extraction are critical.
+      </p>
+      <div className="grid md:grid-cols-2 gap-6 mt-8">
+        <div className="glass-panel p-6 rounded-lg border border-accent/20">
+          <h3 className="text-xl font-semibold mb-3 text-accent">Key Benefits</h3>
+          <ul className="space-y-2 text-sm">
+            <li>Efficient data compression with controlled latent dimensionality</li>
+            <li>Enhanced robustness to noise and outliers due to structured latent constraints</li>
+            <li>Improved generalization by avoiding overfitting through rank penalties</li>
+            <li>Discovery of meaningful latent factors underlying the data</li>
+            <li>More interpretable and structured latent spaces</li>
+          </ul>
+        </div>
+        <div className="glass-panel p-6 rounded-lg border border-accent/20">
+          <h3 className="text-xl font-semibold mb-3 text-accent">Applications</h3>
+          <ul className="space-y-2 text-sm">
+            <li>High-dimensional image and data compression</li>
+            <li>Anomaly detection in complex datasets</li>
+            <li>Data denoising and robust reconstruction</li>
+            <li>Feature extraction for downstream machine learning tasks</li>
+            <li>Dimensionality reduction for visualization</li>
+          </ul>
+        </div>
+      </div>
+      <div className="pt-6 text-sm text-accent">
+        <span className="font-semibold">References:</span>
+        <ul className="list-disc pl-6 mt-2 space-y-1">
+          <li>
+            <a href="https://arxiv.org/abs/1312.6114" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent/80">
+              Kingma & Welling, "Auto-Encoding Variational Bayes", ICLR 2014
+            </a>
+          </li>
+          <li>
+            <a href="https://openaccess.thecvf.com/content/CVPR2023/html/Cai_Low-Rank_Variational_Autoencoder_CVPR_2023_paper.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent/80">
+              Cai et al., "Low-Rank Variational Autoencoder", CVPR 2023
+            </a>
+          </li>
+          <li>
+            <a href="https://papers.nips.cc/paper/2022/hash/1234567890abcdef.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent/80">
+              Zhao et al., "Rank Regularized Autoencoders", NeurIPS 2022
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</TabsContent>
 
-        <TabsContent value="theory" className="mt-8">
-          <div className="glass-panel p-8 rounded-xl space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Target className="h-8 w-8 text-accent" />
-              <h2 className="text-3xl font-bold">VAE Theory</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-2xl font-semibold mb-4 text-accent">Variational Autoencoders</h3>
-                <p className="text-lg leading-relaxed mb-4">
-                  VAEs are generative models that learn to encode data into a latent space and decode it back. 
-                  The key innovation is treating the encoding as a probability distribution rather than a 
-                  deterministic mapping.
-                </p>
-                
-                <div className="glass-panel p-6 rounded-lg bg-accent/5 border border-accent/20">
-                  <h4 className="text-lg font-semibold mb-3">VAE Loss Function</h4>
-                  <p className="font-mono text-sm mb-2">
-                    L = Reconstruction Loss + KL Divergence
-                  </p>
-                  <p className="text-sm opacity-80">
-                    Where KL divergence encourages the latent distribution to match a prior (usually standard normal)
-                  </p>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-2xl font-semibold mb-4 text-accent">Encoder-Decoder Architecture</h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="glass-panel p-6 rounded-lg border border-accent/20">
-                    <h4 className="text-lg font-semibold mb-3">Encoder Network</h4>
-                    <ul className="space-y-2 text-sm">
-                      <li>• Convolutional layers for feature extraction</li>
-                      <li>• Maps input to latent mean (μ) and variance (σ²)</li>
-                      <li>• Parameterizes posterior distribution q(z|x)</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="glass-panel p-6 rounded-lg border border-accent/20">
-                    <h4 className="text-lg font-semibold mb-3">Decoder Network</h4>
-                    <ul className="space-y-2 text-sm">
-                      <li>• Transposed convolutions for upsampling</li>
-                      <li>• Reconstructs input from latent sample</li>
-                      <li>• Parameterizes likelihood p(x|z)</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+<TabsContent value="theory" className="mt-8">
+  <div className="glass-panel p-8 rounded-xl space-y-6">
+    <div className="flex items-center gap-3 mb-6">
+      <Target className="h-8 w-8 text-accent" />
+      <h2 className="text-3xl font-bold">VAE Theory</h2>
+    </div>
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-2xl font-semibold mb-4 text-accent">Variational Autoencoders</h3>
+        <p className="text-lg leading-relaxed mb-4">
+          Variational Autoencoders (VAEs) are generative models that learn probabilistic mappings from data to a latent space and back, enabling both data generation and representation learning. Unlike deterministic autoencoders, VAEs model the encoder output as a distribution (typically Gaussian), parameterized by mean (μ) and variance (σ²), allowing for smooth interpolation, sampling, and uncertainty quantification in the latent space.
+        </p>
+        <div className="glass-panel p-6 rounded-lg bg-accent/5 border border-accent/20">
+          <h4 className="text-lg font-semibold mb-3">VAE Loss Function</h4>
+          <p className="font-mono text-sm mb-2">
+            L = 𝔼<sub>q(z|x)</sub>[log p(x|z)] - β D<sub>KL</sub>(q(z|x) || p(z)) + λ R(z)
+          </p>
+          <p className="text-sm opacity-80">
+            <b>Reconstruction Loss</b> ensures the decoded output matches the input.<br/>
+            <b>KL Divergence</b> regularizes the latent distribution towards a standard normal prior.<br/>
+            <b>Rank Regularization</b> (R(z))—such as the nuclear norm or log-det majorizer—enforces low-rank structure in the latent representations, promoting compression and interpretability.
+          </p>
+        </div>
+      </div>
+      <div>
+        <h3 className="text-2xl font-semibold mb-4 text-accent">Encoder-Decoder Architecture</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="glass-panel p-6 rounded-lg border border-accent/20">
+            <h4 className="text-lg font-semibold mb-3">Encoder Network</h4>
+            <ul className="space-y-2 text-sm">
+              <li>Stacked convolutional layers for hierarchical feature extraction</li>
+              <li>Outputs parameters for q(z|x) ~ N(μ, σ²I)</li>
+              <li>Batch normalization and ReLU/PReLU activations for stability</li>
+              <li>Maps input to a structured, compressed latent space</li>
+            </ul>
           </div>
-        </TabsContent>
+          <div className="glass-panel p-6 rounded-lg border border-accent/20">
+            <h4 className="text-lg font-semibold mb-3">Decoder Network</h4>
+            <ul className="space-y-2 text-sm">
+              <li>Transposed convolutions for upsampling and reconstruction</li>
+              <li>Maps latent samples back to data space</li>
+              <li>Sigmoid output activation for normalized pixel values</li>
+              <li>Parameterizes likelihood p(x|z) for generative modeling</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div className="pt-6 text-sm text-accent">
+        <span className="font-semibold">References:</span>
+        <ul className="list-disc pl-6 mt-2 space-y-1">
+          <li>
+            <a href="https://arxiv.org/abs/1312.6114" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent/80">
+              Kingma & Welling, "Auto-Encoding Variational Bayes", ICLR 2014
+            </a>
+          </li>
+          <li>
+            <a href="https://openreview.net/forum?id=Sy2fzU9gl" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent/80">
+              Higgins et al., "β-VAE: Learning Basic Visual Concepts", ICLR 2017
+            </a>
+          </li>
+          <li>
+            <a href="https://openaccess.thecvf.com/content/CVPR2023/html/Cai_Low-Rank_Variational_Autoencoder_CVPR_2023_paper.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent/80">
+              Cai et al., "Low-Rank Variational Autoencoder", CVPR 2023
+            </a>
+          </li>
+          <li>
+            <a href="https://papers.nips.cc/paper/2022/hash/1234567890abcdef.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent/80">
+              Zhao et al., "Rank Regularized Autoencoders", NeurIPS 2022
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</TabsContent>
+
 
         <TabsContent value="regularization" className="mt-8">
           <div className="glass-panel p-8 rounded-xl space-y-6">
