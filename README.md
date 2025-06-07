@@ -1,6 +1,11 @@
 # Simulix
 
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Live Site](https://img.shields.io/badge/visit-live--demo-brightgreen)](https://preview--simulix.lovable.app/)
+
 **Simulix** is an interactive web platform designed to make applied statistical mathematics and data science concepts accessible, visual, and engaging for students, educators, and beginners. Through hands-on visualizations, educational guides, and real-time experimentation, Simulix bridges the gap between theory and practical understanding.
+
+🌐 **Access the Platform**: [https://preview--simulix.lovable.app/](https://preview--simulix.lovable.app/)
 
 ---
 
@@ -101,4 +106,5 @@ This project is open-source and available under the **MIT License**.
 
 ---
 
-**Explore, interact, and master applied statistical mathematics and data science with Simulix.**
+**Explore, interact, and master applied statistical mathematics and data science with Simulix.**  
+🌐 [Visit the live site →](https://preview--simulix.lovable.app/)
