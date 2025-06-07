@@ -130,7 +130,7 @@ export const ImageReconstructionGrid: React.FC<ImageGridProps> = ({
       </div>
       
       <div className="text-center text-xs text-muted-foreground mt-4">
-        Real MNIST digits • VAE learns to compress and reconstruct handwritten digits
+        Synthetic MNIST digits • VAE learns to compress and reconstruct handwritten digits
       </div>
     </div>
   );
