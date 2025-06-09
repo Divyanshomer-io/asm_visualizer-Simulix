@@ -51,7 +51,7 @@ surrogate(x: number, x0: number): number {
     const lambda = this.params.regularization === 'nuc' ? this.params.lambdaNuc : this.params.lambdaMajorizer;
     const lr_base = 0.1 / (1 + lambda / 100);
     const lr_scale = Math.sqrt(this.params.latentDim / 50);
-    const eta = (f_x0 / this.L) ;
+    const eta = (f_x0 / this.L)*5 ;
     
     // Track objectives and gradients with parameter information
     this.history.x.push(x);
@@ -92,34 +92,31 @@ surrogate(x: number, x0: number): number {
 
 // Parameter-aware MM optimization simulation
 export const simulateMMOptimization = (epochs: number, latentDim: number, vaeParams: any): MMHistory => {
-  // Parameter-dependent objective function
   const lambda = vaeParams.regularization === 'nuc' ? vaeParams.lambdaNuc : vaeParams.lambdaMajorizer;
   const complexity_factor = Math.log(latentDim + 1) * (1 + lambda / 300);
   
+  // Better function for MM demonstration
   const f = (x: number) => {
-    const base_loss = Math.exp(-x * x / (latentDim * 0.1)) * (50 );
+    const base_loss = (x * x + 1) * 10;  // Gentler quadratic
     const result = base_loss * complexity_factor;
-    return Math.max(result, 1e-6); // Ensure positive values
+    return Math.max(result, 1e-6);
   };
   
-const grad_f = (x: number) => {
-  // Derivative of f(x) = exp(-x²/(latentDim*0.1)) * 50 * complexity_factor
-  const latentScale = latentDim * 0.1;
-  const base_grad = -2 * x / latentScale * Math.exp(-x * x / latentScale) * 50 * complexity_factor;
-  return base_grad; // Remove extra lambda scaling
-};
+  const grad_f = (x: number) => {
+    return 2 * x * 10 * complexity_factor;
+  };
   
-  const lipschitz_L = 10.0 * (1 + lambda / 100); // Parameter-dependent Lipschitz constant
+  const lipschitz_L = 20 * complexity_factor; // Adjusted Lipschitz constant
   const optimizer = new MMOptimizer(f, grad_f, lipschitz_L, vaeParams);
   
-  let x = Math.random() * 2 - 1; // Initial point
+  let x = (Math.random() - 0.5) * 4; // Larger initial range
   
   for (let i = 1; i <= epochs; i++) {
     const x_prev = x;
     x = optimizer.step(x, x_prev, i);
     
-    // Parameter-dependent stochasticity
-    const noise_scale = 0.1 * Math.sqrt(latentDim / 50) / (1 + lambda / 200);
+    // Reduced noise to see MM effect clearly
+    const noise_scale = 0.01 * Math.sqrt(latentDim / 50) / (1 + lambda / 200);
     x += (Math.random() - 0.5) * noise_scale;
   }
   
