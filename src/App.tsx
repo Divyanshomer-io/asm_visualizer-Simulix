@@ -4,8 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { VizzyProvider } from "@/contexts/VizzyContext";
-import Vizzy from "@/components/Vizzy";
 import Landing from "./pages/Landing";
 import Blog from "./pages/Blog";
 import Simulator from "./pages/Simulator";
@@ -42,96 +40,93 @@ const App = () => (
     console.error('App level error:', error, errorInfo);
   }}>
     <QueryClientProvider client={queryClient}>
-      <VizzyProvider>
-        <ErrorBoundary>
-          <TooltipProvider>
+      <ErrorBoundary>
+        <TooltipProvider>
+          <ErrorBoundary>
+            <Toaster />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <Sonner />
+          </ErrorBoundary>
+          <BrowserRouter>
             <ErrorBoundary>
-              <Toaster />
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/blog" element={
+                  <ErrorBoundary>
+                    <Blog />
+                  </ErrorBoundary>
+                } />
+                <Route path="/simulator" element={
+                  <ErrorBoundary>
+                    <Simulator />
+                  </ErrorBoundary>
+                } />
+                <Route path="/simulated-annealing-toy" element={
+                  <ErrorBoundary>
+                    <SimulatedAnnealingToy />
+                  </ErrorBoundary>
+                } />
+                <Route path="/alias-method" element={
+                  <ErrorBoundary>
+                    <AliasMethod />
+                  </ErrorBoundary>
+                } />
+                <Route path="/bootstrapping" element={
+                  <ErrorBoundary>
+                    <Bootstrapping />
+                  </ErrorBoundary>
+                } />
+                <Route path="/huber-mean" element={
+                  <ErrorBoundary>
+                    <HuberMean />
+                  </ErrorBoundary>
+                } />
+                <Route path="/importance-sampling" element={
+                  <ErrorBoundary>
+                    <ImportanceSampling />
+                  </ErrorBoundary>
+                } />
+                <Route path="/neural-network" element={
+                  <ErrorBoundary>
+                    <NeuralNetwork />
+                  </ErrorBoundary>
+                } />
+                <Route path="/random-forest" element={
+                  <ErrorBoundary>
+                    <RandomForest />
+                  </ErrorBoundary>
+                } />
+                <Route path="/deep-rl" element={
+                  <ErrorBoundary>
+                    <DeepRL />
+                  </ErrorBoundary>
+                } />
+                <Route path="/bias-variance" element={
+                  <ErrorBoundary>
+                    <BiasVarianceTradeoff />
+                  </ErrorBoundary>
+                } />
+                <Route path="/low-rank-vae" element={
+                  <ErrorBoundary>
+                    <LowRankVAE />
+                  </ErrorBoundary>
+                } />
+                <Route path="/about" element={
+                  <ErrorBoundary>
+                    <About />
+                  </ErrorBoundary>
+                } />
+                <Route path="*" element={
+                  <ErrorBoundary>
+                    <NotFound />
+                  </ErrorBoundary>
+                } />
+              </Routes>
             </ErrorBoundary>
-            <ErrorBoundary>
-              <Sonner />
-            </ErrorBoundary>
-            <BrowserRouter>
-              <ErrorBoundary>
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/blog" element={
-                    <ErrorBoundary>
-                      <Blog />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/simulator" element={
-                    <ErrorBoundary>
-                      <Simulator />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/simulated-annealing-toy" element={
-                    <ErrorBoundary>
-                      <SimulatedAnnealingToy />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/alias-method" element={
-                    <ErrorBoundary>
-                      <AliasMethod />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/bootstrapping" element={
-                    <ErrorBoundary>
-                      <Bootstrapping />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/huber-mean" element={
-                    <ErrorBoundary>
-                      <HuberMean />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/importance-sampling" element={
-                    <ErrorBoundary>
-                      <ImportanceSampling />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/neural-network" element={
-                    <ErrorBoundary>
-                      <NeuralNetwork />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/random-forest" element={
-                    <ErrorBoundary>
-                      <RandomForest />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/deep-rl" element={
-                    <ErrorBoundary>
-                      <DeepRL />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/bias-variance" element={
-                    <ErrorBoundary>
-                      <BiasVarianceTradeoff />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/low-rank-vae" element={
-                    <ErrorBoundary>
-                      <LowRankVAE />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/about" element={
-                    <ErrorBoundary>
-                      <About />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="*" element={
-                    <ErrorBoundary>
-                      <NotFound />
-                    </ErrorBoundary>
-                  } />
-                </Routes>
-              </ErrorBoundary>
-              <Vizzy />
-            </BrowserRouter>
-          </TooltipProvider>
-        </ErrorBoundary>
-      </VizzyProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ErrorBoundary>
     </QueryClientProvider>
   </ErrorBoundary>
 );
