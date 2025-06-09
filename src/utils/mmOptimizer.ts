@@ -97,14 +97,17 @@ export const simulateMMOptimization = (epochs: number, latentDim: number, vaePar
   const complexity_factor = Math.log(latentDim + 1) * (1 + lambda / 300);
   
   const f = (x: number) => {
-    const base_loss = Math.exp(-x * x / (latentDim * 0.1)) * (50 + Math.random() * 10);
-    return base_loss * complexity_factor;
+    const base_loss = Math.exp(-x * x / (latentDim * 0.1)) * (50 );
+    const result = base_loss * complexity_factor;
+    return Math.max(result, 1e-6); // Ensure positive values
   };
   
-  const grad_f = (x: number) => {
-    const base_grad = -2 * x * f(x) / (latentDim * 0.1);
-    return base_grad * (1 + lambda / 500); // λ-dependent gradient scaling
-  };
+const grad_f = (x: number) => {
+  // Derivative of f(x) = exp(-x²/(latentDim*0.1)) * 50 * complexity_factor
+  const latentScale = latentDim * 0.1;
+  const base_grad = -2 * x / latentScale * Math.exp(-x * x / latentScale) * 50 * complexity_factor;
+  return base_grad; // Remove extra lambda scaling
+};
   
   const lipschitz_L = 10.0 * (1 + lambda / 100); // Parameter-dependent Lipschitz constant
   const optimizer = new MMOptimizer(f, grad_f, lipschitz_L, vaeParams);
