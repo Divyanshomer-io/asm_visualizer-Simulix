@@ -51,7 +51,7 @@ surrogate(x: number, x0: number): number {
     const lambda = this.params.regularization === 'nuc' ? this.params.lambdaNuc : this.params.lambdaMajorizer;
     const lr_base = 0.1 / (1 + lambda / 100);
     const lr_scale = Math.sqrt(this.params.latentDim / 50);
-    const eta = (f_x0 / this.L) * lr_base * lr_scale;
+    const eta = (f_x0 / this.L) ;
     
     // Track objectives and gradients with parameter information
     this.history.x.push(x);
@@ -72,7 +72,7 @@ surrogate(x: number, x0: number): number {
     this.history.grad_f_norm.push(Math.abs(grad_f / (this.f(x) + 1e-8)));
     this.history.grad_g_norm.push(Math.abs(grad_g ));
     
-    return x - eta * grad_g * grad_scale;
+    return x - eta * grad_g ;
   }
 
   reset(): void {
