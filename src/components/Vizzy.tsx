@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Settings, Maximize2, Minimize2 } from 'lucide-react';
+import { MessageCircle, X, Send, Maximize2, Minimize2 } from 'lucide-react';
 import { useVizzy } from '@/contexts/VizzyContext';
 import { callGeminiAPI } from '@/api/vizzy-chat';
 import { toast } from 'sonner';
@@ -26,7 +25,6 @@ const Vizzy: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isMaximized, setIsMaximized] = useState(false);
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
 
@@ -89,8 +87,7 @@ const Vizzy: React.FC = () => {
     if (!message.trim()) return;
     
     if (!apiKey) {
-      toast.error('Please set your Gemini API key first');
-      setShowApiKeyInput(true);
+      toast.error('Please enter your Gemini API key first');
       return;
     }
 
@@ -180,14 +177,6 @@ const Vizzy: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <Settings className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
                   onClick={() => setIsMaximized(!isMaximized)}
                   className="text-gray-400 hover:text-white"
                 >
@@ -204,27 +193,25 @@ const Vizzy: React.FC = () => {
               </div>
             </div>
 
-            {/* API Key Input */}
-            {showApiKeyInput && (
-              <div className="p-4 border-b border-white/10 bg-blue-900/20">
-                <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Gemini API Key:</label>
-                  <Input
-                    type="password"
-                    placeholder="Enter your Gemini API key..."
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    className="bg-background/50"
-                  />
-                  <p className="text-xs text-gray-400">
-                    Get your API key from{' '}
-                    <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                      Google AI Studio
-                    </a>
-                  </p>
-                </div>
+            {/* API Key Input Section */}
+            <div className="p-4 border-b border-white/10 bg-blue-900/20">
+              <div className="space-y-2">
+                <label className="text-sm text-gray-300">Gemini API Key:</label>
+                <Input
+                  type="password"
+                  placeholder="Enter your Gemini API key..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="bg-background/50 text-white placeholder-gray-400"
+                />
+                <p className="text-xs text-gray-400">
+                  Get your API key from{' '}
+                  <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                    Google AI Studio
+                  </a>
+                </p>
               </div>
-            )}
+            </div>
 
             {/* Messages */}
             <div
