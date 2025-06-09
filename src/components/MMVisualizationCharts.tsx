@@ -79,7 +79,7 @@ const MMVisualizationCharts: React.FC<MMVisualizationChartsProps> = ({ mmHistory
           ))}
           {data && (
             <div className="text-yellow-400 text-sm mt-1">
-              <p>η = f(x₀)/L × λ_scale × z_scale</p>
+              <p>η = f(x₀)/L</p>
               <p>λ={data.lambda?.toFixed(1)}, z_dim={data.zDim}</p>
             </div>
           )}
