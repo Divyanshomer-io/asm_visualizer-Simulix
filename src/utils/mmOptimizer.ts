@@ -36,20 +36,12 @@ export class MMOptimizer {
   }
 
   // Parameter-aware surrogate function
-  surrogate(x: number, x0: number): number {
-    const f_x0 = this.f(x0);
-    const f_x = this.f(x);
-    
-    // λ-dependent scaling factor
-    const lambda = this.params.regularization === 'nuc' ? this.params.lambdaNuc : this.params.lambdaMajorizer;
-    const reg_scale = 1 + lambda / 100;
-    
-    // z_dim capacity factor
-    const latent_cap = Math.sqrt(this.params.latentDim / 10);
-    
-    return (Math.log(f_x0 + 1e-8) + 
-            (f_x - f_x0) / (f_x0 + 1e-8) * reg_scale * latent_cap);
-  }
+surrogate(x: number, x0: number): number {
+  const f_x0 = this.f(x0) + 1e-8;
+  const f_x = this.f(x);
+  return Math.log(f_x0) + (f_x - f_x0) / f_x0;
+}
+
 
   // Parameter-aware MM update rule
   step(x: number, x0: number, iteration: number): number {
@@ -78,7 +70,7 @@ export class MMOptimizer {
     
     // Log gradient magnitudes
     this.history.grad_f_norm.push(Math.abs(grad_f / (this.f(x) + 1e-8)));
-    this.history.grad_g_norm.push(Math.abs(grad_g * grad_scale));
+    this.history.grad_g_norm.push(Math.abs(grad_g ));
     
     return x - eta * grad_g * grad_scale;
   }
