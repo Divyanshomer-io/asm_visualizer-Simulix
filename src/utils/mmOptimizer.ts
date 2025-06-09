@@ -36,12 +36,20 @@ export class MMOptimizer {
   }
 
   // Parameter-aware surrogate function
-surrogate(x: number, x0: number): number {
-  const f_x0 = this.f(x0) + 1e-8;
-  const f_x = this.f(x);
-  return Math.log(f_x0) + (f_x - f_x0) / f_x0;
-}
-
+  surrogate(x: number, x0: number): number {
+    const f_x0 = this.f(x0);
+    const f_x = this.f(x);
+    
+    // λ-dependent scaling factor
+    const lambda = this.params.regularization === 'nuc' ? this.params.lambdaNuc : this.params.lambdaMajorizer;
+    const reg_scale = 1 + lambda / 100;
+    
+    // z_dim capacity factor
+    const latent_cap = Math.sqrt(this.params.latentDim / 10);
+    
+    return (Math.log(f_x0 + 1e-8) + 
+            (f_x - f_x0) / (f_x0 + 1e-8) * reg_scale * latent_cap);
+  }
 
   // Parameter-aware MM update rule
   step(x: number, x0: number, iteration: number): number {
@@ -51,7 +59,7 @@ surrogate(x: number, x0: number): number {
     const lambda = this.params.regularization === 'nuc' ? this.params.lambdaNuc : this.params.lambdaMajorizer;
     const lr_base = 0.1 / (1 + lambda / 100);
     const lr_scale = Math.sqrt(this.params.latentDim / 50);
-    const eta = (f_x0 / this.L)*5 ;
+    const eta = (f_x0 / this.L) * lr_base * lr_scale;
     
     // Track objectives and gradients with parameter information
     this.history.x.push(x);
@@ -70,9 +78,9 @@ surrogate(x: number, x0: number): number {
     
     // Log gradient magnitudes
     this.history.grad_f_norm.push(Math.abs(grad_f / (this.f(x) + 1e-8)));
-    this.history.grad_g_norm.push(Math.abs(grad_g ));
+    this.history.grad_g_norm.push(Math.abs(grad_g * grad_scale));
     
-    return x - eta * grad_g ;
+    return x - eta * grad_g * grad_scale;
   }
 
   reset(): void {
@@ -92,31 +100,31 @@ surrogate(x: number, x0: number): number {
 
 // Parameter-aware MM optimization simulation
 export const simulateMMOptimization = (epochs: number, latentDim: number, vaeParams: any): MMHistory => {
+  // Parameter-dependent objective function
   const lambda = vaeParams.regularization === 'nuc' ? vaeParams.lambdaNuc : vaeParams.lambdaMajorizer;
   const complexity_factor = Math.log(latentDim + 1) * (1 + lambda / 300);
   
-  // Better function for MM demonstration
   const f = (x: number) => {
-    const base_loss = (x * x + 1) * 10;  // Gentler quadratic
-    const result = base_loss * complexity_factor;
-    return Math.max(result, 1e-6);
+    const base_loss = Math.exp(-x * x / (latentDim * 0.1)) * (50 + Math.random() * 10);
+    return base_loss * complexity_factor;
   };
   
   const grad_f = (x: number) => {
-    return 2 * x * 10 * complexity_factor;
+    const base_grad = -2 * x * f(x) / (latentDim * 0.1);
+    return base_grad * (1 + lambda / 500); // λ-dependent gradient scaling
   };
   
-  const lipschitz_L = 20 * complexity_factor; // Adjusted Lipschitz constant
+  const lipschitz_L = 10.0 * (1 + lambda / 100); // Parameter-dependent Lipschitz constant
   const optimizer = new MMOptimizer(f, grad_f, lipschitz_L, vaeParams);
   
-  let x = (Math.random() - 0.5) * 4; // Larger initial range
+  let x = Math.random() * 2 - 1; // Initial point
   
   for (let i = 1; i <= epochs; i++) {
     const x_prev = x;
     x = optimizer.step(x, x_prev, i);
     
-    // Reduced noise to see MM effect clearly
-    const noise_scale = 0.01 * Math.sqrt(latentDim / 50) / (1 + lambda / 200);
+    // Parameter-dependent stochasticity
+    const noise_scale = 0.1 * Math.sqrt(latentDim / 50) / (1 + lambda / 200);
     x += (Math.random() - 0.5) * noise_scale;
   }
   
