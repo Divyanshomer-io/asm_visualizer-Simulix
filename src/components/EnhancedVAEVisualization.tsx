@@ -4,6 +4,11 @@ import { VAEState, VAEParams } from '@/utils/lowRankVAE';
 import { ImageReconstructionGrid } from './MNISTImageRenderer';
 import { RealisticVAEReconstructor, VAETrainingDynamics, TrainingMetrics } from '@/utils/realisticVAEReconstructor';
 import InfoTooltip, { VAETooltips } from '@/components/InfoTooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import MMVisualizationCharts from '@/components/MMVisualizationCharts';
+import SVRGVisualizationCharts from '@/components/SVRGVisualizationCharts';
+import { simulateMMOptimization, MMHistory } from '@/utils/mmOptimizer';
+import { simulateSVRGOptimization, SVRGHistory } from '@/utils/svrgOptimizer';
 
 interface EnhancedVAEVisualizationProps {
   state: VAEState;
@@ -24,6 +29,8 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
   const [reconstructionQuality, setReconstructionQuality] = useState(0.1);
   const [liveMetrics, setLiveMetrics] = useState<TrainingMetrics | null>(null);
   const [currentReconstructions, setCurrentReconstructions] = useState<number[][][]>([]);
+  const [mmHistory, setMMHistory] = useState<MMHistory | null>(null);
+  const [svrgHistory, setSVRGHistory] = useState<SVRGHistory | null>(null);
   const trainingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Reset state when resetKey changes
@@ -33,6 +40,8 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
       setReconstructionQuality(0.1);
       setLiveMetrics(null);
       setCurrentReconstructions([]);
+      setMMHistory(null);
+      setSVRGHistory(null);
       if (trainingRef.current) {
         clearTimeout(trainingRef.current);
         trainingRef.current = null;
@@ -40,7 +49,7 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
     }
   }, [resetKey]);
 
-  // Generate enhanced training dynamics when training starts
+  // Generate parameter-aware MM and SVRG optimization data
   useEffect(() => {
     if (isTraining && currentEpoch === 0) {
       startEnhancedTraining();
@@ -54,6 +63,13 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
       params.regularization,
       params.regularization === 'nuc' ? params.lambdaNuc : params.lambdaMajorizer
     );
+
+    // Generate parameter-aware MM and SVRG optimization data
+    const mmData = simulateMMOptimization(params.epochs, params.latentDim, params);
+    const svrgData = simulateSVRGOptimization(params.epochs, params.latentDim, params.batchSize, params);
+    
+    setMMHistory(mmData);
+    setSVRGHistory(svrgData);
 
     for (let epoch = 1; epoch <= params.epochs; epoch++) {
       if (!isTraining) break;
@@ -101,7 +117,7 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
     }
   }, [params, isTraining, state.originalImages, onTrainingUpdate]);
 
-  // Prepare data for charts with enhanced metrics
+  // Prepare data for charts with enhanced metrics - incremental updates
   const enhancedTrainingData = liveMetrics ? liveMetrics.totalLosses.map((loss, index) => ({
     epoch: index + 1,
     totalLoss: Number(loss.toFixed(2)),
@@ -317,96 +333,134 @@ const EnhancedVAEVisualization: React.FC<EnhancedVAEVisualizationProps> = ({
         />
       </div>
 
-      {/* Enhanced Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Loss Components Chart */}
-        <div className="glass-panel p-6 rounded-xl">
-          <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-lg font-semibold text-accent">Loss Components</h3>
-            <InfoTooltip {...VAETooltips.lossComponents} side="right"/>
-          </div>
-          {enhancedTrainingData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={enhancedTrainingData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="epoch" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" />
-                <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="totalLoss" 
-                  stroke="#3B82F6" 
-                  strokeWidth={2} 
-                  name="Total Loss"
-                  dot={{ r: 3, fill: '#3B82F6' }}
-                  connectNulls={false}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="reconLoss" 
-                  stroke="#10B981" 
-                  strokeWidth={2} 
-                  name="Reconstruction"
-                  dot={{ r: 3, fill: '#10B981' }}
-                  connectNulls={false}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="klLoss" 
-                  stroke="#8B5CF6" 
-                  strokeWidth={2} 
-                  name="KL Divergence"
-                  dot={{ r: 3, fill: '#8B5CF6' }}
-                  connectNulls={false}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="regLoss" 
-                  stroke="#F59E0B" 
-                  strokeWidth={2} 
-                  name="Regularization"
-                  dot={{ r: 3, fill: '#F59E0B' }}
-                  connectNulls={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-              Start training to see loss components
-            </div>
-          )}
-        </div>
+      {/* Enhanced Charts with Parameter-Aware Visualizations */}
+      <div className="glass-panel p-6 rounded-xl">
+        <Tabs defaultValue="loss" className="w-full">
+          <TabsList className="grid grid-cols-4 w-full">
+            <TabsTrigger value="loss">Loss Components</TabsTrigger>
+            <TabsTrigger value="quality">Quality Evolution</TabsTrigger>
+            <TabsTrigger value="mm">MM Dynamics</TabsTrigger>
+            <TabsTrigger value="svrg">Control Variates</TabsTrigger>
+          </TabsList>
 
-        {/* Quality Evolution Chart */}
-        <div className="glass-panel p-6 rounded-xl">
-          <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-lg font-semibold text-accent">Quality Evolution</h3>
-            <InfoTooltip {...VAETooltips.qualityEvolution} />
-          </div>
-          {qualityHistory.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={qualityHistory}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="epoch" stroke="#9CA3AF" />
-                <YAxis domain={[0, 100]} stroke="#9CA3AF" />
-                <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="quality" 
-                  stroke="#EF4444" 
-                  strokeWidth={3}
-                  name="Reconstruction Quality (%)"
-                  dot={{ r: 3, fill: '#EF4444' }}
-                  connectNulls={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-              Start training to see quality evolution
+          <TabsContent value="loss" className="space-y-6">
+            {/* Full-width Loss Components Chart only */}
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-semibold text-accent">Loss Components Analysis</h3>
+              <InfoTooltip {...VAETooltips.lossComponents} side="right"/>
             </div>
-          )}
-        </div>
+            {enhancedTrainingData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={enhancedTrainingData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis 
+                    dataKey="epoch" 
+                    stroke="#9CA3AF"
+                    label={{ value: 'Epochs', position: 'insideBottom', offset: -5, style: { textAnchor: 'middle', fill: '#9CA3AF' } }}
+                  />
+                  <YAxis 
+                    stroke="#9CA3AF"
+                    label={{ value: 'Loss Value', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#9CA3AF' } }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="totalLoss" 
+                    stroke="#3B82F6" 
+                    strokeWidth={3} 
+                    name="Total Loss"
+                    dot={{ r: 4, fill: '#3B82F6' }}
+                    connectNulls={false}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="reconLoss" 
+                    stroke="#10B981" 
+                    strokeWidth={3} 
+                    name="Reconstruction Loss"
+                    dot={{ r: 4, fill: '#10B981' }}
+                    connectNulls={false}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="klLoss" 
+                    stroke="#8B5CF6" 
+                    strokeWidth={3} 
+                    name="KL Divergence"
+                    dot={{ r: 4, fill: '#8B5CF6' }}
+                    connectNulls={false}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="regLoss" 
+                    stroke="#F59E0B" 
+                    strokeWidth={3} 
+                    name="Regularization Loss"
+                    dot={{ r: 4, fill: '#F59E0B' }}
+                    connectNulls={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+                Start training to see loss components
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="quality">
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-semibold text-accent">Reconstruction Quality Over Time</h3>
+              <InfoTooltip {...VAETooltips.qualityEvolution} />
+            </div>
+            {qualityHistory.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={qualityHistory}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis 
+                    dataKey="epoch" 
+                    stroke="#9CA3AF"
+                    label={{ value: 'Epochs', position: 'insideBottom', offset: -5, style: { textAnchor: 'middle', fill: '#9CA3AF' } }}
+                  />
+                  <YAxis 
+                    domain={[0, 100]} 
+                    stroke="#9CA3AF"
+                    label={{ value: 'Quality (%)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#9CA3AF' } }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="quality" 
+                    stroke="#EF4444" 
+                    strokeWidth={3}
+                    name="Reconstruction Quality (%)"
+                    dot={{ r: 4, fill: '#EF4444' }}
+                    connectNulls={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+                Start training to see detailed quality evolution
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="mm">
+            <MMVisualizationCharts mmHistory={mmHistory || { 
+              x: [], f: [], g: [], grad_f_norm: [], grad_g_norm: [], 
+              learning_rates: [], iterations: [], lambda_values: [], z_dim_values: [] 
+            }} />
+          </TabsContent>
+
+          <TabsContent value="svrg">
+            <SVRGVisualizationCharts svrgHistory={svrgHistory || { 
+              variance: [], sgd_variance: [], snapshots: [], corrections: [], 
+              grad_norms: [], iterations: [], snapshot_epochs: [], 
+              lambda_influence: [], z_dim_capacity: [] 
+            }} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Parameter Impact Summary */}
