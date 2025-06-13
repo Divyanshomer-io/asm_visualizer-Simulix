@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-// import { toast } from 'sonner';
+import { toast } from 'sonner';
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import QLearningVisualization from '@/components/QLearningVisualization';
