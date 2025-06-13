@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
+import { ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 import QLearningVisualization from '@/components/QLearningVisualization';
 import QLearningControls from '@/components/QLearningControls';
 import QLearningEducation from '@/components/QLearningEducation';
@@ -354,15 +356,22 @@ const QLearningMaze = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
-      {/* Header */}
+
       <header className="w-full glass-panel border-b border-white/5 mb-8">
-        <div className="container py-6 px-4 md:px-8">
-          <h1 className="text-2xl md:text-3xl font-light tracking-tight">
-            Q-Learning Maze Solver
-            <span className="text-sm ml-3 opacity-70 font-normal">
-              Interactive Reinforcement Learning Visualization
-            </span>
-          </h1>
+        <div className="container py-6 px-4 md:px-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-light tracking-tight">
+              Q-Learning Maze Solver
+              <span className="text-sm ml-3 opacity-70 font-normal">
+                Interactive Learning
+              </span>
+            </h1>
+            <p className="text-sm opacity-70">Interactive Reinforcement Learning Visualization</p>
+          </div>
+          <Link to="/" className="control-btn flex items-center gap-2 text-sm">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Visualizations
+          </Link>
         </div>
       </header>
 
