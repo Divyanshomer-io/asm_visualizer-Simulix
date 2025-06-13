@@ -1,10 +1,10 @@
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Play, Square, RotateCcw, Route, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
+import QLearningVisualization from '@/components/QLearningVisualization';
+import QLearningControls from '@/components/QLearningControls';
+import QLearningEducation from '@/components/QLearningEducation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface MazeState {
   maze: number[][];
@@ -21,19 +21,13 @@ interface MazeState {
 }
 
 interface Parameters {
-  alpha: number;      // learning rate
-  gamma: number;      // discount factor
-  epsilon: number;    // exploration rate
-  mazeSize: number;   // maze dimensions
+  alpha: number;
+  gamma: number;
+  epsilon: number;
+  mazeSize: number;
 }
 
 const QLearningMaze = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const heatmapCanvasRef = useRef<HTMLCanvasElement>(null);
-  const rewardsCanvasRef = useRef<HTMLCanvasElement>(null);
-  const stepsCanvasRef = useRef<HTMLCanvasElement>(null);
-  const epsilonCanvasRef = useRef<HTMLCanvasElement>(null);
-  
   const [state, setState] = useState<MazeState>(() => {
     const initialSize = 6;
     return {
@@ -60,7 +54,6 @@ const QLearningMaze = () => {
     mazeSize: 6
   });
 
-  // Actions: up, down, left, right
   const actions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
   const isValidState = useCallback((pos: [number, number], maze: number[][]) => {
@@ -125,7 +118,6 @@ const QLearningMaze = () => {
       const reward = getReward(nextPos, currentState.goalPos);
       totalReward += reward;
 
-      // Q-learning update
       const currentQ = newQTable[pos[0]][pos[1]][action];
       const maxNextQ = pos[0] === currentState.goalPos[0] && pos[1] === currentState.goalPos[1] 
         ? 0 
@@ -141,214 +133,66 @@ const QLearningMaze = () => {
     return { totalReward, steps, newQTable };
   }, [actions, chooseAction, isValidState, getReward]);
 
-  const drawMaze = useCallback((canvas: HTMLCanvasElement, currentState: MazeState) => {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const cellSize = Math.min(canvas.width, canvas.height) / currentState.maze.length;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw grid and maze
-    currentState.maze.forEach((row, i) => {
-      row.forEach((cell, j) => {
-        const x = j * cellSize;
-        const y = i * cellSize;
-
-        // Draw cell background
-        ctx.fillStyle = cell === 1 ? '#1a1a1a' : '#2a2a2a';
-        ctx.fillRect(x, y, cellSize, cellSize);
-
-        // Draw grid lines
-        ctx.strokeStyle = '#404040';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, cellSize, cellSize);
-      });
-    });
-
-    // Draw start position
-    const startX = currentState.startPos[1] * cellSize + cellSize / 2;
-    const startY = currentState.startPos[0] * cellSize + cellSize / 2;
-    ctx.fillStyle = '#22c55e';
-    ctx.beginPath();
-    ctx.arc(startX, startY, cellSize * 0.3, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.fillStyle = 'white';
-    ctx.font = `${cellSize * 0.3}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('S', startX, startY);
-
-    // Draw goal position
-    const goalX = currentState.goalPos[1] * cellSize + cellSize / 2;
-    const goalY = currentState.goalPos[0] * cellSize + cellSize / 2;
-    ctx.fillStyle = '#ef4444';
-    ctx.beginPath();
-    ctx.arc(goalX, goalY, cellSize * 0.3, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.fillStyle = 'white';
-    ctx.fillText('G', goalX, goalY);
-
-    // Draw policy arrows
-    currentState.qTable.forEach((row, i) => {
-      row.forEach((qValues, j) => {
-        if (currentState.maze[i][j] === 0 && 
-            (i !== currentState.goalPos[0] || j !== currentState.goalPos[1]) &&
-            qValues.some(q => q !== 0)) {
-          
-          const maxQ = Math.max(...qValues);
-          const bestAction = qValues.indexOf(maxQ);
-          
-          const centerX = j * cellSize + cellSize / 2;
-          const centerY = i * cellSize + cellSize / 2;
-          const [dy, dx] = actions[bestAction];
-          
-          const endX = centerX + dx * cellSize * 0.2;
-          const endY = centerY + dy * cellSize * 0.2;
-          
-          ctx.strokeStyle = '#3b82f6';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY);
-          ctx.lineTo(endX, endY);
-          ctx.stroke();
-          
-          // Arrow head
-          const angle = Math.atan2(dy, dx);
-          const headLength = cellSize * 0.08;
-          ctx.beginPath();
-          ctx.moveTo(endX, endY);
-          ctx.lineTo(endX - headLength * Math.cos(angle - Math.PI / 6), 
-                    endY - headLength * Math.sin(angle - Math.PI / 6));
-          ctx.moveTo(endX, endY);
-          ctx.lineTo(endX - headLength * Math.cos(angle + Math.PI / 6), 
-                    endY - headLength * Math.sin(angle + Math.PI / 6));
-          ctx.stroke();
-        }
-      });
-    });
-
-    // Draw path if showing
-    if (currentState.showPath && currentState.path.length > 1) {
-      ctx.strokeStyle = '#fbbf24';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(currentState.path[0][1] * cellSize + cellSize / 2, 
-                currentState.path[0][0] * cellSize + cellSize / 2);
+  const startTraining = useCallback(async () => {
+    if (state.isTraining) return;
+    
+    setState(prev => ({ ...prev, isTraining: true, showPath: false }));
+    toast.success("Training started!");
+    
+    const initialEpsilon = params.epsilon;
+    let currentState = { ...state, isTraining: true };
+    const newRewards: number[] = [];
+    const newSteps: number[] = [];
+    const newEpsilons: number[] = [];
+    
+    for (let episode = 0; episode < 200; episode++) {
+      // Exponential decay of epsilon
+      const currentEpsilon = Math.max(0.01, initialEpsilon * Math.pow(0.98, episode));
+      newEpsilons.push(currentEpsilon);
       
-      currentState.path.slice(1).forEach(pos => {
-        ctx.lineTo(pos[1] * cellSize + cellSize / 2, pos[0] * cellSize + cellSize / 2);
-      });
-      ctx.stroke();
+      const currentParams = { ...params, epsilon: currentEpsilon };
+      const result = trainEpisode(currentState, currentParams);
       
-      ctx.strokeStyle = '#ef4444';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-  }, [actions]);
-
-  const drawQValues = useCallback((canvas: HTMLCanvasElement, currentState: MazeState) => {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const cellSize = Math.min(canvas.width, canvas.height) / currentState.maze.length;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Get max Q values for each cell
-    const maxQValues = currentState.qTable.map(row => 
-      row.map(qValues => Math.max(...qValues))
-    );
-    const globalMax = Math.max(...maxQValues.flat());
-    const globalMin = Math.min(...maxQValues.flat());
-
-    maxQValues.forEach((row, i) => {
-      row.forEach((maxQ, j) => {
-        const x = j * cellSize;
-        const y = i * cellSize;
-        
-        // Color based on Q-value (viridis-like colormap)
-        const normalized = globalMax > globalMin ? (maxQ - globalMin) / (globalMax - globalMin) : 0;
-        const hue = 240 + normalized * 60; // Blue to green
-        const saturation = 70;
-        const lightness = 20 + normalized * 60;
-        
-        ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-        ctx.fillRect(x, y, cellSize, cellSize);
-        
-        // Draw value text
-        ctx.fillStyle = normalized > 0.5 ? 'white' : 'black';
-        ctx.font = `${cellSize * 0.2}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(maxQ.toFixed(1), x + cellSize / 2, y + cellSize / 2);
-      });
-    });
-  }, []);
-
-  const drawChart = useCallback((canvas: HTMLCanvasElement, data: number[], color: string, label: string) => {
-    const ctx = canvas.getContext('2d');
-    if (!ctx || data.length === 0) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    const margin = 40;
-    const width = canvas.width - 2 * margin;
-    const height = canvas.height - 2 * margin;
-    
-    const minVal = Math.min(...data);
-    const maxVal = Math.max(...data);
-    const range = maxVal - minVal || 1;
-    
-    // Draw axes
-    ctx.strokeStyle = '#404040';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin, margin);
-    ctx.lineTo(margin, margin + height);
-    ctx.lineTo(margin + width, margin + height);
-    ctx.stroke();
-    
-    // Draw data
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    
-    data.forEach((value, index) => {
-      const x = margin + (index / (data.length - 1)) * width;
-      const y = margin + height - ((value - minVal) / range) * height;
+      newRewards.push(result.totalReward);
+      newSteps.push(result.steps);
       
-      if (index === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
+      currentState = {
+        ...currentState,
+        qTable: result.newQTable,
+        episodeRewards: [...newRewards],
+        episodeSteps: [...newSteps],
+        episodeEpsilons: [...newEpsilons],
+        currentEpisode: episode + 1
+      };
+      
+      // Update UI every 10 episodes
+      if (episode % 10 === 0 || episode === 199) {
+        setState(currentState);
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
-    });
+    }
     
-    ctx.stroke();
-    
-    // Draw title
-    ctx.fillStyle = 'white';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, canvas.width / 2, 20);
-  }, []);
+    setState(prev => ({ ...prev, isTraining: false }));
+    toast.success("Training completed!");
+  }, [state, params, trainEpisode]);
 
-  const findPath = useCallback((currentState: MazeState) => {
-    const path: [number, number][] = [currentState.startPos];
-    let pos = [...currentState.startPos] as [number, number];
+  const findPath = useCallback(() => {
+    const path: [number, number][] = [state.startPos];
+    let pos = [...state.startPos] as [number, number];
     const visited = new Set<string>();
     const maxSteps = 50;
     let steps = 0;
 
     while (steps < maxSteps && 
-           (pos[0] !== currentState.goalPos[0] || pos[1] !== currentState.goalPos[1])) {
+           (pos[0] !== state.goalPos[0] || pos[1] !== state.goalPos[1])) {
       const posKey = `${pos[0]},${pos[1]}`;
       if (visited.has(posKey)) break;
       visited.add(posKey);
 
-      const validActions = getValidActions(pos, currentState.maze);
+      const validActions = getValidActions(pos, state.maze);
       if (validActions.length === 0) break;
 
-      const qValues = currentState.qTable[pos[0]][pos[1]];
+      const qValues = state.qTable[pos[0]][pos[1]];
       let bestAction = validActions[0];
       let bestValue = qValues[bestAction];
 
@@ -360,7 +204,7 @@ const QLearningMaze = () => {
       });
 
       const nextPos: [number, number] = [pos[0] + actions[bestAction][0], pos[1] + actions[bestAction][1]];
-      if (isValidState(nextPos, currentState.maze)) {
+      if (isValidState(nextPos, state.maze)) {
         path.push(nextPos);
         pos = nextPos;
       } else {
@@ -370,76 +214,10 @@ const QLearningMaze = () => {
     }
 
     return path;
-  }, [actions, getValidActions, isValidState]);
-
-  // Canvas click handler for maze editing
-  const handleMazeClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
-    if (state.isTraining) return;
-    
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    
-    const cellSize = Math.min(canvas.width, canvas.height) / state.maze.length;
-    const col = Math.floor(x / cellSize);
-    const row = Math.floor(y / cellSize);
-    
-    if (row >= 0 && row < state.maze.length && col >= 0 && col < state.maze[0].length) {
-      if ((row !== state.startPos[0] || col !== state.startPos[1]) &&
-          (row !== state.goalPos[0] || col !== state.goalPos[1])) {
-        setState(prev => {
-          const newMaze = prev.maze.map(r => [...r]);
-          newMaze[row][col] = 1 - newMaze[row][col];
-          return { ...prev, maze: newMaze, showPath: false };
-        });
-      }
-    }
-  }, [state.isTraining, state.maze.length, state.startPos, state.goalPos]);
-
-  // Training function
-  const startTraining = useCallback(async () => {
-    if (state.isTraining) return;
-    
-    setState(prev => ({ ...prev, isTraining: true, showPath: false }));
-    toast.success("Training started!");
-    
-    let currentState = { ...state };
-    const newRewards: number[] = [];
-    const newSteps: number[] = [];
-    const newEpsilons: number[] = [];
-    
-    for (let episode = 0; episode < 200; episode++) {
-      if (!currentState.isTraining) break;
-      
-      newEpsilons.push(params.epsilon);
-      const result = trainEpisode(currentState, params);
-      newRewards.push(result.totalReward);
-      newSteps.push(result.steps);
-      
-      currentState = {
-        ...currentState,
-        qTable: result.newQTable,
-        episodeRewards: newRewards,
-        episodeSteps: newSteps,
-        episodeEpsilons: newEpsilons,
-        currentEpisode: episode + 1
-      };
-      
-      if (episode % 10 === 0) {
-        setState(currentState);
-        await new Promise(resolve => setTimeout(resolve, 50));
-      }
-    }
-    
-    setState(prev => ({ ...prev, isTraining: false }));
-    toast.success("Training completed!");
-  }, [state, params, trainEpisode]);
+  }, [state, actions, getValidActions, isValidState]);
 
   const showOptimalPath = useCallback(() => {
-    const path = findPath(state);
+    const path = findPath();
     setState(prev => ({ ...prev, showPath: true, path }));
     
     if (path.length > 1) {
@@ -447,7 +225,7 @@ const QLearningMaze = () => {
     } else {
       toast.error("No path found!");
     }
-  }, [state, findPath]);
+  }, [findPath]);
 
   const resetAll = useCallback(() => {
     setState(prev => ({
@@ -481,7 +259,14 @@ const QLearningMaze = () => {
     toast.info("Maze reset");
   }, [params.mazeSize]);
 
-  // Handle maze size change
+  const handleMazeClick = useCallback((row: number, col: number) => {
+    setState(prev => {
+      const newMaze = prev.maze.map(r => [...r]);
+      newMaze[row][col] = 1 - newMaze[row][col];
+      return { ...prev, maze: newMaze, showPath: false };
+    });
+  }, []);
+
   const handleMazeSizeChange = useCallback((newSize: number[]) => {
     const size = newSize[0];
     if (size === params.mazeSize) return;
@@ -494,7 +279,6 @@ const QLearningMaze = () => {
         Array(size).fill(null).map(() => Array(4).fill(0))
       );
       
-      // Copy old maze data where possible
       const minSize = Math.min(prev.maze.length, size);
       for (let i = 0; i < minSize; i++) {
         for (let j = 0; j < minSize; j++) {
@@ -520,51 +304,22 @@ const QLearningMaze = () => {
     });
   }, [params.mazeSize]);
 
-  // Drawing effects
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      drawMaze(canvas, state);
-    }
-  }, [state.maze, state.qTable, state.showPath, state.path, drawMaze, state]);
+  const totalWalls = useMemo(() => 
+    state.maze.flat().filter(cell => cell === 1).length, 
+    [state.maze]
+  );
 
-  useEffect(() => {
-    const canvas = heatmapCanvasRef.current;
-    if (canvas) {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      drawQValues(canvas, state);
-    }
-  }, [state.qTable, drawQValues, state]);
+  const bestReward = useMemo(() => 
+    state.episodeRewards.length > 0 ? Math.max(...state.episodeRewards) : undefined,
+    [state.episodeRewards]
+  );
 
-  useEffect(() => {
-    const canvas = rewardsCanvasRef.current;
-    if (canvas && state.episodeRewards.length > 0) {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      drawChart(canvas, state.episodeRewards, '#3b82f6', 'Episode Rewards');
-    }
-  }, [state.episodeRewards, drawChart]);
-
-  useEffect(() => {
-    const canvas = stepsCanvasRef.current;
-    if (canvas && state.episodeSteps.length > 0) {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      drawChart(canvas, state.episodeSteps, '#ef4444', 'Steps per Episode');
-    }
-  }, [state.episodeSteps, drawChart]);
-
-  useEffect(() => {
-    const canvas = epsilonCanvasRef.current;
-    if (canvas && state.episodeEpsilons.length > 0) {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      drawChart(canvas, state.episodeEpsilons, '#22c55e', 'Exploration Rate (Epsilon)');
-    }
-  }, [state.episodeEpsilons, drawChart]);
+  const avgSteps = useMemo(() => 
+    state.episodeSteps.length > 0 
+      ? state.episodeSteps.reduce((a, b) => a + b, 0) / state.episodeSteps.length
+      : undefined,
+    [state.episodeSteps]
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
@@ -582,209 +337,57 @@ const QLearningMaze = () => {
 
       {/* Main content */}
       <main className="container px-4 md:px-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left column - Visualizations */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Top row - Maze and Q-values */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="glass-panel">
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    Maze - {state.isTraining ? "TRAINING..." : "READY"} (Episode: {state.currentEpisode})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <canvas
-                    ref={canvasRef}
-                    className="w-full h-80 border border-white/10 rounded cursor-pointer"
-                    onClick={handleMazeClick}
-                  />
-                  <p className="text-sm opacity-70 mt-2">
-                    Click cells to add/remove walls
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="glass-panel">
-                <CardHeader>
-                  <CardTitle className="text-lg">Q-Values Heatmap</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <canvas
-                    ref={heatmapCanvasRef}
-                    className="w-full h-80 border border-white/10 rounded"
-                  />
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Middle row - Rewards and Steps */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="glass-panel">
-                <CardContent className="p-4">
-                  <canvas
-                    ref={rewardsCanvasRef}
-                    className="w-full h-48 border border-white/10 rounded"
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="glass-panel">
-                <CardContent className="p-4">
-                  <canvas
-                    ref={stepsCanvasRef}
-                    className="w-full h-48 border border-white/10 rounded"
-                  />
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Bottom row - Epsilon */}
-            <Card className="glass-panel">
-              <CardContent className="p-4">
-                <canvas
-                  ref={epsilonCanvasRef}
-                  className="w-full h-48 border border-white/10 rounded"
-                />
-              </CardContent>
-            </Card>
+          <div className="lg:col-span-3">
+            <QLearningVisualization
+              maze={state.maze}
+              qTable={state.qTable}
+              startPos={state.startPos}
+              goalPos={state.goalPos}
+              episodeRewards={state.episodeRewards}
+              episodeSteps={state.episodeSteps}
+              episodeEpsilons={state.episodeEpsilons}
+              currentEpisode={state.currentEpisode}
+              isTraining={state.isTraining}
+              showPath={state.showPath}
+              path={state.path}
+              onMazeClick={handleMazeClick}
+            />
           </div>
 
-          {/* Right column - Controls */}
+          {/* Right column - Controls and Education */}
           <div className="space-y-6">
-            {/* Control Buttons */}
-            <Card className="glass-panel">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Controls
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button
-                  onClick={startTraining}
-                  disabled={state.isTraining}
-                  className="w-full control-btn-primary"
-                >
-                  <Play className="h-4 w-4" />
-                  {state.isTraining ? "TRAINING..." : "START TRAINING"}
-                </Button>
-
-                <Button
-                  onClick={showOptimalPath}
-                  disabled={state.isTraining}
-                  className="w-full control-btn"
-                >
-                  <Route className="h-4 w-4" />
-                  SHOW PATH
-                </Button>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    onClick={resetMaze}
-                    disabled={state.isTraining}
-                    className="control-btn"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    RESET MAZE
-                  </Button>
-
-                  <Button
-                    onClick={resetAll}
-                    disabled={state.isTraining}
-                    className="control-btn-secondary"
-                  >
-                    <Square className="h-4 w-4" />
-                    RESET ALL
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Parameters */}
-            <Card className="glass-panel">
-              <CardHeader>
-                <CardTitle className="text-lg">Parameters</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Learning Rate (α): {params.alpha.toFixed(2)}
-                  </label>
-                  <Slider
-                    value={[params.alpha]}
-                    onValueChange={(value) => setParams(prev => ({ ...prev, alpha: value[0] }))}
-                    min={0.1}
-                    max={1.0}
-                    step={0.1}
-                    className="w-full"
-                    disabled={state.isTraining}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Exploration Rate (ε): {params.epsilon.toFixed(2)}
-                  </label>
-                  <Slider
-                    value={[params.epsilon]}
-                    onValueChange={(value) => setParams(prev => ({ ...prev, epsilon: value[0] }))}
-                    min={0.0}
-                    max={1.0}
-                    step={0.1}
-                    className="w-full"
-                    disabled={state.isTraining}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Maze Size: {params.mazeSize}x{params.mazeSize}
-                  </label>
-                  <Slider
-                    value={[params.mazeSize]}
-                    onValueChange={handleMazeSizeChange}
-                    min={5}
-                    max={10}
-                    step={1}
-                    className="w-full"
-                    disabled={state.isTraining}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Info Panel */}
-            <Card className="glass-panel">
-              <CardHeader>
-                <CardTitle className="text-lg">Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="space-y-1">
-                  <p><strong>Current Episode:</strong> {state.currentEpisode}</p>
-                  <p><strong>Maze Size:</strong> {params.mazeSize}×{params.mazeSize}</p>
-                  <p><strong>Total Walls:</strong> {state.maze.flat().filter(cell => cell === 1).length}</p>
-                </div>
-                
-                {state.episodeRewards.length > 0 && (
-                  <div className="space-y-1">
-                    <p><strong>Best Reward:</strong> {Math.max(...state.episodeRewards).toFixed(1)}</p>
-                    <p><strong>Avg Steps:</strong> {(state.episodeSteps.reduce((a, b) => a + b, 0) / state.episodeSteps.length).toFixed(1)}</p>
-                  </div>
-                )}
-
-                <div className="pt-2 border-t border-white/10">
-                  <h4 className="font-medium mb-2">Instructions:</h4>
-                  <ul className="text-xs space-y-1 opacity-80">
-                    <li>• Click maze cells to add/remove walls</li>
-                    <li>• Use sliders to adjust parameters</li>
-                    <li>• Green circle (S) = Start position</li>
-                    <li>• Red circle (G) = Goal position</li>
-                    <li>• Blue arrows show learned policy</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            <Tabs defaultValue="controls" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="controls">Controls</TabsTrigger>
+                <TabsTrigger value="education">Learn</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="controls" className="space-y-6">
+                <QLearningControls
+                  isTraining={state.isTraining}
+                  currentEpisode={state.currentEpisode}
+                  mazeSize={params.mazeSize}
+                  totalWalls={totalWalls}
+                  bestReward={bestReward}
+                  avgSteps={avgSteps}
+                  alpha={params.alpha}
+                  epsilon={params.epsilon}
+                  onStartTraining={startTraining}
+                  onShowPath={showOptimalPath}
+                  onResetMaze={resetMaze}
+                  onResetAll={resetAll}
+                  onAlphaChange={(value) => setParams(prev => ({ ...prev, alpha: value[0] }))}
+                  onEpsilonChange={(value) => setParams(prev => ({ ...prev, epsilon: value[0] }))}
+                  onMazeSizeChange={handleMazeSizeChange}
+                />
+              </TabsContent>
+              
+              <TabsContent value="education">
+                <QLearningEducation />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>
