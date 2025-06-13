@@ -169,7 +169,8 @@ const QLearningMaze = () => {
       }
       
       // Continuous epsilon decay across all episodes (not reset per session)
-      const currentEpsilon = Math.max(0.01, initialEpsilon * Math.pow(0.98, episode));
+      const sessionEpisode = episode - startEpisode; // Episodes within current session
+      const currentEpsilon = Math.max(0.01, initialEpsilon * Math.pow(0.98, sessionEpisode));
       newEpsilons[episode] = currentEpsilon;
       
       const currentParams = { ...params, epsilon: currentEpsilon };
@@ -269,7 +270,7 @@ const QLearningMaze = () => {
     setParams(prev => ({
       ...prev,
       alpha: 0.3,
-      epsilon: 0.3,
+     // epsilon: 0.3,
       maxEpisodes: 500
     }));
     
