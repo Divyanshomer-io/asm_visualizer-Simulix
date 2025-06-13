@@ -7,9 +7,6 @@ interface QLearningVisualizationProps {
   qTable: number[][][];
   startPos: [number, number];
   goalPos: [number, number];
-  episodeRewards: number[];
-  episodeSteps: number[];
-  episodeEpsilons: number[];
   currentEpisode: number;
   isTraining: boolean;
   showPath: boolean;
@@ -22,9 +19,6 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
   qTable,
   startPos,
   goalPos,
-  episodeRewards,
-  episodeSteps,
-  episodeEpsilons,
   currentEpisode,
   isTraining,
   showPath,
@@ -33,9 +27,6 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
 }) => {
   const mazeCanvasRef = useRef<HTMLCanvasElement>(null);
   const heatmapCanvasRef = useRef<HTMLCanvasElement>(null);
-  const rewardsCanvasRef = useRef<HTMLCanvasElement>(null);
-  const stepsCanvasRef = useRef<HTMLCanvasElement>(null);
-  const epsilonCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const actions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
@@ -182,54 +173,6 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
     });
   }, [maze, qTable]);
 
-  const drawChart = useCallback((canvas: HTMLCanvasElement, data: number[], color: string, label: string) => {
-    const ctx = canvas.getContext('2d');
-    if (!ctx || data.length === 0) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    const margin = 40;
-    const width = canvas.width - 2 * margin;
-    const height = canvas.height - 2 * margin;
-    
-    const minVal = Math.min(...data);
-    const maxVal = Math.max(...data);
-    const range = maxVal - minVal || 1;
-    
-    // Draw axes
-    ctx.strokeStyle = '#404040';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin, margin);
-    ctx.lineTo(margin, margin + height);
-    ctx.lineTo(margin + width, margin + height);
-    ctx.stroke();
-    
-    // Draw data
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    
-    data.forEach((value, index) => {
-      const x = margin + (index / (data.length - 1)) * width;
-      const y = margin + height - ((value - minVal) / range) * height;
-      
-      if (index === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
-    });
-    
-    ctx.stroke();
-    
-    // Draw title
-    ctx.fillStyle = 'white';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, canvas.width / 2, 20);
-  }, []);
-
   const handleMazeClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     if (isTraining) return;
     
@@ -271,96 +214,38 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
     }
   }, [qTable, drawQValues]);
 
-  useEffect(() => {
-    const canvas = rewardsCanvasRef.current;
-    if (canvas && episodeRewards.length > 0) {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      drawChart(canvas, episodeRewards, '#3b82f6', 'Episode Rewards');
-    }
-  }, [episodeRewards, drawChart]);
-
-  useEffect(() => {
-    const canvas = stepsCanvasRef.current;
-    if (canvas && episodeSteps.length > 0) {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      drawChart(canvas, episodeSteps, '#ef4444', 'Steps per Episode');
-    }
-  }, [episodeSteps, drawChart]);
-
-  useEffect(() => {
-    const canvas = epsilonCanvasRef.current;
-    if (canvas && episodeEpsilons.length > 0) {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      drawChart(canvas, episodeEpsilons, '#22c55e', 'Exploration Rate (Epsilon)');
-    }
-  }, [episodeEpsilons, drawChart]);
-
   return (
-    <div className="space-y-6">
-      {/* Top row - Maze and Q-values */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="glass-panel">
-          <CardHeader>
-            <CardTitle className="text-lg">
-              Maze - {isTraining ? "TRAINING..." : "READY"} (Episode: {currentEpisode})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <canvas
-              ref={mazeCanvasRef}
-              className="w-full h-80 border border-white/10 rounded cursor-pointer"
-              onClick={handleMazeClick}
-            />
-            <p className="text-sm opacity-70 mt-2">
-              Click cells to add/remove walls
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-panel">
-          <CardHeader>
-            <CardTitle className="text-lg">Q-Values Heatmap</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <canvas
-              ref={heatmapCanvasRef}
-              className="w-full h-80 border border-white/10 rounded"
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Middle row - Rewards and Steps */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="glass-panel">
-          <CardContent className="p-4">
-            <canvas
-              ref={rewardsCanvasRef}
-              className="w-full h-48 border border-white/10 rounded"
-            />
-          </CardContent>
-        </Card>
-
-        <Card className="glass-panel">
-          <CardContent className="p-4">
-            <canvas
-              ref={stepsCanvasRef}
-              className="w-full h-48 border border-white/10 rounded"
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bottom row - Epsilon */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card className="glass-panel">
-        <CardContent className="p-4">
+        <CardHeader>
+          <CardTitle className="text-lg">
+            Maze - {isTraining ? "TRAINING..." : "READY"} (Episode: {currentEpisode})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <canvas
-            ref={epsilonCanvasRef}
-            className="w-full h-48 border border-white/10 rounded"
+            ref={mazeCanvasRef}
+            className="w-full h-80 border border-white/10 rounded cursor-pointer"
+            onClick={handleMazeClick}
           />
+          <p className="text-sm opacity-70 mt-2">
+            Click cells to add/remove walls
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="glass-panel">
+        <CardHeader>
+          <CardTitle className="text-lg">Q-Values Heatmap</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <canvas
+            ref={heatmapCanvasRef}
+            className="w-full h-80 border border-white/10 rounded"
+          />
+          <p className="text-sm opacity-70 mt-2">
+            Darker = Lower Q-values, Brighter = Higher Q-values
+          </p>
         </CardContent>
       </Card>
     </div>

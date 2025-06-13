@@ -1,9 +1,9 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import QLearningVisualization from '@/components/QLearningVisualization';
 import QLearningControls from '@/components/QLearningControls';
 import QLearningEducation from '@/components/QLearningEducation';
+import QLearningPlots from '@/components/QLearningPlots';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface MazeState {
@@ -25,7 +25,15 @@ interface Parameters {
   gamma: number;
   epsilon: number;
   mazeSize: number;
+  maxEpisodes: number;
+  speed: 'slow' | 'medium' | 'fast';
 }
+
+const SPEEDS = {
+  slow: { plotUpdate: 5, stepDelay: 200 },
+  medium: { plotUpdate: 10, stepDelay: 50 },
+  fast: { plotUpdate: 20, stepDelay: 10 }
+};
 
 const QLearningMaze = () => {
   const [state, setState] = useState<MazeState>(() => {
@@ -51,7 +59,9 @@ const QLearningMaze = () => {
     alpha: 0.3,
     gamma: 0.9,
     epsilon: 0.3,
-    mazeSize: 6
+    mazeSize: 6,
+    maxEpisodes: 200,
+    speed: 'medium'
   });
 
   const actions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
@@ -141,20 +151,24 @@ const QLearningMaze = () => {
     
     const initialEpsilon = params.epsilon;
     let currentState = { ...state, isTraining: true };
-    const newRewards: number[] = [];
-    const newSteps: number[] = [];
-    const newEpsilons: number[] = [];
+    const newRewards: number[] = [...state.episodeRewards];
+    const newSteps: number[] = [...state.episodeSteps];
+    const newEpsilons: number[] = [...state.episodeEpsilons];
     
-    for (let episode = 0; episode < 200; episode++) {
+    const startEpisode = state.currentEpisode;
+    const totalEpisodesToRun = params.maxEpisodes;
+    const speed = SPEEDS[params.speed];
+    
+    for (let episode = startEpisode; episode < totalEpisodesToRun; episode++) {
       // Exponential decay of epsilon
       const currentEpsilon = Math.max(0.01, initialEpsilon * Math.pow(0.98, episode));
-      newEpsilons.push(currentEpsilon);
+      newEpsilons[episode] = currentEpsilon;
       
       const currentParams = { ...params, epsilon: currentEpsilon };
       const result = trainEpisode(currentState, currentParams);
       
-      newRewards.push(result.totalReward);
-      newSteps.push(result.steps);
+      newRewards[episode] = result.totalReward;
+      newSteps[episode] = result.steps;
       
       currentState = {
         ...currentState,
@@ -165,10 +179,10 @@ const QLearningMaze = () => {
         currentEpisode: episode + 1
       };
       
-      // Update UI every 10 episodes
-      if (episode % 10 === 0 || episode === 199) {
+      // Update UI based on speed settings
+      if (episode % speed.plotUpdate === 0 || episode === totalEpisodesToRun - 1) {
         setState(currentState);
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, speed.stepDelay));
       }
     }
     
@@ -339,55 +353,55 @@ const QLearningMaze = () => {
       <main className="container px-4 md:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left column - Visualizations */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-6">
+            {/* Maze Display */}
             <QLearningVisualization
               maze={state.maze}
               qTable={state.qTable}
               startPos={state.startPos}
               goalPos={state.goalPos}
-              episodeRewards={state.episodeRewards}
-              episodeSteps={state.episodeSteps}
-              episodeEpsilons={state.episodeEpsilons}
               currentEpisode={state.currentEpisode}
               isTraining={state.isTraining}
               showPath={state.showPath}
               path={state.path}
               onMazeClick={handleMazeClick}
             />
+
+            {/* Dynamic Plots */}
+            <QLearningPlots
+              episodeRewards={state.episodeRewards}
+              episodeSteps={state.episodeSteps}
+              episodeEpsilons={state.episodeEpsilons}
+              isTraining={state.isTraining}
+            />
+
+            {/* Educational Content */}
+            <QLearningEducation />
           </div>
 
-          {/* Right column - Controls and Education */}
+          {/* Right column - Controls */}
           <div className="space-y-6">
-            <Tabs defaultValue="controls" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="controls">Controls</TabsTrigger>
-                <TabsTrigger value="education">Learn</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="controls" className="space-y-6">
-                <QLearningControls
-                  isTraining={state.isTraining}
-                  currentEpisode={state.currentEpisode}
-                  mazeSize={params.mazeSize}
-                  totalWalls={totalWalls}
-                  bestReward={bestReward}
-                  avgSteps={avgSteps}
-                  alpha={params.alpha}
-                  epsilon={params.epsilon}
-                  onStartTraining={startTraining}
-                  onShowPath={showOptimalPath}
-                  onResetMaze={resetMaze}
-                  onResetAll={resetAll}
-                  onAlphaChange={(value) => setParams(prev => ({ ...prev, alpha: value[0] }))}
-                  onEpsilonChange={(value) => setParams(prev => ({ ...prev, epsilon: value[0] }))}
-                  onMazeSizeChange={handleMazeSizeChange}
-                />
-              </TabsContent>
-              
-              <TabsContent value="education">
-                <QLearningEducation />
-              </TabsContent>
-            </Tabs>
+            <QLearningControls
+              isTraining={state.isTraining}
+              currentEpisode={state.currentEpisode}
+              maxEpisodes={params.maxEpisodes}
+              speed={params.speed}
+              mazeSize={params.mazeSize}
+              totalWalls={totalWalls}
+              bestReward={bestReward}
+              avgSteps={avgSteps}
+              alpha={params.alpha}
+              epsilon={params.epsilon}
+              onStartTraining={startTraining}
+              onShowPath={showOptimalPath}
+              onResetMaze={resetMaze}
+              onResetAll={resetAll}
+              onAlphaChange={(value) => setParams(prev => ({ ...prev, alpha: value[0] }))}
+              onEpsilonChange={(value) => setParams(prev => ({ ...prev, epsilon: value[0] }))}
+              onMazeSizeChange={handleMazeSizeChange}
+              onMaxEpisodesChange={(value) => setParams(prev => ({ ...prev, maxEpisodes: value }))}
+              onSpeedChange={(speed) => setParams(prev => ({ ...prev, speed }))}
+            />
           </div>
         </div>
       </main>
