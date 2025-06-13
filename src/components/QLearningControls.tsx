@@ -51,13 +51,6 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
   onMaxEpisodesChange,
   onSpeedChange
 }) => {
-  const handleEpisodesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= 1 && value <= 1500) {
-      onMaxEpisodesChange(value);
-    }
-  };
-
   const getSpeedIcon = (speedValue: string) => {
     switch (speedValue) {
       case 'slow':
@@ -101,7 +94,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
             className="w-full control-btn-primary"
           >
             <Play className="h-4 w-4" />
-            {isTraining ? `TRAINING... (${currentEpisode}/${maxEpisodes})` : "START TRAINING"}
+            {isTraining ? `TRAINING... (${currentEpisode})` : `START TRAINING (+${maxEpisodes})`}
           </Button>
 
           <div className="grid grid-cols-2 gap-2">
@@ -141,24 +134,18 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
           <CardTitle className="text-lg">Training Configuration</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Episodes Input */}
+          {/* Training Session Info */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">
-              Max Episodes: {maxEpisodes}
+              Training Progress
             </Label>
-            <Input
-              type="number"
-              min="1"
-              max="1500"
-              value={maxEpisodes}
-              onChange={handleEpisodesChange}
-              disabled={isTraining}
-              className="w-full"
-              placeholder="Enter number of episodes (1-1500)"
-            />
-            <p className="text-xs opacity-70">
-              Training will resume from episode {currentEpisode + 1}
-            </p>
+            <div className="text-sm space-y-1">
+              <p><strong>Current Episode:</strong> {currentEpisode}</p>
+              <p><strong>Episodes per Session:</strong> {maxEpisodes}</p>
+              <p className="text-xs opacity-70">
+                Next session will train episodes {currentEpisode + 1}-{currentEpisode + maxEpisodes}
+              </p>
+            </div>
           </div>
 
           {/* Speed Control */}
@@ -227,7 +214,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
 
           <div className="space-y-2">
             <Label className="text-sm font-medium">
-              Exploration Rate (ε): {epsilon.toFixed(2)}
+              Initial Exploration Rate (ε): {epsilon.toFixed(2)}
             </Label>
             <Slider
               value={[epsilon]}
@@ -238,6 +225,9 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
               className="w-full"
               disabled={isTraining}
             />
+            <p className="text-xs opacity-70">
+              Decays automatically during training (0.98^episode)
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -257,32 +247,20 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
         </CardContent>
       </Card>
 
-      {/* Status Information */}
+      {/* Instructions */}
       <Card className="glass-panel">
         <CardHeader>
-          <CardTitle className="text-lg">Status Information</CardTitle>
+          <CardTitle className="text-lg">Instructions</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <div className="space-y-1">
-            <p><strong>Current Episode:</strong> {currentEpisode}</p>
-            <p><strong>Progress:</strong> {((currentEpisode / maxEpisodes) * 100).toFixed(1)}%</p>
-            <p><strong>Maze Size:</strong> {mazeSize}×{mazeSize}</p>
-            <p><strong>Total Walls:</strong> {totalWalls}</p>
-          </div>
-          
-          {bestReward !== undefined && avgSteps !== undefined && (
-            <div className="space-y-1 pt-2 border-t border-white/10">
-              <p><strong>Best Reward:</strong> {bestReward.toFixed(1)}</p>
-              <p><strong>Avg Steps:</strong> {avgSteps.toFixed(1)}</p>
-            </div>
-          )}
-
-          <div className="pt-2 border-t border-white/10">
-            <h4 className="font-medium mb-2">Instructions:</h4>
-            <ul className="text-xs space-y-1 opacity-80">
+        <CardContent>
+          <div className="text-sm space-y-2 opacity-80">
+            <h4 className="font-medium mb-2">How to Use:</h4>
+            <ul className="text-xs space-y-1">
               <li>• Click maze cells to add/remove walls</li>
-              <li>• Adjust parameters before training</li>
-              <li>• Training resumes from last episode</li>
+              <li>• Each training session runs 500 episodes</li>
+              <li>• Progress accumulates across sessions</li>
+              <li>• "RESET ALL" clears training data & parameters</li>
+              <li>• "RESET MAZE" only clears wall layout</li>
               <li>• Green circle (S) = Start position</li>
               <li>• Red circle (G) = Goal position</li>
               <li>• Blue arrows show learned policy</li>

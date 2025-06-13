@@ -4,7 +4,7 @@ import QLearningVisualization from '@/components/QLearningVisualization';
 import QLearningControls from '@/components/QLearningControls';
 import QLearningEducation from '@/components/QLearningEducation';
 import QLearningPlots from '@/components/QLearningPlots';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface MazeState {
   maze: number[][];
@@ -35,6 +35,8 @@ const SPEEDS = {
   fast: { plotUpdate: 20, stepDelay: 10 }
 };
 
+const EPISODES_PER_TRAINING_SESSION = 500;
+
 const QLearningMaze = () => {
   const [state, setState] = useState<MazeState>(() => {
     const initialSize = 6;
@@ -60,7 +62,7 @@ const QLearningMaze = () => {
     gamma: 0.9,
     epsilon: 0.3,
     mazeSize: 6,
-    maxEpisodes: 200,
+    maxEpisodes: 500,
     speed: 'medium'
   });
 
@@ -147,7 +149,7 @@ const QLearningMaze = () => {
     if (state.isTraining) return;
     
     setState(prev => ({ ...prev, isTraining: true, showPath: false }));
-    toast.success("Training started!");
+    toast.success(`Starting training for ${EPISODES_PER_TRAINING_SESSION} episodes!`);
     
     const initialEpsilon = params.epsilon;
     let currentState = { ...state, isTraining: true };
@@ -155,12 +157,18 @@ const QLearningMaze = () => {
     const newSteps: number[] = [...state.episodeSteps];
     const newEpsilons: number[] = [...state.episodeEpsilons];
     
+    // Training session runs for fixed 500 episodes
     const startEpisode = state.currentEpisode;
-    const totalEpisodesToRun = params.maxEpisodes;
+    const endEpisode = startEpisode + EPISODES_PER_TRAINING_SESSION;
     const speed = SPEEDS[params.speed];
     
-    for (let episode = startEpisode; episode < totalEpisodesToRun; episode++) {
-      // Exponential decay of epsilon
+    for (let episode = startEpisode; episode < endEpisode; episode++) {
+      if (!document.hasFocus()) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        continue;
+      }
+      
+      // Continuous epsilon decay across all episodes (not reset per session)
       const currentEpsilon = Math.max(0.01, initialEpsilon * Math.pow(0.98, episode));
       newEpsilons[episode] = currentEpsilon;
       
@@ -180,14 +188,14 @@ const QLearningMaze = () => {
       };
       
       // Update UI based on speed settings
-      if (episode % speed.plotUpdate === 0 || episode === totalEpisodesToRun - 1) {
+      if (episode % speed.plotUpdate === 0 || episode === endEpisode - 1) {
         setState(currentState);
         await new Promise(resolve => setTimeout(resolve, speed.stepDelay));
       }
     }
     
     setState(prev => ({ ...prev, isTraining: false }));
-    toast.success("Training completed!");
+    toast.success(`Training session completed! ${EPISODES_PER_TRAINING_SESSION} episodes finished.`);
   }, [state, params, trainEpisode]);
 
   const findPath = useCallback(() => {
@@ -242,14 +250,12 @@ const QLearningMaze = () => {
   }, [findPath]);
 
   const resetAll = useCallback(() => {
+    // Reset everything except maze cell selection
     setState(prev => ({
       ...prev,
-      maze: Array(params.mazeSize).fill(null).map(() => Array(params.mazeSize).fill(0)),
       qTable: Array(params.mazeSize).fill(null).map(() => 
         Array(params.mazeSize).fill(null).map(() => Array(4).fill(0))
       ),
-      startPos: [0, 0],
-      goalPos: [params.mazeSize - 1, params.mazeSize - 1],
       episodeRewards: [],
       episodeSteps: [],
       episodeEpsilons: [],
@@ -258,10 +264,20 @@ const QLearningMaze = () => {
       showPath: false,
       path: []
     }));
-    toast.info("Everything reset");
+    
+    // Reset parameters to defaults
+    setParams(prev => ({
+      ...prev,
+      alpha: 0.3,
+      epsilon: 0.3,
+      maxEpisodes: 500
+    }));
+    
+    toast.info("Training progress and parameters reset (maze preserved)");
   }, [params.mazeSize]);
 
   const resetMaze = useCallback(() => {
+    // Only reset maze cells and positions
     setState(prev => ({
       ...prev,
       maze: Array(params.mazeSize).fill(null).map(() => Array(params.mazeSize).fill(0)),
@@ -270,7 +286,7 @@ const QLearningMaze = () => {
       showPath: false,
       path: []
     }));
-    toast.info("Maze reset");
+    toast.info("Maze layout reset");
   }, [params.mazeSize]);
 
   const handleMazeClick = useCallback((row: number, col: number) => {
@@ -374,9 +390,6 @@ const QLearningMaze = () => {
               episodeEpsilons={state.episodeEpsilons}
               isTraining={state.isTraining}
             />
-
-            {/* Educational Content */}
-            <QLearningEducation />
           </div>
 
           {/* Right column - Controls */}
@@ -384,7 +397,7 @@ const QLearningMaze = () => {
             <QLearningControls
               isTraining={state.isTraining}
               currentEpisode={state.currentEpisode}
-              maxEpisodes={params.maxEpisodes}
+              maxEpisodes={EPISODES_PER_TRAINING_SESSION}
               speed={params.speed}
               mazeSize={params.mazeSize}
               totalWalls={totalWalls}
@@ -403,6 +416,52 @@ const QLearningMaze = () => {
               onSpeedChange={(speed) => setParams(prev => ({ ...prev, speed }))}
             />
           </div>
+        </div>
+
+        {/* Status Information Row - Below plots */}
+        <div className="mt-8">
+          <Card className="glass-panel">
+            <CardHeader>
+              <CardTitle className="text-lg">Training Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-sm">
+                <div className="space-y-1">
+                  <p className="text-xs opacity-70">Current Episode</p>
+                  <p className="font-medium">{state.currentEpisode}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs opacity-70">Episodes Per Session</p>
+                  <p className="font-medium">{EPISODES_PER_TRAINING_SESSION}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs opacity-70">Maze Size</p>
+                  <p className="font-medium">{params.mazeSize}×{params.mazeSize}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs opacity-70">Total Walls</p>
+                  <p className="font-medium">{totalWalls}</p>
+                </div>
+                {bestReward !== undefined && (
+                  <div className="space-y-1">
+                    <p className="text-xs opacity-70">Best Reward</p>
+                    <p className="font-medium text-green-400">{bestReward.toFixed(1)}</p>
+                  </div>
+                )}
+                {avgSteps !== undefined && (
+                  <div className="space-y-1">
+                    <p className="text-xs opacity-70">Avg Steps</p>
+                    <p className="font-medium text-blue-400">{avgSteps.toFixed(1)}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Educational Content - Full width below status */}
+        <div className="mt-6">
+          <QLearningEducation />
         </div>
       </main>
 
