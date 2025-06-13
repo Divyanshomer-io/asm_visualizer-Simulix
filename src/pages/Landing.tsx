@@ -203,6 +203,15 @@ const closeContribution = () => {
       tags: ["Deep Learning", "VAE", "Compression", "Regularization"],
       gradient: "from-amber-500/20 to-orange-500/20"
     },
+    {
+      id: "qlearning-maze",
+      title: "Q-Learning Maze Solver",
+      description: "Interactive Q-Learning algorithm visualization with maze editing, real-time training, and policy visualization for reinforcement learning education.",
+      path: "/qlearning-maze",
+      icon: <Search className="h-6 w-6" />,
+      tags: ["Reinforcement Learning", "Q-Learning", "Maze Solving", "Interactive"],
+      gradient: "from-teal-500/20 to-cyan-500/20"
+    },
   ];
 
   // Filter visualizations based on search query
