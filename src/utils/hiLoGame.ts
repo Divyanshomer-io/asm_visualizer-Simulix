@@ -1,5 +1,3 @@
-
-// Game types and interfaces
 export interface GameState {
   currentCard: number;
   deck: number[];
@@ -19,83 +17,55 @@ export interface GameParams {
   learningRate: number;
 }
 
-// Create a deck of cards (1-13, where 1=Ace, 11=Jack, 12=Queen, 13=King)
 export const createDeck = (numDecks: number): number[] => {
-  const singleDeck = Array.from({ length: 13 }, (_, i) => i + 1);
-  const fullDeck: number[] = [];
-  
-  for (let deck = 0; deck < numDecks; deck++) {
+  const deck: number[] = [];
+  for (let i = 0; i < numDecks; i++) {
     for (let suit = 0; suit < 4; suit++) {
-      fullDeck.push(...singleDeck);
+      for (let rank = 1; rank <= 13; rank++) {
+        deck.push(rank);
+      }
     }
   }
   
-  // Shuffle the deck
-  for (let i = fullDeck.length - 1; i > 0; i--) {
+  // Shuffle deck
+  for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [fullDeck[i], fullDeck[j]] = [fullDeck[j], fullDeck[i]];
+    [deck[i], deck[j]] = [deck[j], deck[i]];
   }
   
-  return fullDeck;
+  return deck;
 };
 
-// Draw a card from the deck
 export const drawCard = (deck: number[]): number => {
-  const cardIndex = Math.floor(Math.random() * deck.length);
-  const card = deck[cardIndex];
-  deck.splice(cardIndex, 1);
-  return card;
+  if (deck.length === 0) {
+    throw new Error('Cannot draw from empty deck');
+  }
+  return deck.pop()!;
 };
 
-// Calculate true probability based on remaining cards
 export const calculateTrueProbability = (currentCard: number, deck: number[]): number => {
-  if (deck.length === 0) return 0.5;
+  const higher = deck.filter(card => card > currentCard).length;
+  const lower = deck.filter(card => card < currentCard).length;
+  const total = higher + lower;
   
-  const higherCards = deck.filter(card => card > currentCard).length;
-  return higherCards / deck.length;
+  return total > 0 ? higher / total : 0.5;
 };
 
-// Generate Beta distribution PDF for visualization
-export const generateBetaPDF = (alpha: number, beta: number, points: number = 100) => {
-  const x: number[] = [];
-  const y: number[] = [];
-  
-  for (let i = 0; i <= points; i++) {
-    const t = i / points;
-    x.push(t);
-    
-    // Beta PDF formula: (t^(α-1) * (1-t)^(β-1)) / B(α,β)
-    // We'll use a simplified version for visualization
-    const pdf = Math.pow(t, alpha - 1) * Math.pow(1 - t, beta - 1);
-    y.push(pdf);
-  }
-  
-  // Normalize
-  const maxY = Math.max(...y);
-  if (maxY > 0) {
-    for (let i = 0; i < y.length; i++) {
-      y[i] = y[i] / maxY;
-    }
-  }
-  
-  return { x, y };
+export const getCardName = (value: number): string => {
+  const names: { [key: number]: string } = {
+    1: 'A',
+    11: 'J',
+    12: 'Q',
+    13: 'K'
+  };
+  return names[value] || value.toString();
 };
 
-// Get card name for display
-export const getCardName = (cardValue: number): string => {
-  switch (cardValue) {
-    case 1: return 'A';
-    case 11: return 'J';
-    case 12: return 'Q';
-    case 13: return 'K';
-    default: return cardValue.toString();
-  }
-};
-
-// Calculate best winning streak
 export const calculateBestStreak = (history: ('correct' | 'incorrect')[]): number => {
-  let bestStreak = 0;
+  if (history.length === 0) return 0;
+  
   let currentStreak = 0;
+  let bestStreak = 0;
   
   for (const result of history) {
     if (result === 'correct') {
@@ -109,10 +79,10 @@ export const calculateBestStreak = (history: ('correct' | 'incorrect')[]): numbe
   return bestStreak;
 };
 
-// Calculate current winning streak
 export const calculateCurrentStreak = (history: ('correct' | 'incorrect')[]): number => {
-  let currentStreak = 0;
+  if (history.length === 0) return 0;
   
+  let currentStreak = 0;
   for (let i = history.length - 1; i >= 0; i--) {
     if (history[i] === 'correct') {
       currentStreak++;
@@ -122,4 +92,28 @@ export const calculateCurrentStreak = (history: ('correct' | 'incorrect')[]): nu
   }
   
   return currentStreak;
+};
+
+export const generateBetaPDF = (alpha: number, beta: number, points: number = 100): { x: number[], y: number[] } => {
+  const x: number[] = [];
+  const y: number[] = [];
+  
+  for (let i = 0; i <= points; i++) {
+    const t = i / points;
+    x.push(t * 12 + 1); // Scale to card range 1-13
+    
+    // Beta PDF calculation
+    const betaValue = Math.pow(t, alpha - 1) * Math.pow(1 - t, beta - 1);
+    y.push(betaValue);
+  }
+  
+  // Normalize
+  const maxY = Math.max(...y);
+  if (maxY > 0) {
+    for (let i = 0; i < y.length; i++) {
+      y[i] = y[i] / maxY;
+    }
+  }
+  
+  return { x, y };
 };
