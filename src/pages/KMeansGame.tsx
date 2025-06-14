@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Home, MapPin, Users, Target, Brain, BarChart3 } from "lucide-react";
@@ -185,7 +186,7 @@ const KMeansGame = () => {
         </div>
 
         {/* K-Means Learning Center and Analysis */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-2 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-0 mb-8">
           {/* K-Means Learning Center - Left 3 columns */}
           <div className="lg:col-span-3">
             <div className="glass-panel p-6 rounded-xl">
