@@ -192,12 +192,12 @@ const HiLoBayesianGame = () => {
                     <div className="flex justify-between items-center text-xs">
                       <div className="flex items-center gap-1">
                         <span className="text-slate-400">Score:</span>
-                        <InfoTooltip
+{/*                         <InfoTooltip
                           title={HiLoTooltips.score.title}
                           content={HiLoTooltips.score.content}
                           variant={HiLoTooltips.score.variant}
                           side="left"
-                        />
+                        /> */}
                       </div>
                       <span className={`font-medium ${state.score >= 0 ? 'text-green-400' : 'text-red-400'}`}>{state.score}</span>
                     </div>
@@ -208,12 +208,12 @@ const HiLoBayesianGame = () => {
                     <div className="flex justify-between items-center text-xs">
                       <div className="flex items-center gap-1">
                         <span className="text-slate-400">Win Rate:</span>
-                        <InfoTooltip
+{/*                         <InfoTooltip
                           title={HiLoTooltips.winRate.title}
                           content={HiLoTooltips.winRate.content}
                           variant={HiLoTooltips.winRate.variant}
                           side="left"
-                        />
+                        /> */}
                       </div>
                       <span className="text-emerald-400 font-medium">{(winRate * 100).toFixed(1)}%</span>
                     </div>
