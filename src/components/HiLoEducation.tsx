@@ -9,7 +9,7 @@ const HiLoEducation: React.FC = () => {
       <div className="glass-panel p-8 rounded-xl">
         <div className="flex items-center gap-3 mb-6">
           <Brain className="h-6 w-6 text-blue-400" />
-          <h2 className="text-2xl font-bold text-blue-400">Educational Content</h2>
+          <h2 className="text-2xl font-bold text-blue-400">Learn About Bayesian </h2>
         </div>
         
         <Tabs defaultValue="basics" className="w-full">
