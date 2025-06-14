@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -7,21 +6,39 @@ import { Shuffle, Users, Target, Zap } from "lucide-react";
 interface KMeansClusteringComparisonProps {
   cities: {x: number, y: number, name: string, population: number}[];
   k: number;
+  clusters: {center: {x: number, y: number}, cities: number[], color: string}[];
 }
 
-const KMeansClusteringComparison: React.FC<KMeansClusteringComparisonProps> = ({ cities, k }) => {
+const KMeansClusteringComparison: React.FC<KMeansClusteringComparisonProps> = ({ cities, k, clusters }) => {
   
   const comparisonData = useMemo(() => {
     if (cities.length === 0) return { kmeans: [], hierarchical: [], density: [] };
     
     const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
     
-    // K-means simulation
-    const kmeansData = cities.map((city, index) => ({
-      ...city,
-      cluster: index % k,
-      color: colors[index % k]
-    }));
+    // Use real K-means clustering data from the main visualization
+    const kmeansData = cities.map((city, cityIndex) => {
+      // Find which cluster this city belongs to
+      let clusterIndex = 0;
+      let clusterColor = colors[0];
+      
+      if (clusters.length > 0) {
+        for (let i = 0; i < clusters.length; i++) {
+          if (clusters[i].cities.includes(cityIndex)) {
+            clusterIndex = i;
+            // Use the cluster's actual color or fallback to predefined colors
+            clusterColor = clusters[i].color || colors[i % colors.length];
+            break;
+          }
+        }
+      }
+      
+      return {
+        ...city,
+        cluster: clusterIndex,
+        color: clusterColor
+      };
+    });
     
     // Hierarchical clustering simulation (distance-based)
     const hierarchicalData = cities.map((city, index) => {
@@ -44,7 +61,7 @@ const KMeansClusteringComparison: React.FC<KMeansClusteringComparisonProps> = ({
     });
     
     return { kmeans: kmeansData, hierarchical: hierarchicalData, density: densityData };
-  }, [cities, k]);
+  }, [cities, k, clusters]);
 
   const renderScatterChart = (data: any[], title: string, icon: React.ReactNode) => (
     <Card className="glass-panel border-accent/20">

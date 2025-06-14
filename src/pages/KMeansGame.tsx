@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Home, MapPin, Users, Target, Brain, BarChart3 } from "lucide-react";
@@ -184,6 +183,7 @@ const KMeansGame = () => {
                   <KMeansClusteringComparison
                     cities={cities}
                     k={k}
+                    clusters={clusters}
                   />
                 </TabsContent>
                 
