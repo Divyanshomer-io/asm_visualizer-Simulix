@@ -3,11 +3,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface InfoTooltipProps {
-  content: string;
+  content: string | React.ReactNode;
   className?: string;
+  variant?: 'info' | 'warning' | 'error';
+  side?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-const InfoTooltip: React.FC<InfoTooltipProps> = ({ content, className = '' }) => {
+const InfoTooltip: React.FC<InfoTooltipProps> = ({ 
+  content, 
+  className = '', 
+  variant = 'info',
+  side = 'right'
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const iconRef = useRef<HTMLSpanElement>(null);
@@ -73,6 +80,17 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({ content, className = '' }) =>
     }
   }, [isVisible]);
 
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'warning':
+        return 'bg-yellow-800 border-yellow-600 text-yellow-100';
+      case 'error':
+        return 'bg-red-800 border-red-600 text-red-100';
+      default:
+        return 'bg-gray-800 border-gray-600 text-white';
+    }
+  };
+
   return (
     <>
       <span
@@ -95,7 +113,7 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({ content, className = '' }) =>
       {isVisible && (
         <div
           ref={tooltipRef}
-          className="fixed z-[9999] bg-gray-800 border border-gray-600 rounded-md p-3 text-white text-sm leading-relaxed max-w-[280px] shadow-lg"
+          className={`fixed z-[9999] border rounded-md p-3 text-sm leading-relaxed max-w-[280px] shadow-lg ${getVariantStyles()}`}
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
@@ -108,14 +126,39 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({ content, className = '' }) =>
           >
             <X size={14} />
           </button>
-          <div 
-            className="pr-4"
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
+          <div className="pr-4">
+            {typeof content === 'string' ? (
+              <div dangerouslySetInnerHTML={{ __html: content }} />
+            ) : (
+              content
+            )}
+          </div>
         </div>
       )}
     </>
   );
+};
+
+// VAE-specific tooltip content
+export const VAETooltips = {
+  latentDimension: {
+    content: "<b>Latent Dimension:</b><br>• Size of the compressed representation<br>• Lower dimensions = more compression<br>• Higher dimensions = better reconstruction<br>• Trade-off between quality and efficiency"
+  },
+  nuclearNorm: {
+    content: "<b>Nuclear Norm Regularization:</b><br>• Promotes low-rank structure in latent space<br>• Higher λ = stronger regularization<br>• Helps prevent overfitting<br>• Encourages sparse latent representations"
+  },
+  epochs: {
+    content: "<b>Training Epochs:</b><br>• Number of complete passes through data<br>• More epochs = longer training<br>• Watch for overfitting with too many epochs<br>• Quality typically improves with more training"
+  },
+  mnistReconstruction: {
+    content: "<b>MNIST Reconstruction:</b><br>• Shows how well the VAE reconstructs handwritten digits<br>• Top row: original images<br>• Bottom row: reconstructed images<br>• Better models show cleaner reconstructions"
+  },
+  lossComponents: {
+    content: "<b>Loss Components:</b><br>• Total Loss: Overall training objective<br>• Reconstruction Loss: How well images are reconstructed<br>• KL Divergence: Regularization term for latent space<br>• Regularization Loss: Nuclear norm penalty"
+  },
+  qualityEvolution: {
+    content: "<b>Quality Evolution:</b><br>• Tracks reconstruction quality over training<br>• Quality improves as model learns<br>• Plateaus indicate convergence<br>• Drops may indicate overfitting"
+  }
 };
 
 export default InfoTooltip;

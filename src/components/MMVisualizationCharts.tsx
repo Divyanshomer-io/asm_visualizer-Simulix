@@ -96,14 +96,7 @@ const MMVisualizationCharts: React.FC<MMVisualizationChartsProps> = ({ mmHistory
         <div className="flex items-center gap-2 mb-4">
           <h3 className="text-lg font-semibold text-accent">Parameter-Aware MM Dynamics</h3>
           <InfoTooltip 
-            content={
-              <>
-                <p className="font-semibold">Parameter-Integrated MM Surrogate:</p>
-                <code className="text-xs">g(x;x₀,λ,z) = log(f(x₀)) + (f(x)-f(x₀))/f(x₀) × reg_scale × latent_cap</code>
-                <p className="mt-2 text-xs">Surrogate adapts to λ (regularization strength) and z_dim (latent capacity).</p>
-                <p className="mt-1 text-xs">Higher λ → flatter surrogate, Lower z_dim → reduced capacity factor</p>
-              </>
-            }
+            content="<b>Parameter-Integrated MM Surrogate:</b><br><code>g(x;x₀,λ,z) = log(f(x₀)) + (f(x)-f(x₀))/f(x₀) × reg_scale × latent_cap</code><br>Surrogate adapts to λ (regularization strength) and z_dim (latent capacity).<br>Higher λ → flatter surrogate, Lower z_dim → reduced capacity factor"
             variant="info"
           />
         </div>
@@ -171,17 +164,7 @@ const MMVisualizationCharts: React.FC<MMVisualizationChartsProps> = ({ mmHistory
         <div className="flex items-center gap-2 mb-4">
           <h3 className="text-lg font-semibold text-accent">Parameter-Influenced Gradient Analysis</h3>
           <InfoTooltip 
-            content={
-              <>
-                <p className="font-semibold">λ & z_dim Gradient Scaling:</p>
-                <ul className="text-xs mt-1 space-y-1">
-                  <li>• <span className="text-red-400">||∇f||</span>: Original objective gradient</li>
-                  <li>• <span className="text-green-400">||∇g||</span>: Parameter-scaled surrogate gradient</li>
-                  <li>• Higher λ → increased gradient scaling</li>
-                  <li>• Lower z_dim → reduced gradient magnitude</li>
-                </ul>
-              </>
-            }
+            content="<b>λ & z_dim Gradient Scaling:</b><br>• <span class='text-red-400'>||∇f||</span>: Original objective gradient<br>• <span class='text-green-400'>||∇g||</span>: Parameter-scaled surrogate gradient<br>• Higher λ → increased gradient scaling<br>• Lower z_dim → reduced gradient magnitude"
             variant="info"
           />
         </div>
