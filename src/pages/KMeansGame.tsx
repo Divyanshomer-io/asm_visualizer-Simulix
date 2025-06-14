@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Home, MapPin, Users, Target, Brain, BarChart3 } from "lucide-react";
@@ -89,75 +90,7 @@ const KMeansGame = () => {
       {/* Main Content with Grid Layout */}
       <div className="flex-1 container px-4 md:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
-          {/* Left Column - Game Controls */}
-          <div className="lg:col-span-1">
-            <div className="glass-panel p-6 rounded-xl h-fit sticky top-24">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg flex items-center justify-center">
-                  <Target className="h-5 w-5 text-purple-400" />
-                </div>
-                <h3 className="text-xl font-semibold">Game Controls</h3>
-              </div>
-              
-              <KMeansGameControls
-                cities={cities}
-                setCities={setCities}
-                k={k}
-                setK={setK}
-                clusters={clusters}
-                setClusters={setClusters}
-                isRunning={isRunning}
-                setIsRunning={setIsRunning}
-                iteration={iteration}
-                setIteration={setIteration}
-                convergenceData={convergenceData}
-                setConvergenceData={setConvergenceData}
-                showCentroids={showCentroids}
-                setShowCentroids={setShowCentroids}
-                showConnections={showConnections}
-                setShowConnections={setShowConnections}
-                animationSpeed={animationSpeed}
-                setAnimationSpeed={setAnimationSpeed}
-                maxIterations={maxIterations}
-                setMaxIterations={setMaxIterations}
-                gameScore={gameScore}
-                setGameScore={setGameScore}
-                gameLevel={gameLevel}
-                setGameLevel={setGameLevel}
-              />
-
-              {/* Quick Stats in Control Panel */}
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500/20 to-cyan-500/20 rounded-lg flex items-center justify-center">
-                    <BarChart3 className="h-4 w-4 text-green-400" />
-                  </div>
-                  <h4 className="text-lg font-semibold">Quick Stats</h4>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-accent/10 p-3 rounded-lg">
-                    <div className="text-xl font-bold text-accent">{gameScore}</div>
-                    <div className="text-xs text-muted-foreground">Score</div>
-                  </div>
-                  <div className="bg-blue-500/10 p-3 rounded-lg">
-                    <div className="text-xl font-bold text-blue-400">{gameLevel}</div>
-                    <div className="text-xs text-muted-foreground">Level</div>
-                  </div>
-                  <div className="bg-green-500/10 p-3 rounded-lg">
-                    <div className="text-xl font-bold text-green-400">{cities.length}</div>
-                    <div className="text-xs text-muted-foreground">Cities</div>
-                  </div>
-                  <div className="bg-purple-500/10 p-3 rounded-lg">
-                    <div className="text-xl font-bold text-purple-400">{iteration}</div>
-                    <div className="text-xs text-muted-foreground">Steps</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - City Builder Map and Learning Center */}
+          {/* Left Column - City Builder Map and Learning Center */}
           <div className="lg:col-span-3 space-y-0">
             {/* City Builder Map */}
             <div className="glass-panel p-6 rounded-xl rounded-b-none">
@@ -311,6 +244,74 @@ const KMeansGame = () => {
                   </div>
                 </TabsContent>
               </Tabs>
+            </div>
+          </div>
+
+          {/* Right Column - Game Controls */}
+          <div className="lg:col-span-1">
+            <div className="glass-panel p-6 rounded-xl h-fit sticky top-24">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg flex items-center justify-center">
+                  <Target className="h-5 w-5 text-purple-400" />
+                </div>
+                <h3 className="text-xl font-semibold">Game Controls</h3>
+              </div>
+              
+              <KMeansGameControls
+                cities={cities}
+                setCities={setCities}
+                k={k}
+                setK={setK}
+                clusters={clusters}
+                setClusters={setClusters}
+                isRunning={isRunning}
+                setIsRunning={setIsRunning}
+                iteration={iteration}
+                setIteration={setIteration}
+                convergenceData={convergenceData}
+                setConvergenceData={setConvergenceData}
+                showCentroids={showCentroids}
+                setShowCentroids={setShowCentroids}
+                showConnections={showConnections}
+                setShowConnections={setShowConnections}
+                animationSpeed={animationSpeed}
+                setAnimationSpeed={setAnimationSpeed}
+                maxIterations={maxIterations}
+                setMaxIterations={setMaxIterations}
+                gameScore={gameScore}
+                setGameScore={setGameScore}
+                gameLevel={gameLevel}
+                setGameLevel={setGameLevel}
+              />
+
+              {/* Quick Stats in Control Panel */}
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-green-500/20 to-cyan-500/20 rounded-lg flex items-center justify-center">
+                    <BarChart3 className="h-4 w-4 text-green-400" />
+                  </div>
+                  <h4 className="text-lg font-semibold">Quick Stats</h4>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-accent/10 p-3 rounded-lg">
+                    <div className="text-xl font-bold text-accent">{gameScore}</div>
+                    <div className="text-xs text-muted-foreground">Score</div>
+                  </div>
+                  <div className="bg-blue-500/10 p-3 rounded-lg">
+                    <div className="text-xl font-bold text-blue-400">{gameLevel}</div>
+                    <div className="text-xs text-muted-foreground">Level</div>
+                  </div>
+                  <div className="bg-green-500/10 p-3 rounded-lg">
+                    <div className="text-xl font-bold text-green-400">{cities.length}</div>
+                    <div className="text-xs text-muted-foreground">Cities</div>
+                  </div>
+                  <div className="bg-purple-500/10 p-3 rounded-lg">
+                    <div className="text-xl font-bold text-purple-400">{iteration}</div>
+                    <div className="text-xs text-muted-foreground">Steps</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
