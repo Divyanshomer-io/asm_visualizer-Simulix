@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Timer, Search } from 'lucide-react';
+import InfoTooltip from './InfoTooltip';
 
 interface QLearningPlotsProps {
   episodeRewards: number[];
@@ -105,8 +105,10 @@ const QLearningPlots: React.FC<QLearningPlotsProps> = ({
   return (
     <Card className="glass-panel">
       <CardHeader>
-        <CardTitle className="text-lg">
-          Training Progress {isTraining && <span className="text-sm opacity-70 ml-2">(LIVE)</span>}
+        <CardTitle className="text-lg flex items-center gap-2">
+          Training Progress
+          <InfoTooltip content="<b>Training Analytics:</b><br>• <b>Rewards:</b> Cumulative reward per episode<br>• <b>Steps:</b> Number of steps to reach goal<br>• <b>Exploration:</b> ε-greedy exploration rate<br>• Higher rewards and fewer steps indicate better learning" />
+          {isTraining && <span className="text-sm opacity-70 ml-2">(LIVE)</span>}
         </CardTitle>
       </CardHeader>
       <CardContent>

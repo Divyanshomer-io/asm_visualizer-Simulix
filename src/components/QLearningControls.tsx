@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Play, Square, RotateCcw, Route, Settings, Zap, Clock, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import InfoTooltip from './InfoTooltip';
 
 interface QLearningControlsProps {
   isTraining: boolean;
@@ -183,8 +183,9 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
         <CardContent className="space-y-6">
           {/* Training Session Info */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium flex items-center">
               Training Progress
+              <InfoTooltip content="<b>Training Progress:</b><br>• Shows current episode number<br>• Each training session runs for the specified number of episodes<br>• Agent learns by exploring and updating Q-values" />
             </Label>
             <div className="text-sm space-y-1">
               <p><strong>Current Episode:</strong> {currentEpisode}</p>
@@ -196,8 +197,9 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
 
           {/* Episodes per Session */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium flex items-center">
               Episodes per Training Session
+              <InfoTooltip content="<b>Episodes per Session:</b><br>• Number of learning episodes per training run<br>• More episodes = better learning but takes longer<br>• Range: 100-2000 episodes<br>• Default: 500 episodes" />
             </Label>
             <Input
               type="number"
@@ -221,8 +223,9 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
 
           {/* Speed Control */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium flex items-center">
               Training Speed
+              <InfoTooltip content="<b>Training Speed:</b><br>• <b>Slow:</b> Detailed visualization, see each step<br>• <b>Medium:</b> Balanced speed and detail<br>• <b>Fast:</b> Quick training with minimal visualization<br>• Faster speeds complete training quicker" />
             </Label>
             <Select 
               value={speed} 
@@ -269,8 +272,9 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium flex items-center">
               Learning Rate (α): {alpha.toFixed(2)}
+              <InfoTooltip content="<b>Learning Rate (α):</b><br>• Controls how much new information overrides old<br>• High α (0.8-1.0): Fast learning, may be unstable<br>• Low α (0.1-0.3): Slow learning, more stable<br>• Medium α (0.4-0.7): Balanced approach" />
             </Label>
             <Slider
               value={[alpha]}
@@ -284,8 +288,9 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium flex items-center">
               Initial Exploration Rate (ε): {epsilon.toFixed(2)}
+              <InfoTooltip content="<b>Exploration Rate (ε):</b><br>• Probability of random action vs. best known action<br>• High ε (0.8-1.0): More exploration, less exploitation<br>• Low ε (0.0-0.2): More exploitation, less exploration<br>• Decays during training for exploration → exploitation" />
             </Label>
             <Slider
               value={[epsilon]}
@@ -302,8 +307,9 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium flex items-center">
               Maze Size: {mazeSize}x{mazeSize}
+              <InfoTooltip content="<b>Maze Size:</b><br>• Dimensions of the learning environment<br>• Larger mazes = more complex problems<br>• Smaller mazes = faster learning<br>• Range: 5x5 to 10x10 grid" />
             </Label>
             <Slider
               value={[mazeSize]}
