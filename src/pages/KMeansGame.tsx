@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Home, MapPin, Users, Target, Brain } from "lucide-react";
@@ -88,63 +89,170 @@ const KMeansGame = () => {
 
       {/* Main Content */}
       <div className="flex-1 container px-4 md:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
-          
-          {/* Main Visualization - Left Side */}
-          <div className="lg:col-span-3 space-y-6">
-            <div className="glass-panel p-6 rounded-xl">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-lg flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-accent" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold">City Builder Map</h2>
-                    <p className="text-muted-foreground">Click to place cities and watch K-means clustering in action</p>
-                  </div>
+        {/* Main Visualization - Full Width */}
+        <div className="mb-8">
+          <div className="glass-panel p-6 rounded-xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-lg flex items-center justify-center">
+                  <MapPin className="h-6 w-6 text-accent" />
                 </div>
-                
-                {/* Game Stats */}
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-accent">{gameScore}</div>
-                    <div className="text-sm text-muted-foreground">Score</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-400">{gameLevel}</div>
-                    <div className="text-sm text-muted-foreground">Level</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-400">{cities.length}</div>
-                    <div className="text-sm text-muted-foreground">Cities</div>
-                  </div>
+                <div>
+                  <h2 className="text-2xl font-bold">City Builder Map</h2>
+                  <p className="text-muted-foreground">Click to place cities and watch K-means clustering in action</p>
                 </div>
               </div>
               
-              <KMeansGameVisualization
-                cities={cities}
-                setCities={setCities}
-                clusters={clusters}
-                setClusters={setClusters}
-                k={k}
-                isRunning={isRunning}
-                iteration={iteration}
-                setIteration={setIteration}
-                convergenceData={convergenceData}
-                setConvergenceData={setConvergenceData}
-                showCentroids={showCentroids}
-                showConnections={showConnections}
-                animationSpeed={animationSpeed}
-                maxIterations={maxIterations}
-                gameScore={gameScore}
-                setGameScore={setGameScore}
-                gameLevel={gameLevel}
-                setGameLevel={setGameLevel}
-              />
+              {/* Game Stats */}
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-accent">{gameScore}</div>
+                  <div className="text-sm text-muted-foreground">Score</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-400">{gameLevel}</div>
+                  <div className="text-sm text-muted-foreground">Level</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-400">{cities.length}</div>
+                  <div className="text-sm text-muted-foreground">Cities</div>
+                </div>
+              </div>
+            </div>
+            
+            <KMeansGameVisualization
+              cities={cities}
+              setCities={setCities}
+              clusters={clusters}
+              setClusters={setClusters}
+              k={k}
+              isRunning={isRunning}
+              iteration={iteration}
+              setIteration={setIteration}
+              convergenceData={convergenceData}
+              setConvergenceData={setConvergenceData}
+              showCentroids={showCentroids}
+              showConnections={showConnections}
+              animationSpeed={animationSpeed}
+              maxIterations={maxIterations}
+              gameScore={gameScore}
+              setGameScore={setGameScore}
+              gameLevel={gameLevel}
+              setGameLevel={setGameLevel}
+            />
+          </div>
+        </div>
+
+        {/* K-Means Learning Center and Control Panel Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
+          {/* K-Means Learning Center - Left 3 columns */}
+          <div className="lg:col-span-3">
+            <div className="glass-panel p-6 rounded-xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-lg flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-accent" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">K-Means Learning Center</h2>
+                  <p className="text-muted-foreground">Explore different aspects of K-means clustering</p>
+                </div>
+              </div>
+
+              <Tabs defaultValue="convergence" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="convergence">Convergence Analysis</TabsTrigger>
+                  <TabsTrigger value="elbow">Elbow Method</TabsTrigger>
+                  <TabsTrigger value="comparison">Algorithm Comparison</TabsTrigger>
+                  <TabsTrigger value="concepts">Core Concepts</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="convergence" className="mt-6">
+                  <KMeansConvergencePlots
+                    convergenceData={convergenceData}
+                    clusters={clusters}
+                    cities={cities}
+                    iteration={iteration}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="elbow" className="mt-6">
+                  <KMeansElbowPlot
+                    cities={cities}
+                    currentK={k}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="comparison" className="mt-6">
+                  <KMeansClusteringComparison
+                    cities={cities}
+                    k={k}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="concepts" className="mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-semibold text-accent">Algorithm Steps</h3>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
+                          <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-xs font-bold text-blue-400">1</div>
+                          <div>
+                            <p className="font-medium">Initialize Centroids</p>
+                            <p className="text-muted-foreground">Randomly place K centroids in the data space</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
+                          <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center text-xs font-bold text-green-400">2</div>
+                          <div>
+                            <p className="font-medium">Assign Points</p>
+                            <p className="text-muted-foreground">Assign each point to the nearest centroid</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
+                          <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">3</div>
+                          <div>
+                            <p className="font-medium">Update Centroids</p>
+                            <p className="text-muted-foreground">Move centroids to the center of assigned points</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
+                          <div className="w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center text-xs font-bold text-orange-400">4</div>
+                          <div>
+                            <p className="font-medium">Check Convergence</p>
+                            <p className="text-muted-foreground">Repeat until centroids stop moving</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-semibold text-accent">Key Metrics</h3>
+                      <div className="space-y-3 text-sm">
+                        <div className="p-3 glass-panel rounded-lg">
+                          <p className="font-medium text-blue-400">WCSS (Within-Cluster Sum of Squares)</p>
+                          <p className="text-muted-foreground">Measures how tight clusters are. Lower is better.</p>
+                        </div>
+                        <div className="p-3 glass-panel rounded-lg">
+                          <p className="font-medium text-green-400">Inertia</p>
+                          <p className="text-muted-foreground">Sum of squared distances from points to centroids.</p>
+                        </div>
+                        <div className="p-3 glass-panel rounded-lg">
+                          <p className="font-medium text-purple-400">Silhouette Score</p>
+                          <p className="text-muted-foreground">Measures how well points fit in their clusters.</p>
+                        </div>
+                        <div className="p-3 glass-panel rounded-lg">
+                          <p className="font-medium text-orange-400">Elbow Point</p>
+                          <p className="text-muted-foreground">Optimal K where WCSS reduction starts diminishing.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
 
-          {/* Control Panel - Right Side */}
+          {/* Control Panel - Right 1 column */}
           <div className="space-y-6">
             <div className="glass-panel p-6 rounded-xl">
               <div className="flex items-center gap-3 mb-6">
@@ -181,130 +289,19 @@ const KMeansGame = () => {
                 setGameLevel={setGameLevel}
               />
             </div>
-
-            <div className="glass-panel p-6 rounded-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-lg flex items-center justify-center">
-                  <Brain className="h-5 w-5 text-green-400" />
-                </div>
-                <h3 className="text-xl font-semibold">Quick Tips</h3>
-              </div>
-              
-              <KMeansGameEducation
-                k={k}
-                cities={cities}
-                clusters={clusters}
-                iteration={iteration}
-                convergenceData={convergenceData}
-                gameLevel={gameLevel}
-              />
-            </div>
           </div>
         </div>
 
-        {/* Educational Content - Full Width Tabs */}
+        {/* Educational Content - Full Width */}
         <div className="glass-panel p-6 rounded-xl">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-lg flex items-center justify-center">
-              <Brain className="h-6 w-6 text-accent" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">K-Means Learning Center</h2>
-              <p className="text-muted-foreground">Explore different aspects of K-means clustering</p>
-            </div>
-          </div>
-
-          <Tabs defaultValue="convergence" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="convergence">Convergence Analysis</TabsTrigger>
-              <TabsTrigger value="elbow">Elbow Method</TabsTrigger>
-              <TabsTrigger value="comparison">Algorithm Comparison</TabsTrigger>
-              <TabsTrigger value="concepts">Core Concepts</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="convergence" className="mt-6">
-              <KMeansConvergencePlots
-                convergenceData={convergenceData}
-                clusters={clusters}
-                cities={cities}
-                iteration={iteration}
-              />
-            </TabsContent>
-            
-            <TabsContent value="elbow" className="mt-6">
-              <KMeansElbowPlot
-                cities={cities}
-                currentK={k}
-              />
-            </TabsContent>
-            
-            <TabsContent value="comparison" className="mt-6">
-              <KMeansClusteringComparison
-                cities={cities}
-                k={k}
-              />
-            </TabsContent>
-            
-            <TabsContent value="concepts" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-accent">Algorithm Steps</h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
-                      <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-xs font-bold text-blue-400">1</div>
-                      <div>
-                        <p className="font-medium">Initialize Centroids</p>
-                        <p className="text-muted-foreground">Randomly place K centroids in the data space</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
-                      <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center text-xs font-bold text-green-400">2</div>
-                      <div>
-                        <p className="font-medium">Assign Points</p>
-                        <p className="text-muted-foreground">Assign each point to the nearest centroid</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
-                      <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">3</div>
-                      <div>
-                        <p className="font-medium">Update Centroids</p>
-                        <p className="text-muted-foreground">Move centroids to the center of assigned points</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
-                      <div className="w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center text-xs font-bold text-orange-400">4</div>
-                      <div>
-                        <p className="font-medium">Check Convergence</p>
-                        <p className="text-muted-foreground">Repeat until centroids stop moving</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-accent">Key Metrics</h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="p-3 glass-panel rounded-lg">
-                      <p className="font-medium text-blue-400">WCSS (Within-Cluster Sum of Squares)</p>
-                      <p className="text-muted-foreground">Measures how tight clusters are. Lower is better.</p>
-                    </div>
-                    <div className="p-3 glass-panel rounded-lg">
-                      <p className="font-medium text-green-400">Inertia</p>
-                      <p className="text-muted-foreground">Sum of squared distances from points to centroids.</p>
-                    </div>
-                    <div className="p-3 glass-panel rounded-lg">
-                      <p className="font-medium text-purple-400">Silhouette Score</p>
-                      <p className="text-muted-foreground">Measures how well points fit in their clusters.</p>
-                    </div>
-                    <div className="p-3 glass-panel rounded-lg">
-                      <p className="font-medium text-orange-400">Elbow Point</p>
-                      <p className="text-muted-foreground">Optimal K where WCSS reduction starts diminishing.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <KMeansGameEducation
+            k={k}
+            cities={cities}
+            clusters={clusters}
+            iteration={iteration}
+            convergenceData={convergenceData}
+            gameLevel={gameLevel}
+          />
         </div>
       </div>
 
