@@ -21,6 +21,7 @@ import LowRankVAE from "./pages/LowRankVAE";
 import QLearningMaze from "./pages/QLearningMaze";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import HiLoBayesianGame from "./pages/HiLoBayesianGame";
 
 // Configure React Query with safe defaults
 const queryClient = new QueryClient({
@@ -112,6 +113,11 @@ const App = () => (
                 <Route path="/low-rank-vae" element={
                   <ErrorBoundary>
                     <LowRankVAE />
+                  </ErrorBoundary>
+                } />
+                <Route path="/hi-lo-bayesian" element={
+                  <ErrorBoundary>
+                    <HiLoBayesianGame />
                   </ErrorBoundary>
                 } />
                 <Route path="/qlearning-maze" element={
