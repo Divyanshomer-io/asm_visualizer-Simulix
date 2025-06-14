@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, PlayingCards, BookOpen, MessageSquare, Layers } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, Spade, BookOpen, MessageSquare, Layers } from "lucide-react";
 import MobilePopup from "@/components/MobilePopup";
 import FeedbackForm from "@/components/FeedbackForm";
 import ContributionForm from '@/components/ContributionForm';
@@ -217,7 +216,7 @@ const closeContribution = () => {
       title: "Hi-Lo Bayesian Visualization",
       description: "Interactive Hi-Lo card game visualization demonstrating Bayesian probability updates and dynamic probability distribution plots for educational reinforcement of Bayesian inference and decision making.",
       path: "/hi-lo-bayesian",
-      icon: <PlayingCards className="h-6 w-6" />,
+      icon: <Spade className="h-6 w-6" />,
       tags: ["Bayesian Inference", "Probability", "Card Game", "Visualization"],
       gradient: "from-purple-500/20 to-pink-500/20"
     },
@@ -299,7 +298,7 @@ const closeContribution = () => {
                   >
                     Simulix
                   </span>
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur opacity-0 hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
                 </div>
               </div>
               

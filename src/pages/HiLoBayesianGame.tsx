@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { PlayingCards, RotateCcw, TrendingUp, Brain, Target } from 'lucide-react';
+import { Spade, RotateCcw, TrendingUp, Brain, Target } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 interface Card {
@@ -211,7 +211,7 @@ const HiLoBayesianGame = () => {
         <div className="container py-6 px-4 md:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <PlayingCards className="h-8 w-8 text-accent" />
+              <Spade className="h-8 w-8 text-accent" />
               <div>
                 <h1 className="text-2xl font-bold">Hi-Lo Bayesian Game</h1>
                 <p className="text-sm opacity-70">Learn Bayesian inference through card prediction</p>
