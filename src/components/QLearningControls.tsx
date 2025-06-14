@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react';
-import { Play, Square, RotateCcw, Route, Settings, Zap, Clock, Gauge, ChevronDown } from 'lucide-react';
+import { Play, Square, RotateCcw, Route, Settings, Zap, Clock, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface QLearningControlsProps {
   isTraining: boolean;
@@ -54,7 +53,6 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
 }) => {
   const [episodesInput, setEpisodesInput] = useState(maxEpisodes.toString());
   const [episodesError, setEpisodesError] = useState('');
-  const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
 
   const validateEpisodes = (value: string) => {
     const num = parseInt(value);
@@ -318,62 +316,6 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
             />
           </div>
         </CardContent>
-      </Card>
-
-      {/* Instructions Dropdown */}
-      <Card className="glass-panel">
-        <Collapsible open={isInstructionsOpen} onOpenChange={setIsInstructionsOpen}>
-          <CollapsibleTrigger asChild>
-            <CardHeader className="cursor-pointer hover:bg-accent/5 transition-colors">
-              <CardTitle className="text-lg flex items-center justify-between">
-                Instructions
-                <ChevronDown className={`h-4 w-4 transition-transform ${isInstructionsOpen ? 'rotate-180' : ''}`} />
-              </CardTitle>
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent>
-              <div className="text-sm space-y-3 opacity-80">
-                <div className="space-y-2">
-                  <h4 className="font-medium text-base">How to Use:</h4>
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="bg-accent/10 p-3 rounded-lg">
-                      <h5 className="font-medium mb-1">Maze Setup</h5>
-                      <ul className="text-xs space-y-1">
-                        <li>• Click maze cells to add/remove walls</li>
-                        <li>• Green circle (S) = Start position</li>
-                        <li>• Red circle (G) = Goal position</li>
-                      </ul>
-                    </div>
-                    <div className="bg-accent/10 p-3 rounded-lg">
-                      <h5 className="font-medium mb-1">Training</h5>
-                      <ul className="text-xs space-y-1">
-                        <li>• Set episodes per session (100-2000)</li>
-                        <li>• Training continues from last episode</li>
-                        <li>• Exploration rate resets each session</li>
-                      </ul>
-                    </div>
-                    <div className="bg-accent/10 p-3 rounded-lg">
-                      <h5 className="font-medium mb-1">Visualization</h5>
-                      <ul className="text-xs space-y-1">
-                        <li>• Blue arrows show learned policy</li>
-                        <li>• Heatmap shows Q-value strength</li>
-                        <li>• Yellow path shows optimal route</li>
-                      </ul>
-                    </div>
-                    <div className="bg-accent/10 p-3 rounded-lg">
-                      <h5 className="font-medium mb-1">Reset Options</h5>
-                      <ul className="text-xs space-y-1">
-                        <li>• "RESET ALL" clears training & parameters</li>
-                        <li>• "RESET MAZE" only clears wall layout</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Collapsible>
       </Card>
     </div>
   );

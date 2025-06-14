@@ -8,7 +8,7 @@ import QLearningEducation from '@/components/QLearningEducation';
 import QLearningPlots from '@/components/QLearningPlots';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, BookOpen } from 'lucide-react';
+import { ChevronDown, BookOpen, Activity, Target, Zap } from 'lucide-react';
 
 interface MazeState {
   maze: number[][];
@@ -398,42 +398,94 @@ const QLearningMaze = () => {
               isTraining={state.isTraining}
             />
 
-            {/* Training Status - Full Width */}
-            <Card className="glass-panel">
-              <CardHeader>
-                <CardTitle className="text-lg">Training Status</CardTitle>
+            {/* Enhanced Training Status - Full Width */}
+            <Card className="glass-panel border-l-4 border-l-blue-500">
+              <CardHeader className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-white/10">
+                <CardTitle className="text-lg flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-blue-400" />
+                    Training Status
+                  </div>
+                  <div className="flex items-center gap-2 ml-auto">
+                    {state.isTraining && (
+                      <div className="flex items-center gap-2 text-green-400">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span className="text-sm font-mono">ACTIVE</span>
+                      </div>
+                    )}
+                  </div>
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
-                  <div className="space-y-1">
-                    <p className="text-xs opacity-70">Current Episode</p>
-                    <p className="font-medium">{state.currentEpisode}</p>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-blue-400" />
+                      <p className="text-xs opacity-70 font-medium">Current Episode</p>
+                    </div>
+                    <p className="font-bold text-xl text-blue-400">{state.currentEpisode}</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs opacity-70">Episodes per Session</p>
-                    <p className="font-medium">{params.maxEpisodes}</p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4 text-purple-400" />
+                      <p className="text-xs opacity-70 font-medium">Episodes/Session</p>
+                    </div>
+                    <p className="font-bold text-xl text-purple-400">{params.maxEpisodes}</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs opacity-70">Maze Size</p>
-                    <p className="font-medium">{params.mazeSize}×{params.mazeSize}</p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-gradient-to-r from-cyan-400 to-blue-500 rounded"></div>
+                      <p className="text-xs opacity-70 font-medium">Maze Size</p>
+                    </div>
+                    <p className="font-bold text-xl text-cyan-400">{params.mazeSize}×{params.mazeSize}</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs opacity-70">Total Walls</p>
-                    <p className="font-medium">{totalWalls}</p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-gradient-to-r from-orange-400 to-red-500 rounded"></div>
+                      <p className="text-xs opacity-70 font-medium">Total Walls</p>
+                    </div>
+                    <p className="font-bold text-xl text-orange-400">{totalWalls}</p>
                   </div>
+                  
                   {bestReward !== undefined && (
-                    <div className="space-y-1">
-                      <p className="text-xs opacity-70">Best Reward</p>
-                      <p className="font-medium text-green-400">{bestReward.toFixed(1)}</p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded"></div>
+                        <p className="text-xs opacity-70 font-medium">Best Reward</p>
+                      </div>
+                      <p className="font-bold text-xl text-green-400">{bestReward.toFixed(1)}</p>
                     </div>
                   )}
+                  
                   {avgSteps !== undefined && (
-                    <div className="space-y-1">
-                      <p className="text-xs opacity-70">Avg Steps</p>
-                      <p className="font-medium text-blue-400">{avgSteps.toFixed(1)}</p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-gradient-to-r from-yellow-400 to-amber-500 rounded"></div>
+                        <p className="text-xs opacity-70 font-medium">Avg Steps</p>
+                      </div>
+                      <p className="font-bold text-xl text-yellow-400">{avgSteps.toFixed(1)}</p>
                     </div>
                   )}
                 </div>
+                
+                {/* Progress indicator */}
+                {state.isTraining && (
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-green-400 font-medium">Training Progress</span>
+                      <span className="text-blue-400 font-mono">Episode {state.currentEpisode}</span>
+                    </div>
+                    <div className="mt-2 w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min(100, (state.currentEpisode % params.maxEpisodes) / params.maxEpisodes * 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
