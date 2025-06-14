@@ -29,13 +29,33 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
     const iconRect = iconRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
     
-    let left = iconRect.right + 10;
-    let top = iconRect.top - tooltipRect.height / 2;
+    let left = 0;
+    let top = 0;
+    
+    switch (side) {
+      case "right":
+        left = iconRect.right + 10;
+        top = iconRect.top - tooltipRect.height / 2;
+        break;
+      case "left":
+        left = iconRect.left - tooltipRect.width - 10;
+        top = iconRect.top - tooltipRect.height / 2;
+        break;
+      case "bottom":
+        left = iconRect.left - tooltipRect.width / 2 + iconRect.width / 2;
+        top = iconRect.bottom + 10;
+        break;
+      case "top":
+        left = iconRect.left - tooltipRect.width / 2 + iconRect.width / 2;
+        top = iconRect.top - tooltipRect.height - 10;
+        break;
+    }
     
     // Smart positioning to avoid screen edges
-    if (left + tooltipRect.width > window.innerWidth) {
-      left = iconRect.left - tooltipRect.width - 10;
+    if (left + tooltipRect.width > window.innerWidth - 10) {
+      left = window.innerWidth - tooltipRect.width - 10;
     }
+    if (left < 10) left = 10;
     if (top < 10) top = 10;
     if (top + tooltipRect.height > window.innerHeight - 10) {
       top = window.innerHeight - tooltipRect.height - 10;
@@ -50,7 +70,7 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
     }
     showTimeoutRef.current = setTimeout(() => {
       setIsVisible(true);
-    }, 300);
+    }, 200);
   };
 
   const handleMouseLeave = () => {
@@ -140,6 +160,35 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
     });
   };
 
+  const getArrowPosition = () => {
+    switch (side) {
+      case "right":
+        return {
+          left: '-5px',
+          top: '50%',
+          transform: 'translateY(-50%) rotate(45deg)'
+        };
+      case "left":
+        return {
+          right: '-5px',
+          top: '50%',
+          transform: 'translateY(-50%) rotate(45deg)'
+        };
+      case "bottom":
+        return {
+          left: '50%',
+          top: '-5px',
+          transform: 'translateX(-50%) rotate(45deg)'
+        };
+      case "top":
+        return {
+          left: '50%',
+          bottom: '-5px',
+          transform: 'translateX(-50%) rotate(45deg)'
+        };
+    }
+  };
+
   return (
     <>
       <div
@@ -160,14 +209,14 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
       {isVisible && (
         <div
           ref={tooltipRef}
-          className="tooltip-container fixed z-[9999] bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-blue-500/50 rounded-lg p-3 text-gray-100 shadow-2xl backdrop-blur-sm opacity-0 animate-in fade-in-0 zoom-in-95 duration-200"
+          className="tooltip-container fixed z-[9999] bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-blue-500/50 rounded-lg p-3 text-gray-100 shadow-2xl backdrop-blur-sm"
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
             maxWidth: `${maxWidth}px`,
             pointerEvents: isPinned ? 'auto' : 'none',
             opacity: 1,
-            animationFillMode: 'forwards'
+            transition: 'opacity 0.15s ease-in-out'
           }}
         >
           {title && (
@@ -187,12 +236,8 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
           
           {/* Tooltip arrow */}
           <div 
-            className="absolute w-2 h-2 bg-gradient-to-br from-slate-800 to-slate-900 transform rotate-45 border-l border-t border-blue-500/50"
-            style={{
-              left: '-5px',
-              top: '50%',
-              transform: 'translateY(-50%) rotate(45deg)'
-            }}
+            className="absolute w-2 h-2 bg-gradient-to-br from-slate-800 to-slate-900 border-l border-t border-blue-500/50"
+            style={getArrowPosition()}
           />
         </div>
       )}

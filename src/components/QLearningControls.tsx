@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Play, Square, RotateCcw, Route, Settings, Zap, Clock, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -134,6 +133,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
             <Settings className="h-5 w-5" />
             Training Controls
             <QLearningTooltip
+              side="bottom"
               content="⚙️ Training Management
 • START TRAINING: Begin/resume learning episodes
 • SHOW PATH: Visualize current optimal policy path
@@ -190,6 +190,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
           <CardTitle className="text-lg flex items-center gap-2">
             Training Configuration
             <QLearningTooltip
+              side="bottom"
               content="⚡ Batch Training Settings
 • Episodes per session: Training batch size
 • Current Episode: Progress within current batch
@@ -291,6 +292,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
             <Label className="text-sm font-medium flex items-center">
               Learning Rate (α): {alpha.toFixed(2)}
               <QLearningTooltip
+                side="bottom"
                 content="📈 Learning Rate (α)
 • Controls how much new information overrides old knowledge
 • Higher α (0.5-1.0): Fast learning, potentially unstable
@@ -314,6 +316,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
             <Label className="text-sm font-medium flex items-center">
               Initial Exploration Rate (ε): {epsilon.toFixed(2)}
               <QLearningTooltip
+                side="bottom"
                 content="🎲 Exploration Rate (ε-greedy)
 • Probability of taking random actions vs. best known action
 • High ε: More exploration (good early in training)
@@ -340,6 +343,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
             <Label className="text-sm font-medium flex items-center">
               Maze Size: {mazeSize}x{mazeSize}
               <QLearningTooltip
+                side="bottom"
                 content="🗺️ Environment Complexity
 • Larger mazes = More states to learn (exponential growth)
 • 6×6 = 36 states, 8×8 = 64 states, etc.

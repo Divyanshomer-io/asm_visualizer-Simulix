@@ -343,6 +343,7 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
             <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 to-blue-500 animate-pulse"></div>
             Interactive Maze
             <QLearningTooltip
+              side="right"
               content="🎯 Interactive Maze Environment
 • Green circle (S): Agent's starting position
 • Red circle (G): Goal/reward location
@@ -375,6 +376,7 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
             <div className="w-3 h-3 rounded-full bg-gradient-to-r from-cyan-400 to-green-500"></div>
             Q-Values Heatmap
             <QLearningTooltip
+              side="left"
               content="🔥 Q-Values Visualization
 • Color intensity = Expected future reward
 • Darker blue = Lower Q-values (avoid these states)

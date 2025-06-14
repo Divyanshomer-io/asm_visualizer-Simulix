@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,6 +61,7 @@ const QLearningPlots: React.FC<QLearningPlotsProps> = ({
             <TabsTrigger value="rewards" className="flex items-center gap-2">
               Rewards
               <QLearningTooltip
+                side="right"
                 content="🏆 Cumulative Reward Progress
 • Y-axis: Total reward accumulated per episode
 • Shows learning progress over time
@@ -73,6 +73,7 @@ const QLearningPlots: React.FC<QLearningPlotsProps> = ({
             <TabsTrigger value="steps" className="flex items-center gap-2">
               Steps
               <QLearningTooltip
+                side="right"
                 content="👣 Steps per Episode
 • Number of actions taken to reach goal
 • Decreasing trend = more efficient pathfinding
@@ -84,6 +85,7 @@ const QLearningPlots: React.FC<QLearningPlotsProps> = ({
             <TabsTrigger value="exploration" className="flex items-center gap-2">
               Exploration
               <QLearningTooltip
+                side="left"
                 content="🔍 Exploration Rate Decay
 • Shows ε-greedy exploration probability over time
 • Typically starts high (0.9) and decays to low (0.01)
