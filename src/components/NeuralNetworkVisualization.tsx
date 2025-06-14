@@ -1,6 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useState, useEffect, useRef } from "react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, ReferenceLine } from "recharts";
@@ -506,7 +504,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                 valAccuracy: { label: "Validation Accuracy", color: "#f59e0b" }
               }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={displayData} margin={{ top: 20, right: 30, bottom: 40, left: 40 }}>
+                  <LineChart data={displayData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis 
                       dataKey="epoch" 
@@ -576,161 +574,156 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
             </div>
           </div>
 
-          {/* Loss and Weight Distribution - Full Width with Tabs */}
-          <div className="glass-panel p-6 rounded-xl">
-            <Tabs defaultValue="loss" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="loss">Loss Curves</TabsTrigger>
-                <TabsTrigger value="weights">Weight Distribution</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="loss" className="mt-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-lg font-semibold">
-                    Loss Curves {trainingHistory && trainingHistory.earlyStopped && '(Early Stopped)'}
-                  </h3>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-xs text-xs">
-                        Graph showing how the training loss decreases over iterations, indicating how well the model is minimizing error.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <div className="h-64 relative overflow-hidden">
-                  <ChartContainer config={{ 
-                    trainLoss: { label: "Training Loss", color: "#3b82f6" },
-                    valLoss: { label: "Validation Loss", color: "#ef4444" }
-                  }}>
+          {/* Loss and Weight Distribution - Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Loss Chart with Train/Val Curves and single-point handling */}
+            <div className="glass-panel p-6 rounded-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-semibold">
+                  Loss Curves {trainingHistory && trainingHistory.earlyStopped && '(Early Stopped)'}
+                </h3>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs text-xs">
+                      Graph showing how the training loss decreases over iterations, indicating how well the model is minimizing error.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="h-80 relative">
+                <ChartContainer config={{ 
+                  trainLoss: { label: "Training Loss", color: "#3b82f6" },
+                  valLoss: { label: "Validation Loss", color: "#ef4444" }
+                }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={displayData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis 
+                        dataKey="epoch" 
+                        stroke="#9ca3af" 
+                        domain={isEmptyPlot ? [0, 10] : ['dataMin', 'dataMax']}
+                        type="number"
+                        label={{ 
+                          value: 'Epoch', 
+                          position: 'insideBottom', 
+                          offset: -10,
+                          style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                        }} 
+                      />
+                      <YAxis 
+                        stroke="#9ca3af" 
+                        label={{ 
+                          value: 'Loss', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
+                        }}
+                      />
+                      <ChartTooltip content={isEmptyPlot ? undefined : <ChartTooltipContent />} />
+                      {!isEmptyPlot && (
+                        <>
+                          <Line 
+                            type="monotone" 
+                            dataKey="trainLoss" 
+                            stroke="#3b82f6" 
+                            strokeWidth={2}
+                            dot={{ r: trainingData.length === 1 ? 6 : 2 }}
+                            name="Training Loss"
+                            connectNulls={false}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="valLoss" 
+                            stroke="#ef4444" 
+                            strokeWidth={2}
+                            dot={{ r: trainingData.length === 1 ? 6 : 2 }}
+                            name="Validation Loss"
+                            connectNulls={false}
+                          />
+                        </>
+                      )}
+                      {trainingHistory?.earlyStopped && !isEmptyPlot && (
+                        <ReferenceLine 
+                          x={trainingHistory.finalEpoch} 
+                          stroke="#10b981" 
+                          strokeDasharray="5 5"
+                          label={{ value: "Early Stop", position: "top" }}
+                        />
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+                {isEmptyPlot && (
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-secondary/10">
+                    <div className="text-center">
+                      <p className="text-lg font-medium">No Training Data Yet</p>
+                      <p className="text-sm mt-2">Start training to see loss curves</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Weight Distribution */}
+            <div className="glass-panel p-6 rounded-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-semibold">
+                  Weight Distribution
+                </h3>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs text-xs">
+                      Histogram displaying the distribution of all connection weights in the network, showing how weights are spread and updated during training.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="h-80 relative">
+                {weightData.length > 0 ? (
+                  <ChartContainer config={{ count: { label: "Count", color: "#8b5cf6" } }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={displayData} margin={{ top: 10, right: 20, bottom: 30, left: 30 }}>
+                      <BarChart data={weightData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
-                          dataKey="epoch" 
+                          dataKey="bin" 
                           stroke="#9ca3af" 
-                          domain={isEmptyPlot ? [0, 10] : ['dataMin', 'dataMax']}
-                          type="number"
                           label={{ 
-                            value: 'Epoch', 
+                            value: 'Weight Value', 
                             position: 'insideBottom', 
                             offset: -10,
                             style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
-                          }} 
+                          }}
                         />
                         <YAxis 
                           stroke="#9ca3af" 
                           label={{ 
-                            value: 'Loss', 
+                            value: 'Frequency', 
                             angle: -90, 
                             position: 'insideLeft',
                             style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
                           }}
                         />
-                        <ChartTooltip content={isEmptyPlot ? undefined : <ChartTooltipContent />} />
-                        {!isEmptyPlot && (
-                          <>
-                            <Line 
-                              type="monotone" 
-                              dataKey="trainLoss" 
-                              stroke="#3b82f6" 
-                              strokeWidth={2}
-                              dot={{ r: trainingData.length === 1 ? 6 : 2 }}
-                              name="Training Loss"
-                              connectNulls={false}
-                            />
-                            <Line 
-                              type="monotone" 
-                              dataKey="valLoss" 
-                              stroke="#ef4444" 
-                              strokeWidth={2}
-                              dot={{ r: trainingData.length === 1 ? 6 : 2 }}
-                              name="Validation Loss"
-                              connectNulls={false}
-                            />
-                          </>
-                        )}
-                        {trainingHistory?.earlyStopped && !isEmptyPlot && (
-                          <ReferenceLine 
-                            x={trainingHistory.finalEpoch} 
-                            stroke="#10b981" 
-                            strokeDasharray="5 5"
-                            label={{ value: "Early Stop", position: "top" }}
-                          />
-                        )}
-                      </LineChart>
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="count" fill="#8b5cf6" />
+                      </BarChart>
                     </ResponsiveContainer>
                   </ChartContainer>
-                  {isEmptyPlot && (
-                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-secondary/10">
-                      <div className="text-center">
-                        <p className="text-lg font-medium">No Training Data Yet</p>
-                        <p className="text-sm mt-2">Start training to see loss curves</p>
-                      </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground bg-secondary/10">
+                    <div className="text-center">
+                      <p className="text-lg font-medium">No Weights to Display</p>
+                      <p className="text-sm mt-2">Initialize network to see weight distribution</p>
                     </div>
-                  )}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="weights" className="mt-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-lg font-semibold">
-                    Weight Distribution
-                  </h3>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info size={16} className="text-muted-foreground hover:text-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-xs text-xs">
-                        Histogram displaying the distribution of all connection weights in the network, showing how weights are spread and updated during training.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <div className="h-64 relative overflow-hidden">
-                  {weightData.length > 0 ? (
-                    <ChartContainer config={{ count: { label: "Count", color: "#8b5cf6" } }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={weightData} margin={{ top: 10, right: 20, bottom: 30, left: 30 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                          <XAxis 
-                            dataKey="bin" 
-                            stroke="#9ca3af" 
-                            label={{ 
-                              value: 'Weight Value', 
-                              position: 'insideBottom', 
-                              offset: -10,
-                              style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
-                            }}
-                          />
-                          <YAxis 
-                            stroke="#9ca3af" 
-                            label={{ 
-                              value: 'Frequency', 
-                              angle: -90, 
-                              position: 'insideLeft',
-                              style: { textAnchor: 'middle', fontWeight: 'bold', fill: 'currentColor' }
-                            }}
-                          />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Bar dataKey="count" fill="#8b5cf6" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-muted-foreground bg-secondary/10">
-                      <div className="text-center">
-                        <p className="text-lg font-medium">No Weights to Display</p>
-                        <p className="text-sm mt-2">Initialize network to see weight distribution</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
