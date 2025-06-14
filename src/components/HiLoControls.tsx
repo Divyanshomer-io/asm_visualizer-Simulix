@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TrendingUp, TrendingDown, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
