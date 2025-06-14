@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, BarChart3, Target, Sparkles, Zap, Brain, Network, Spade, Search, BookOpen, Gamepad2 } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, BarChart3, Target, Sparkles, Zap, Brain, Network, Spade, Search, BookOpen, Gamepad2, ChevronDown } from "lucide-react";
 import MobilePopup from "@/components/MobilePopup";
 import FeedbackForm from "@/components/FeedbackForm";
 import ContributionForm from '@/components/ContributionForm';
@@ -279,15 +279,6 @@ const closeContribution = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-{/*             <a 
-              href="#visualizations" 
-              className="group control-btn-primary flex items-center justify-center gap-2 text-lg px-8 py-4 relative overflow-hidden"
-            >
-              <span className="relative z-10">Explore Visualizations</span>
-              <MoveRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-              <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </a> */}
-            
             <Link 
               to="/visualizations" 
               className="group control-btn flex items-center justify-center gap-2 text-lg px-8 py-4 hover:border-accent/40"
@@ -386,14 +377,14 @@ const closeContribution = () => {
             ))}
           </div>
 
-          {/* Explore More Visualizations Button */}
+          {/* Explore More Visualizations Button - Updated with down arrow */}
           <div className="text-center pt-8">
             <Link 
               to="/visualizations"
-              className="group control-btn-primary inline-flex items-center justify-center gap-3 text-lg px-10 py-5 relative overflow-hidden animate-pulse hover:animate-none"
+              className="group control-btn-primary inline-flex items-center justify-center gap-3 text-lg px-10 py-5 relative overflow-hidden"
             >
               <span className="relative z-10">Explore More Visualizations</span>
-              <ChartLine className="h-6 w-6 transition-transform group-hover:scale-110 duration-300" />
+              <ChevronDown className="h-6 w-6 transition-transform group-hover:translate-y-1 duration-300" />
               <div className="absolute inset-0 bg-gradient-to-r from-accent/30 to-blue-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </Link>
           </div>
@@ -463,14 +454,14 @@ const closeContribution = () => {
             ))}
           </div>
 
-          {/* Explore More Games Button */}
+          {/* Explore More Games Button - Updated with down arrow */}
           <div className="text-center pt-8">
             <Link 
               to="/games"
-              className="group control-btn-primary inline-flex items-center justify-center gap-3 text-lg px-10 py-5 relative overflow-hidden animate-pulse hover:animate-none"
+              className="group control-btn-primary inline-flex items-center justify-center gap-3 text-lg px-10 py-5 relative overflow-hidden"
             >
               <span className="relative z-10">Explore More Games</span>
-              <Gamepad2 className="h-6 w-6 transition-transform group-hover:scale-110 duration-300" />
+              <ChevronDown className="h-6 w-6 transition-transform group-hover:translate-y-1 duration-300" />
               <div className="absolute inset-0 bg-gradient-to-r from-accent/30 to-purple-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </Link>
           </div>
@@ -536,12 +527,6 @@ const closeContribution = () => {
             >
               Home
             </button>
-{/*             <button
-              onClick={scrollToVisualizations}
-              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105 cursor-pointer"
-            >
-              Visualizations
-            </button> */}
             <Link
               to="/visualizations"
               className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"

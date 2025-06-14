@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Search, X, Home, ChartLine, Compass, Atom, BarChart3, Target, TrendingUp, Network, TreePine, Scale, Layers, Settings, Dices } from "lucide-react";
+import { MoveRight, Search, X, Home, ChartLine, Compass, Atom, BarChart3, Target, TrendingUp, Network, TreePine, Scale, Layers, Settings, Dices, ChevronDown } from "lucide-react";
 
 const Visualizations = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -122,6 +122,10 @@ const Visualizations = () => {
 
   const clearSearch = () => {
     setSearchQuery("");
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -276,10 +280,72 @@ const Visualizations = () => {
               </Link>
             ))}
           </div>
+
+          {/* Back to top with animated down arrow */}
+          <div className="text-center pt-8">
+            <button
+              onClick={scrollToTop}
+              className="group control-btn-primary inline-flex items-center justify-center gap-3 text-lg px-10 py-5 relative overflow-hidden"
+            >
+              <span className="relative z-10">Back to Top</span>
+              <ChevronDown className="h-6 w-6 transition-transform group-hover:translate-y-1 duration-300 rotate-180" />
+              <div className="absolute inset-0 bg-gradient-to-r from-accent/30 to-blue-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+          </div>
         </div>
       </main>
 
-      {/* Footer */}
+      {/* New Navigation Footer */}
+      <footer className="w-full border-t border-white/5 mt-8">
+        <div className="container py-6 px-4 md:px-8">
+          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8 text-center">
+            <Link
+              to="/"
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"
+            >
+              Home
+            </Link>
+            <Link
+              to="/visualizations"
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"
+            >
+              All Visualizations
+            </Link>
+            <Link
+              to="/games"
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"
+            >
+              Games
+            </Link>
+            <Link
+              to="/about"
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"
+            >
+              About Project
+            </Link>
+            <Link
+              to="/blog"
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"
+            >
+              Blog
+            </Link>
+            <button
+              onClick={() => {/* Feedback form logic would go here */}}
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105 cursor-pointer"
+            >
+              Feedback
+            </button>
+            <button
+              onClick={() => {/* Contribution form logic would go here */}}
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105 cursor-pointer"
+            >
+              Contribute
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      {/* Original Footer */}
       <footer className="w-full glass-panel border-t border-white/5">
         <div className="container py-4 px-4 md:px-8 text-center opacity-70">
           <p className="text-sm">
