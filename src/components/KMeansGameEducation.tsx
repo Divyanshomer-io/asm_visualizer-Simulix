@@ -377,7 +377,7 @@ const KMeansGameEducation: React.FC<KMeansGameEducationProps> = ({
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-red-400">✗</span>
-                        <span>Don't choose K > number of cities</span>
+                        <span>Don't choose K greater than number of cities</span>
                       </div>
                     </div>
                   </CardContent>
