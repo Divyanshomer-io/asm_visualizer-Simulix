@@ -25,10 +25,28 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
     
     if (!iconRef.current) return;
     
-    // Get icon position immediately
     const iconRect = iconRef.current.getBoundingClientRect();
-    const x = iconRect.right + 10;
-    const y = iconRect.top;
+    let x = iconRect.right + 10;
+    let y = iconRect.top;
+    
+    // Adjust position based on side prop
+    switch (side) {
+      case 'left':
+        x = iconRect.left - 10;
+        y = iconRect.top;
+        break;
+      case 'top':
+        x = iconRect.left;
+        y = iconRect.top - 10;
+        break;
+      case 'bottom':
+        x = iconRect.left;
+        y = iconRect.bottom + 10;
+        break;
+      default: // right
+        x = iconRect.right + 10;
+        y = iconRect.top;
+    }
     
     setPosition({ x, y });
     setIsVisible(true);
@@ -47,7 +65,7 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
       
       // Right boundary check
       if (newX + tooltipRect.width > window.innerWidth - 20) {
-        newX = position.x - tooltipRect.width - 20;
+        newX = window.innerWidth - tooltipRect.width - 20;
       }
       
       // Bottom boundary check
@@ -74,11 +92,11 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
   const getVariantStyles = () => {
     switch (variant) {
       case 'warning':
-        return 'bg-yellow-800 border-yellow-600 text-yellow-100';
+        return 'bg-yellow-900/90 border-yellow-500/50 text-yellow-100';
       case 'error':
-        return 'bg-red-800 border-red-600 text-red-100';
+        return 'bg-red-900/90 border-red-500/50 text-red-100';
       default:
-        return 'bg-gray-800 border-gray-600 text-white';
+        return 'bg-gray-900/95 border-gray-500/50 text-white';
     }
   };
 
@@ -89,19 +107,19 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
         role="button"
         aria-label="More information"
         tabIndex={0}
-        className={`info-icon cursor-help text-blue-400 ml-2 text-sm hover:text-blue-300 transition-colors ${className}`}
+        className={`inline-flex items-center justify-center w-4 h-4 text-xs cursor-help text-blue-400 ml-2 hover:text-blue-300 transition-colors rounded-full border border-blue-400/50 ${className}`}
         onMouseEnter={showTooltip}
         onMouseLeave={hideTooltip}
         onFocus={(e) => showTooltip(e as any)}
         onBlur={hideTooltip}
       >
-        ⓘ
+        ?
       </span>
       
       {isVisible && (
         <div
           ref={tooltipRef}
-          className={`fixed z-[99999] border rounded-md p-3 text-sm leading-relaxed max-w-[280px] shadow-xl ${getVariantStyles()}`}
+          className={`fixed z-[99999] border rounded-lg p-4 text-sm leading-relaxed max-w-[320px] shadow-2xl backdrop-blur-sm ${getVariantStyles()}`}
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
@@ -112,12 +130,12 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
         >
           <button
             onClick={hideTooltip}
-            className="absolute top-1 right-1 text-gray-400 hover:text-white transition-colors"
+            className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
             aria-label="Close tooltip"
           >
             <X size={14} />
           </button>
-          <div className="pr-4">
+          <div className="pr-6">
             {typeof content === 'string' ? (
               <div dangerouslySetInnerHTML={{ __html: content }} />
             ) : (
@@ -128,28 +146,6 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
       )}
     </>
   );
-};
-
-// VAE-specific tooltip content
-export const VAETooltips = {
-  latentDimension: {
-    content: "<b>Latent Dimension:</b><br>• Size of the compressed representation<br>• Lower dimensions = more compression<br>• Higher dimensions = better reconstruction<br>• Trade-off between quality and efficiency"
-  },
-  nuclearNorm: {
-    content: "<b>Nuclear Norm Regularization:</b><br>• Promotes low-rank structure in latent space<br>• Higher λ = stronger regularization<br>• Helps prevent overfitting<br>• Encourages sparse latent representations"
-  },
-  epochs: {
-    content: "<b>Training Epochs:</b><br>• Number of complete passes through data<br>• More epochs = longer training<br>• Watch for overfitting with too many epochs<br>• Quality typically improves with more training"
-  },
-  mnistReconstruction: {
-    content: "<b>MNIST Reconstruction:</b><br>• Shows how well the VAE reconstructs handwritten digits<br>• Top row: original images<br>• Bottom row: reconstructed images<br>• Better models show cleaner reconstructions"
-  },
-  lossComponents: {
-    content: "<b>Loss Components:</b><br>• Total Loss: Overall training objective<br>• Reconstruction Loss: How well images are reconstructed<br>• KL Divergence: Regularization term for latent space<br>• Regularization Loss: Nuclear norm penalty"
-  },
-  qualityEvolution: {
-    content: "<b>Quality Evolution:</b><br>• Tracks reconstruction quality over training<br>• Quality improves as model learns<br>• Plateaus indicate convergence<br>• Drops may indicate overfitting"
-  }
 };
 
 export default InfoTooltip;
