@@ -148,4 +148,32 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
   );
 };
 
+// VAE Tooltips content definitions
+export const VAETooltips = {
+  latentDimension: {
+    content: "<b>Latent Dimension:</b><br/>The size of the compressed representation. Lower values = more compression but potentially lower quality. Higher values = less compression but better reconstruction.",
+    variant: "info" as const
+  },
+  nuclearNorm: {
+    content: "<b>Regularization:</b><br/>• <b>Nuclear Norm:</b> Promotes low-rank structure in latent space<br/>• <b>Log-Det Majorizer:</b> Alternative low-rank promotion method<br/>• <b>None:</b> No regularization (may overfit)",
+    variant: "info" as const
+  },
+  epochs: {
+    content: "<b>Training Epochs:</b><br/>Number of complete passes through the training data. More epochs = longer training but potentially better results. Watch for overfitting with too many epochs.",
+    variant: "info" as const
+  },
+  mnistReconstruction: {
+    content: "<b>MNIST Reconstruction:</b><br/>Shows how well the VAE can reconstruct handwritten digits after compression through the latent space. Better reconstruction indicates better learned representations.",
+    variant: "info" as const
+  },
+  lossComponents: {
+    content: "<b>Loss Components:</b><br/>• <b>Total Loss:</b> Overall training objective<br/>• <b>Reconstruction:</b> How well images are rebuilt<br/>• <b>KL Divergence:</b> Regularization term<br/>• <b>Regularization:</b> Low-rank penalty",
+    variant: "info" as const
+  },
+  qualityEvolution: {
+    content: "<b>Quality Evolution:</b><br/>Tracks reconstruction fidelity over training epochs. Quality improves as the model learns better representations of the input data.",
+    variant: "info" as const
+  }
+};
+
 export default InfoTooltip;
