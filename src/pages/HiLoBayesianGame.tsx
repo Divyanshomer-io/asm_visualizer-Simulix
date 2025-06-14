@@ -89,12 +89,15 @@ const HiLoBayesianGame = () => {
     const bayesianEstimate = newAlpha / (newAlpha + newBeta);
     const trueProbability = calculateTrueProbability(state.currentCard, state.deck);
 
+    // Updated reward structure: win +1, lose -2
+    const scoreChange = correct ? 1 : -2;
+
     setState(prev => ({
       ...prev,
       currentCard: nextCard,
       alpha: newAlpha,
       beta: newBeta,
-      score: correct ? prev.score + 1 : prev.score,
+      score: prev.score + scoreChange,
       history: [...prev.history, correct ? 'correct' : 'incorrect'],
       cardHistory: [...prev.cardHistory, nextCard],
       bayesianEstimates: [...prev.bayesianEstimates, bayesianEstimate],
@@ -102,9 +105,9 @@ const HiLoBayesianGame = () => {
     }));
 
     if (correct) {
-      toast.success('Correct guess! 🎉');
+      toast.success('Correct guess! +1 point 🎉');
     } else {
-      toast.error('Wrong guess! 😔');
+      toast.error('Wrong guess! -2 points 😔');
     }
   }, [state, params.learningRate, initializeGame]);
 
@@ -188,7 +191,7 @@ const HiLoBayesianGame = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-400">Score:</span>
-                      <span className="text-green-400 font-medium">{state.score}</span>
+                      <span className={`font-medium ${state.score >= 0 ? 'text-green-400' : 'text-red-400'}`}>{state.score}</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-400">Games:</span>

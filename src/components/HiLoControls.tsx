@@ -100,14 +100,14 @@ const HiLoControls: React.FC<HiLoControlsProps> = ({
           <Slider
             value={[params.priorStrength]}
             onValueChange={([value]) => onParamsChange({ priorStrength: value })}
-            min={0.1}
+            min={1.1}
             max={5.0}
             step={0.1}
             className="w-full"
           />
           <div className="flex justify-between text-xs text-slate-400">
-            <span>0.1</span>
-            <span>2.5</span>
+            <span>1.1</span>
+            <span>3.0</span>
             <span>5.0</span>
           </div>
         </div>
