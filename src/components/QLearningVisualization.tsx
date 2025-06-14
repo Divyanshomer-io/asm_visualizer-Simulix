@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -316,7 +315,6 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
     }
   }, [isTraining, maze.length, startPos, goalPos, onMazeClick]);
 
-  // Canvas drawing effects
   useEffect(() => {
     const canvas = mazeCanvasRef.current;
     if (canvas) {
@@ -354,14 +352,6 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
               className="w-full h-80 border border-white/20 rounded-lg cursor-pointer bg-gradient-to-br from-slate-800 to-slate-900 shadow-2xl"
               onClick={handleMazeClick}
             />
-{/*             <div className="absolute top-2 left-2 flex gap-2">
-              <div className="px-2 py-1 bg-black/50 rounded text-xs text-green-400 font-mono">
-                START
-              </div>
-              <div className="px-2 py-1 bg-black/50 rounded text-xs text-red-400 font-mono">
-                GOAL
-              </div>
-            </div> */}
           </div>
           <p className="text-sm opacity-70 mt-3 text-center">
             🎯 Click cells to add/remove walls • 🤖 Blue arrows show learned policy
@@ -383,12 +373,6 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
               ref={heatmapCanvasRef}
               className="w-full h-80 border border-white/20 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 shadow-2xl"
             />
-            <div className="absolute bottom-2 right-2">
-              <div className="flex items-center gap-2 px-2 py-1 bg-black/50 rounded text-xs">
-{/*                 <div className="w-3 h-3 bg-gradient-to-r from-blue-600 to-green-400 rounded"></div>
-                <span className="text-white">Low → High</span>
-              </div> */}
-            </div>
           </div>
           <p className="text-sm opacity-70 mt-3 text-center">
             Darker = Lower Q-values, Brighter = Higher Q-values
