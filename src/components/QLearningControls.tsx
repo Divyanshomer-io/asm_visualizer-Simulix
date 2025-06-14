@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Play, Square, RotateCcw, Route, Settings, Zap, Clock, Gauge, Brain, Target } from 'lucide-react';
+import { Play, Square, RotateCcw, Route, Settings, Zap, Clock, Gauge, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface QLearningControlsProps {
   isTraining: boolean;
@@ -53,6 +54,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
 }) => {
   const [episodesInput, setEpisodesInput] = useState(maxEpisodes.toString());
   const [episodesError, setEpisodesError] = useState('');
+  const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
 
   const validateEpisodes = (value: string) => {
     const num = parseInt(value);
@@ -114,11 +116,11 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
   const getSpeedLabel = (speedValue: string) => {
     switch (speedValue) {
       case 'slow':
-        return '🐌 Slow (Detailed)';
+        return 'Slow (Detailed)';
       case 'medium':
-        return '⚡ Medium (Balanced)';
+        return 'Medium (Balanced)';
       case 'fast':
-        return '🚀 Fast (Quick)';
+        return 'Fast (Quick)';
       default:
         return 'Medium';
     }
@@ -127,82 +129,77 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
   return (
     <div className="space-y-6">
       {/* Training Controls */}
-      <Card className="glass-panel border-green-500/30 bg-gradient-to-br from-green-900/10 to-emerald-900/10">
+      <Card className="glass-panel">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Target className="h-5 w-5 text-green-400" />
-            🎯 Mission Control
+            <Settings className="h-5 w-5" />
+            Training Controls
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Button
             onClick={onStartTraining}
             disabled={isTraining}
-            className="w-full control-btn-primary bg-gradient-to-r from-green-600/80 to-blue-600/80 hover:from-green-500/90 hover:to-blue-500/90 border-green-400/30"
+            className="w-full control-btn-primary"
           >
             <Play className="h-4 w-4" />
-            {isTraining ? `🧠 LEARNING... (${currentEpisode})` : `🚀 START TRAINING (+${maxEpisodes})`}
+            {isTraining ? `TRAINING... (${currentEpisode})` : `START TRAINING (+${maxEpisodes})`}
           </Button>
 
           <div className="grid grid-cols-2 gap-2">
             <Button
               onClick={onShowPath}
               disabled={isTraining}
-              className="control-btn bg-gradient-to-r from-blue-600/30 to-purple-600/30 hover:from-blue-500/40 hover:to-purple-500/40 border-blue-400/30"
+              className="control-btn"
             >
               <Route className="h-4 w-4" />
-              🗺️ PATH
+              SHOW PATH
             </Button>
 
             <Button
               onClick={onResetAll}
               disabled={isTraining}
-              className="control-btn-secondary bg-gradient-to-r from-red-600/80 to-pink-600/80 hover:from-red-500/90 hover:to-pink-500/90"
+              className="control-btn-secondary"
             >
               <Square className="h-4 w-4" />
-              🗑️ RESET
+              RESET ALL
             </Button>
           </div>
 
           <Button
             onClick={onResetMaze}
             disabled={isTraining}
-            className="w-full control-btn bg-gradient-to-r from-orange-600/30 to-red-600/30 hover:from-orange-500/40 hover:to-red-500/40 border-orange-400/30"
+            className="w-full control-btn"
           >
             <RotateCcw className="h-4 w-4" />
-            🧱 RESET MAZE
+            RESET MAZE
           </Button>
         </CardContent>
       </Card>
 
       {/* Training Configuration */}
-      <Card className="glass-panel border-blue-500/30 bg-gradient-to-br from-blue-900/10 to-cyan-900/10">
+      <Card className="glass-panel">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Settings className="h-5 w-5 text-blue-400" />
-            ⚙️ Training Setup
-          </CardTitle>
+          <CardTitle className="text-lg">Training Configuration</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Training Session Info */}
-          <div className="space-y-2 bg-slate-500/10 p-3 rounded-lg border border-slate-500/20">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Zap className="h-4 w-4 text-yellow-400" />
-              📊 Training Progress
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              Training Progress
             </Label>
             <div className="text-sm space-y-1">
-              <p><strong className="text-cyan-400">Current Episode:</strong> {currentEpisode}</p>
+              <p><strong>Current Episode:</strong> {currentEpisode}</p>
               <p className="text-xs opacity-70">
-                🎯 Next session: episodes {currentEpisode + 1}-{currentEpisode + maxEpisodes}
+                Next session will train episodes {currentEpisode + 1}-{currentEpisode + maxEpisodes}
               </p>
             </div>
           </div>
 
           {/* Episodes per Session */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Target className="h-4 w-4 text-purple-400" />
-              🎮 Episodes per Training Session
+            <Label className="text-sm font-medium">
+              Episodes per Training Session
             </Label>
             <Input
               type="number"
@@ -211,7 +208,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
               onKeyPress={handleEpisodesKeyPress}
               onBlur={handleEpisodesBlur}
               disabled={isTraining}
-              className="w-full bg-purple-500/10 border-purple-500/30 focus:border-purple-400/50"
+              className="w-full"
               placeholder="100-2000"
               min={100}
               max={2000}
@@ -220,22 +217,21 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
               <p className="text-xs text-red-400">{episodesError}</p>
             )}
             <p className="text-xs opacity-70">
-              🎯 Enter 100-2000. Press Enter to apply, defaults to 500.
+              Enter a value between 100-2000. Press Enter to apply, or it will default to 500.
             </p>
           </div>
 
           {/* Speed Control */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Gauge className="h-4 w-4 text-green-400" />
-              ⚡ Training Speed
+            <Label className="text-sm font-medium">
+              Training Speed
             </Label>
             <Select 
               value={speed} 
               onValueChange={onSpeedChange}
               disabled={isTraining}
             >
-              <SelectTrigger className="w-full bg-green-500/10 border-green-500/30">
+              <SelectTrigger className="w-full">
                 <SelectValue>
                   <div className="flex items-center gap-2">
                     {getSpeedIcon(speed)}
@@ -243,23 +239,23 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="bg-card border-border">
+              <SelectContent>
                 <SelectItem value="slow">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    🐌 Slow (Detailed)
+                    Slow (Detailed)
                   </div>
                 </SelectItem>
                 <SelectItem value="medium">
                   <div className="flex items-center gap-2">
                     <Gauge className="h-4 w-4" />
-                    ⚡ Medium (Balanced)
+                    Medium (Balanced)
                   </div>
                 </SelectItem>
                 <SelectItem value="fast">
                   <div className="flex items-center gap-2">
                     <Zap className="h-4 w-4" />
-                    🚀 Fast (Quick)
+                    Fast (Quick)
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -269,18 +265,14 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
       </Card>
 
       {/* Algorithm Parameters */}
-      <Card className="glass-panel border-purple-500/30 bg-gradient-to-br from-purple-900/10 to-pink-900/10">
+      <Card className="glass-panel">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Brain className="h-5 w-5 text-purple-400" />
-            🧠 AI Parameters
-          </CardTitle>
+          <CardTitle className="text-lg">Algorithm Parameters</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-400 rounded"></div>
-              📈 Learning Rate (α): {alpha.toFixed(2)}
+            <Label className="text-sm font-medium">
+              Learning Rate (α): {alpha.toFixed(2)}
             </Label>
             <Slider
               value={[alpha]}
@@ -291,13 +283,11 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
               className="w-full"
               disabled={isTraining}
             />
-            <p className="text-xs opacity-70">🧠 How fast the AI learns from new experiences</p>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-400 rounded"></div>
-              🎲 Exploration Rate (ε): {epsilon.toFixed(2)}
+            <Label className="text-sm font-medium">
+              Initial Exploration Rate (ε): {epsilon.toFixed(2)}
             </Label>
             <Slider
               value={[epsilon]}
@@ -309,14 +299,13 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
               disabled={isTraining}
             />
             <p className="text-xs opacity-70">
-              🔄 Chance of random exploration (resets each training session)
+              Resets to this value at the start of each training session
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <div className="w-3 h-3 border-2 border-cyan-400 rounded"></div>
-              🗺️ Maze Grid Size: {mazeSize}x{mazeSize}
+            <Label className="text-sm font-medium">
+              Maze Size: {mazeSize}x{mazeSize}
             </Label>
             <Slider
               value={[mazeSize]}
@@ -327,9 +316,64 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
               className="w-full"
               disabled={isTraining}
             />
-            <p className="text-xs opacity-70">🧩 Size of the maze grid (creates new maze)</p>
           </div>
         </CardContent>
+      </Card>
+
+      {/* Instructions Dropdown */}
+      <Card className="glass-panel">
+        <Collapsible open={isInstructionsOpen} onOpenChange={setIsInstructionsOpen}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-accent/5 transition-colors">
+              <CardTitle className="text-lg flex items-center justify-between">
+                Instructions
+                <ChevronDown className={`h-4 w-4 transition-transform ${isInstructionsOpen ? 'rotate-180' : ''}`} />
+              </CardTitle>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="text-sm space-y-3 opacity-80">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-base">How to Use:</h4>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="bg-accent/10 p-3 rounded-lg">
+                      <h5 className="font-medium mb-1">Maze Setup</h5>
+                      <ul className="text-xs space-y-1">
+                        <li>• Click maze cells to add/remove walls</li>
+                        <li>• Green circle (S) = Start position</li>
+                        <li>• Red circle (G) = Goal position</li>
+                      </ul>
+                    </div>
+                    <div className="bg-accent/10 p-3 rounded-lg">
+                      <h5 className="font-medium mb-1">Training</h5>
+                      <ul className="text-xs space-y-1">
+                        <li>• Set episodes per session (100-2000)</li>
+                        <li>• Training continues from last episode</li>
+                        <li>• Exploration rate resets each session</li>
+                      </ul>
+                    </div>
+                    <div className="bg-accent/10 p-3 rounded-lg">
+                      <h5 className="font-medium mb-1">Visualization</h5>
+                      <ul className="text-xs space-y-1">
+                        <li>• Blue arrows show learned policy</li>
+                        <li>• Heatmap shows Q-value strength</li>
+                        <li>• Yellow path shows optimal route</li>
+                      </ul>
+                    </div>
+                    <div className="bg-accent/10 p-3 rounded-lg">
+                      <h5 className="font-medium mb-1">Reset Options</h5>
+                      <ul className="text-xs space-y-1">
+                        <li>• "RESET ALL" clears training & parameters</li>
+                        <li>• "RESET MAZE" only clears wall layout</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
     </div>
   );

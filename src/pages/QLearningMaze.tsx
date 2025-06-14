@@ -8,7 +8,7 @@ import QLearningEducation from '@/components/QLearningEducation';
 import QLearningPlots from '@/components/QLearningPlots';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, BookOpen, Target, Zap, Trophy, Timer } from 'lucide-react';
+import { ChevronDown, BookOpen } from 'lucide-react';
 
 interface MazeState {
   maze: number[][];
@@ -352,20 +352,20 @@ const QLearningMaze = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-foreground antialiased overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
 
-      <header className="w-full glass-panel border-b border-blue-500/20 mb-8 bg-gradient-to-r from-blue-900/30 to-purple-900/30">
+      <header className="w-full glass-panel border-b border-white/5 mb-8">
         <div className="container py-6 px-4 md:px-8 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl md:text-3xl font-light tracking-tight text-gradient">
-              🧩 Q-Learning Maze Navigator
+            <h1 className="text-2xl md:text-3xl font-light tracking-tight">
+              Q-Learning Maze Solver
               <span className="text-sm ml-3 opacity-70 font-normal">
-                🎯 Intelligent Pathfinding
+                Interactive Learning
               </span>
             </h1>
-            <p className="text-sm opacity-70">Navigate the digital labyrinth with reinforcement learning</p>
+            <p className="text-sm opacity-70">Interactive Reinforcement Learning Visualization</p>
           </div>
-          <Link to="/" className="control-btn flex items-center gap-2 text-sm hover:bg-blue-500/20 border-blue-400/30">
+          <Link to="/" className="control-btn flex items-center gap-2 text-sm">
             <ArrowLeft className="h-4 w-4" />
             Back to Visualizations
           </Link>
@@ -378,91 +378,59 @@ const QLearningMaze = () => {
           {/* Left column - Visualizations */}
           <div className="lg:col-span-3 space-y-6">
             {/* Maze Display */}
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg blur opacity-75"></div>
-              <div className="relative">
-                <QLearningVisualization
-                  maze={state.maze}
-                  qTable={state.qTable}
-                  startPos={state.startPos}
-                  goalPos={state.goalPos}
-                  currentEpisode={state.currentEpisode}
-                  isTraining={state.isTraining}
-                  showPath={state.showPath}
-                  path={state.path}
-                  onMazeClick={handleMazeClick}
-                />
-              </div>
-            </div>
+            <QLearningVisualization
+              maze={state.maze}
+              qTable={state.qTable}
+              startPos={state.startPos}
+              goalPos={state.goalPos}
+              currentEpisode={state.currentEpisode}
+              isTraining={state.isTraining}
+              showPath={state.showPath}
+              path={state.path}
+              onMazeClick={handleMazeClick}
+            />
 
             {/* Dynamic Plots */}
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 to-blue-600/20 rounded-lg blur opacity-75"></div>
-              <div className="relative">
-                <QLearningPlots
-                  episodeRewards={state.episodeRewards}
-                  episodeSteps={state.episodeSteps}
-                  episodeEpsilons={state.episodeEpsilons}
-                  isTraining={state.isTraining}
-                />
-              </div>
-            </div>
+            <QLearningPlots
+              episodeRewards={state.episodeRewards}
+              episodeSteps={state.episodeSteps}
+              episodeEpsilons={state.episodeEpsilons}
+              isTraining={state.isTraining}
+            />
 
-            {/* Enhanced Training Status */}
-            <Card className="glass-panel border-yellow-500/30 bg-gradient-to-r from-yellow-900/10 to-orange-900/10">
+            {/* Training Status - Full Width */}
+            <Card className="glass-panel">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Target className="h-5 w-5 text-yellow-400" />
-                  🎯 Navigation Progress
-                  {state.isTraining && <div className="animate-pulse text-green-400 text-sm ml-2">● LEARNING</div>}
-                </CardTitle>
+                <CardTitle className="text-lg">Training Status</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-6 text-sm">
-                  <div className="space-y-2 bg-blue-500/10 p-3 rounded-lg border border-blue-500/20">
-                    <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-blue-400" />
-                      <p className="text-xs opacity-70 font-medium">Current Episode</p>
-                    </div>
-                    <p className="font-bold text-lg text-blue-400">{state.currentEpisode}</p>
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
+                  <div className="space-y-1">
+                    <p className="text-xs opacity-70">Current Episode</p>
+                    <p className="font-medium">{state.currentEpisode}</p>
                   </div>
-                  <div className="space-y-2 bg-purple-500/10 p-3 rounded-lg border border-purple-500/20">
-                    <div className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-purple-400" />
-                      <p className="text-xs opacity-70 font-medium">Session Size</p>
-                    </div>
-                    <p className="font-bold text-lg text-purple-400">{params.maxEpisodes}</p>
+                  <div className="space-y-1">
+                    <p className="text-xs opacity-70">Episodes per Session</p>
+                    <p className="font-medium">{params.maxEpisodes}</p>
                   </div>
-                  <div className="space-y-2 bg-cyan-500/10 p-3 rounded-lg border border-cyan-500/20">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-cyan-400 rounded"></div>
-                      <p className="text-xs opacity-70 font-medium">Maze Grid</p>
-                    </div>
-                    <p className="font-bold text-lg text-cyan-400">{params.mazeSize}×{params.mazeSize}</p>
+                  <div className="space-y-1">
+                    <p className="text-xs opacity-70">Maze Size</p>
+                    <p className="font-medium">{params.mazeSize}×{params.mazeSize}</p>
                   </div>
-                  <div className="space-y-2 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-red-400 rounded"></div>
-                      <p className="text-xs opacity-70 font-medium">Wall Blocks</p>
-                    </div>
-                    <p className="font-bold text-lg text-red-400">{totalWalls}</p>
+                  <div className="space-y-1">
+                    <p className="text-xs opacity-70">Total Walls</p>
+                    <p className="font-medium">{totalWalls}</p>
                   </div>
                   {bestReward !== undefined && (
-                    <div className="space-y-2 bg-green-500/10 p-3 rounded-lg border border-green-500/20">
-                      <div className="flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-green-400" />
-                        <p className="text-xs opacity-70 font-medium">Best Score</p>
-                      </div>
-                      <p className="font-bold text-lg text-green-400">{bestReward.toFixed(1)}</p>
+                    <div className="space-y-1">
+                      <p className="text-xs opacity-70">Best Reward</p>
+                      <p className="font-medium text-green-400">{bestReward.toFixed(1)}</p>
                     </div>
                   )}
                   {avgSteps !== undefined && (
-                    <div className="space-y-2 bg-orange-500/10 p-3 rounded-lg border border-orange-500/20">
-                      <div className="flex items-center gap-2">
-                        <Timer className="h-4 w-4 text-orange-400" />
-                        <p className="text-xs opacity-70 font-medium">Avg Steps</p>
-                      </div>
-                      <p className="font-bold text-lg text-orange-400">{avgSteps.toFixed(1)}</p>
+                    <div className="space-y-1">
+                      <p className="text-xs opacity-70">Avg Steps</p>
+                      <p className="font-medium text-blue-400">{avgSteps.toFixed(1)}</p>
                     </div>
                   )}
                 </div>
@@ -470,14 +438,14 @@ const QLearningMaze = () => {
             </Card>
 
             {/* Horizontal Instructions Dropdown */}
-            <Card className="glass-panel border-indigo-500/30 bg-gradient-to-r from-indigo-900/10 to-blue-900/10">
+            <Card className="glass-panel">
               <Collapsible open={isInstructionsOpen} onOpenChange={setIsInstructionsOpen}>
                 <CollapsibleTrigger asChild>
                   <CardHeader className="cursor-pointer hover:bg-accent/5 transition-colors">
                     <CardTitle className="text-lg flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <BookOpen className="h-5 w-5 text-indigo-400" />
-                        🗺️ Navigation Guide & Instructions
+                        <BookOpen className="h-5 w-5" />
+                        Instructions & Usage Guide
                       </div>
                       <ChevronDown className={`h-4 w-4 transition-transform ${isInstructionsOpen ? 'rotate-180' : ''}`} />
                     </CardTitle>
@@ -486,105 +454,97 @@ const QLearningMaze = () => {
                 <CollapsibleContent>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
-                      <div className="bg-blue-500/10 p-4 rounded-lg border border-blue-500/20">
-                        <h4 className="font-medium mb-3 text-base flex items-center gap-2">
-                          🏗️ Maze Construction
-                        </h4>
+                      <div className="bg-accent/10 p-4 rounded-lg">
+                        <h4 className="font-medium mb-3 text-base">Maze Setup</h4>
                         <ul className="text-xs space-y-2">
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-400">🖱️</span>
-                            <span>Click maze cells to build/remove walls</span>
+                            <span className="text-blue-400">•</span>
+                            <span>Click maze cells to add/remove walls</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-green-400">🟢</span>
-                            <span>Green circle (S) = Starting position</span>
+                            <span className="text-green-400">•</span>
+                            <span>Green circle (S) = Start position</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-red-400">🔴</span>
-                            <span>Red circle (G) = Goal destination</span>
+                            <span className="text-red-400">•</span>
+                            <span>Red circle (G) = Goal position</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-gray-400">⬛</span>
-                            <span>Black cells = Wall obstacles</span>
+                            <span className="text-gray-400">•</span>
+                            <span>Black cells = Walls (obstacles)</span>
                           </li>
                         </ul>
                       </div>
 
-                      <div className="bg-green-500/10 p-4 rounded-lg border border-green-500/20">
-                        <h4 className="font-medium mb-3 text-base flex items-center gap-2">
-                          🎯 Training Process
-                        </h4>
+                      <div className="bg-accent/10 p-4 rounded-lg">
+                        <h4 className="font-medium mb-3 text-base">Training Process</h4>
                         <ul className="text-xs space-y-2">
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-400">📊</span>
+                            <span className="text-blue-400">•</span>
                             <span>Set episodes per session (100-2000)</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-green-400">⏩</span>
+                            <span className="text-green-400">•</span>
                             <span>Training continues from last episode</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-orange-400">🔄</span>
+                            <span className="text-orange-400">•</span>
                             <span>Exploration rate resets each session</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-purple-400">⚡</span>
-                            <span>Adjust speed for observation detail</span>
+                            <span className="text-purple-400">•</span>
+                            <span>Adjust speed for detailed/quick observation</span>
                           </li>
                         </ul>
                       </div>
 
-                      <div className="bg-purple-500/10 p-4 rounded-lg border border-purple-500/20">
-                        <h4 className="font-medium mb-3 text-base flex items-center gap-2">
-                          🎨 Visual Elements
-                        </h4>
+                      <div className="bg-accent/10 p-4 rounded-lg">
+                        <h4 className="font-medium mb-3 text-base">Visualization Elements</h4>
                         <ul className="text-xs space-y-2">
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-400">➡️</span>
+                            <span className="text-blue-400">•</span>
                             <span>Blue arrows show learned policy</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-yellow-400">🔥</span>
+                            <span className="text-yellow-400">•</span>
                             <span>Heatmap shows Q-value strength</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-yellow-400">🛤️</span>
+                            <span className="text-yellow-400">•</span>
                             <span>Yellow path shows optimal route</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-gray-400">📈</span>
+                            <span className="text-gray-400">•</span>
                             <span>Charts track learning progress</span>
                           </li>
                         </ul>
                       </div>
 
-                      <div className="bg-red-500/10 p-4 rounded-lg border border-red-500/20">
-                        <h4 className="font-medium mb-3 text-base flex items-center gap-2">
-                          🔄 Reset Options
-                        </h4>
+                      <div className="bg-accent/10 p-4 rounded-lg">
+                        <h4 className="font-medium mb-3 text-base">Reset Options</h4>
                         <ul className="text-xs space-y-2">
                           <li className="flex items-start gap-2">
-                            <span className="text-red-400">🗑️</span>
+                            <span className="text-red-400">•</span>
                             <span>"RESET ALL" clears training & parameters</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-orange-400">🧱</span>
+                            <span className="text-orange-400">•</span>
                             <span>"RESET MAZE" only clears wall layout</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-400">🗺️</span>
+                            <span className="text-blue-400">•</span>
                             <span>"SHOW PATH" displays optimal learned route</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-green-400">⚙️</span>
-                            <span>Parameters adjustable during training</span>
+                            <span className="text-green-400">•</span>
+                            <span>Parameters can be adjusted during training</span>
                           </li>
                         </ul>
                       </div>
                     </div>
 
                     <div className="mt-6 pt-4 border-t border-accent/20">
-                      <h4 className="font-medium mb-3 flex items-center gap-2">🧠 Algorithm Parameters:</h4>
+                      <h4 className="font-medium mb-3">Key Algorithm Parameters:</h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                         <div className="bg-blue-500/10 p-3 rounded border border-blue-500/20">
                           <strong className="text-blue-400">Learning Rate (α):</strong> Controls how much new information overrides old. Higher = faster but less stable learning.
@@ -605,32 +565,27 @@ const QLearningMaze = () => {
 
           {/* Right column - Controls */}
           <div className="space-y-6">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg blur opacity-75"></div>
-              <div className="relative">
-                <QLearningControls
-                  isTraining={state.isTraining}
-                  currentEpisode={state.currentEpisode}
-                  maxEpisodes={params.maxEpisodes}
-                  speed={params.speed}
-                  mazeSize={params.mazeSize}
-                  totalWalls={totalWalls}
-                  bestReward={bestReward}
-                  avgSteps={avgSteps}
-                  alpha={params.alpha}
-                  epsilon={params.epsilon}
-                  onStartTraining={startTraining}
-                  onShowPath={showOptimalPath}
-                  onResetMaze={resetMaze}
-                  onResetAll={resetAll}
-                  onAlphaChange={(value) => setParams(prev => ({ ...prev, alpha: value[0] }))}
-                  onEpsilonChange={(value) => setParams(prev => ({ ...prev, epsilon: value[0] }))}
-                  onMazeSizeChange={handleMazeSizeChange}
-                  onMaxEpisodesChange={(value) => setParams(prev => ({ ...prev, maxEpisodes: value }))}
-                  onSpeedChange={(speed) => setParams(prev => ({ ...prev, speed }))}
-                />
-              </div>
-            </div>
+            <QLearningControls
+              isTraining={state.isTraining}
+              currentEpisode={state.currentEpisode}
+              maxEpisodes={params.maxEpisodes}
+              speed={params.speed}
+              mazeSize={params.mazeSize}
+              totalWalls={totalWalls}
+              bestReward={bestReward}
+              avgSteps={avgSteps}
+              alpha={params.alpha}
+              epsilon={params.epsilon}
+              onStartTraining={startTraining}
+              onShowPath={showOptimalPath}
+              onResetMaze={resetMaze}
+              onResetAll={resetAll}
+              onAlphaChange={(value) => setParams(prev => ({ ...prev, alpha: value[0] }))}
+              onEpsilonChange={(value) => setParams(prev => ({ ...prev, epsilon: value[0] }))}
+              onMazeSizeChange={handleMazeSizeChange}
+              onMaxEpisodesChange={(value) => setParams(prev => ({ ...prev, maxEpisodes: value }))}
+              onSpeedChange={(speed) => setParams(prev => ({ ...prev, speed }))}
+            />
           </div>
         </div>
 
@@ -641,10 +596,10 @@ const QLearningMaze = () => {
       </main>
 
       {/* Footer */}
-      <footer className="w-full glass-panel border-t border-blue-500/20 mt-auto bg-gradient-to-r from-slate-900/50 to-blue-900/50">
+      <footer className="w-full glass-panel border-t border-white/5 mt-auto">
         <div className="container py-4 px-4 md:px-8 text-center">
           <p className="text-sm opacity-70">
-            🧩 Navigate the maze of possibilities with intelligent Q-Learning algorithms
+            Interactive Q-Learning algorithm visualization for solving maze navigation
           </p>
         </div>
       </footer>
