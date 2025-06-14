@@ -1,10 +1,13 @@
-
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Search, X, Home, Gamepad2, Spade, Target, ChevronDown } from "lucide-react";
+import { MoveRight, Search, X, Home, Gamepad2, Spade, Target, ChevronDown, Sparkles } from "lucide-react";
+import FeedbackForm from "@/components/FeedbackForm";
+import ContributionForm from "@/components/ContributionForm";
 
 const Games = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [showContribution, setShowContribution] = useState(false);
 
   const games = [
     {
@@ -101,21 +104,69 @@ const Games = () => {
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="container px-4 md:px-8 py-16">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-6">
-            <div className="inline-flex items-center gap-3 px-6 py-3 glass-panel rounded-full mb-4">
-              <Gamepad2 className="h-6 w-6 text-accent" />
-              <span className="text-lg font-semibold text-accent">Interactive Games</span>
+      {/* Enhanced Hero Section */}
+      <section className="relative py-20 md:py-32 overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-background/90">
+          <div className="absolute inset-0 bg-gradient-to-r from-accent/5 via-blue-500/5 to-purple-500/5"></div>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-accent/10 to-blue-500/10 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+        
+        {/* Content */}
+        <div className="relative container px-4 md:px-8">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            {/* Badge */}
+            <div className="relative group inline-block">
+              <div className="absolute -inset-1 bg-gradient-to-r from-accent/30 via-blue-500/30 to-purple-500/30 rounded-full blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+              <div className="relative inline-flex items-center gap-3 px-8 py-4 glass-panel rounded-full border-2 border-accent/20 group-hover:border-accent/40 transition-all duration-300">
+                <Gamepad2 className="h-6 w-6 text-accent group-hover:scale-110 transition-transform duration-300" />
+                <span className="text-lg font-semibold bg-gradient-to-r from-accent via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Interactive Games
+                </span>
+                <Sparkles className="h-4 w-4 text-accent/60 group-hover:text-accent transition-colors duration-300" />
+              </div>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold">Educational Gaming Suite</h1>
-            <p className="opacity-70 max-w-2xl mx-auto text-lg">
-              Learn complex algorithms and statistical concepts through engaging, interactive game-based visualizations.
-            </p>
-          </div>
+            {/* Main Title */}
+            <div className="space-y-6">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-tight">
+                <span className="block bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+                  Educational
+                </span>
+                <span className="block bg-gradient-to-r from-accent via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Gaming Suite
+                </span>
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-muted-foreground/80 max-w-3xl mx-auto leading-relaxed">
+                Learn complex algorithms and statistical concepts through{" "}
+                <span className="text-accent font-semibold">engaging</span>,{" "}
+                <span className="text-blue-400 font-semibold">interactive</span>{" "}
+                game-based visualizations.
+              </p>
+            </div>
 
+            {/* CTA Button */}
+            <div className="pt-4">
+              <button
+                onClick={() => document.getElementById('games-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group relative inline-flex items-center gap-4 px-10 py-5 text-lg font-semibold rounded-2xl bg-gradient-to-r from-accent/20 via-blue-500/20 to-purple-500/20 border-2 border-accent/30 hover:border-accent/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-accent/30 to-purple-500/30 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <span className="relative z-10 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                  Explore Games
+                </span>
+                <ChevronDown className="relative z-10 h-5 w-5 text-accent group-hover:translate-y-1 transition-transform duration-300" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main content */}
+      <main id="games-section" className="container px-4 md:px-8 py-16">
+        <div className="max-w-6xl mx-auto space-y-12">
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-8">
             <div className="relative group">
@@ -269,13 +320,13 @@ const Games = () => {
               Blog
             </Link>
             <button
-              onClick={() => {/* Feedback form logic would go here */}}
+              onClick={() => setShowFeedback(true)}
               className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105 cursor-pointer"
             >
               Feedback
             </button>
             <button
-              onClick={() => {/* Contribution form logic would go here */}}
+              onClick={() => setShowContribution(true)}
               className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105 cursor-pointer"
             >
               Contribute
@@ -292,6 +343,10 @@ const Games = () => {
           </p>
         </div>
       </footer>
+
+      {/* Forms */}
+      <FeedbackForm showFeedback={showFeedback} setShowFeedback={setShowFeedback} />
+      <ContributionForm showContribution={showContribution} setShowContribution={setShowContribution} />
     </div>
   );
 };
