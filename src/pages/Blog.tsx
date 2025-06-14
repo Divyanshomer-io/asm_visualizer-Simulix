@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MoveRight, Sparkles, Zap, BookOpen, Users, Target, ArrowRight, MessageSquare, Home, Lightbulb } from 'lucide-react';
+import { MoveRight, Sparkles, Zap, BookOpen, Users, Target, ArrowRight, MessageSquare, Home, Lightbulb, Gamepad2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FeedbackForm from '@/components/FeedbackForm';
 import ContributionForm from '@/components/ContributionForm';
@@ -86,12 +86,15 @@ const Blog = () => {
       <section className="container px-4 md:px-8 pb-16">
         <div className="max-w-6xl mx-auto">
           <Tabs defaultValue="why-simulix" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 glass-panel p-2 h-auto">
+            <TabsList className="grid w-full grid-cols-6 glass-panel p-2 h-auto">
               <TabsTrigger value="why-simulix" className="text-xs md:text-sm px-2 py-3">
                 Why Simulix?
               </TabsTrigger>
               <TabsTrigger value="unique-features" className="text-xs md:text-sm px-2 py-3">
                 What Makes Us Unique?
+              </TabsTrigger>
+              <TabsTrigger value="interactive-games" className="text-xs md:text-sm px-2 py-3">
+                Interactive Games
               </TabsTrigger>
               <TabsTrigger value="exploration" className="text-xs md:text-sm px-2 py-3">
                 Exploring & Learning
@@ -199,7 +202,127 @@ const Blog = () => {
               </div>
             </TabsContent>
 
-            {/* Tab 3: Exploring Visualizations */}
+            {/* New Tab 3: Interactive Games */}
+            <TabsContent value="interactive-games" className="mt-8">
+              <div className="glass-panel p-8 rounded-xl space-y-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <Gamepad2 className="h-8 w-8 text-accent" />
+                  <h2 className="text-3xl font-bold">Interactive Learning Games</h2>
+                </div>
+                
+                <h3 className="text-2xl font-semibold text-accent mb-6">
+                  Learning Through Play: Gamified Data Science Education
+                </h3>
+                
+                <p className="text-lg opacity-90 leading-relaxed mb-6">
+                  Simulix goes beyond traditional visualizations by incorporating interactive games that make learning 
+                  data science concepts engaging and memorable. Our game-based approach transforms complex algorithms 
+                  into playful, hands-on experiences.
+                </p>
+                
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="glass-panel p-6 rounded-lg border border-accent/20">
+                    <h4 className="text-xl font-semibold mb-4 text-accent">K-Means City Builder</h4>
+                    <p className="opacity-90 leading-relaxed mb-4">
+                      Build virtual cities and watch K-means clustering algorithms organize them into logical groups. 
+                      This interactive city-building game teaches clustering concepts through visual, spatial learning. 
+                      Place cities on a map, adjust cluster parameters, and see how different algorithms group your 
+                      urban areas in real-time.
+                    </p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Real-time clustering visualization</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span>Interactive city placement</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                      <span>Algorithm comparison tools</span>
+                    </div>
+                  </div>
+                  
+                  <div className="glass-panel p-6 rounded-lg border border-accent/20">
+                    <h4 className="text-xl font-semibold mb-4 text-accent">Hi-Lo Bayesian Game</h4>
+                    <p className="opacity-90 leading-relaxed mb-4">
+                      Master Bayesian reasoning through an engaging card guessing game. Players learn probability 
+                      theory and Bayesian inference by predicting whether the next card will be higher or lower. 
+                      The game visualizes how prior beliefs update with new evidence, making abstract statistical 
+                      concepts tangible and intuitive.
+                    </p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Bayesian inference in action</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span>Probability visualization</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                      <span>Strategic decision making</span>
+                    </div>
+                  </div>
+                  
+                  <div className="glass-panel p-6 rounded-lg border border-accent/20">
+                    <h4 className="text-xl font-semibold mb-4 text-accent">Q-Learning Maze Navigator</h4>
+                    <p className="opacity-90 leading-relaxed mb-4">
+                      Guide an AI agent through challenging mazes using reinforcement learning. Watch as the agent 
+                      learns optimal paths through trial and error, demonstrating Q-learning algorithms in action. 
+                      Customize maze layouts, adjust learning parameters, and observe how different strategies affect 
+                      the agent's performance.
+                    </p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Reinforcement learning visualization</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span>Customizable maze environments</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                      <span>Real-time learning analytics</span>
+                    </div>
+                  </div>
+                  
+                  <div className="glass-panel p-6 rounded-lg border border-accent/20">
+                    <h4 className="text-xl font-semibold mb-4 text-accent">More Games Coming Soon</h4>
+                    <p className="opacity-90 leading-relaxed mb-4">
+                      We're continuously developing new interactive games to cover more data science topics. 
+                      From neural network training simulations to statistical hypothesis testing challenges, 
+                      our growing library of educational games makes learning engaging and effective.
+                    </p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <span>Neural network games in development</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
+                      <span>Statistical testing challenges</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                      <span>Community-requested game topics</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="glass-panel p-6 rounded-lg border border-accent/20 mt-8">
+                  <h4 className="text-xl font-semibold mb-4 text-accent">Why Gamification Works</h4>
+                  <p className="opacity-90 leading-relaxed">
+                    Educational games leverage the power of active learning, immediate feedback, and intrinsic motivation. 
+                    By turning abstract algorithms into interactive challenges, students develop deeper understanding 
+                    and retention. Our games are designed with educational psychology principles in mind, ensuring 
+                    that fun doesn't compromise learning effectiveness. Each game includes progress tracking, 
+                    difficulty scaling, and comprehensive educational support to maximize learning outcomes.
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Tab 4: Exploring Visualizations (updated tab number) */}
             <TabsContent value="exploration" className="mt-8">
               <div className="glass-panel p-8 rounded-xl space-y-6">
                 <div className="flex items-center gap-3 mb-6">
@@ -277,7 +400,7 @@ const Blog = () => {
               </div>
             </TabsContent>
 
-            {/* Tab 4: Learning, Teaching, and Growing */}
+            {/* Tab 5: Learning, Teaching, and Growing (updated tab number) */}
             <TabsContent value="community" className="mt-8">
               <div className="glass-panel p-8 rounded-xl space-y-6">
                 <div className="flex items-center gap-3 mb-6">
@@ -325,7 +448,7 @@ const Blog = () => {
               </div>
             </TabsContent>
 
-            {/* Tab 5: Get Involved */}
+            {/* Tab 6: Get Involved (updated tab number) */}
             <TabsContent value="get-involved" className="mt-8">
               <div className="glass-panel p-8 rounded-xl space-y-8">
                 <div className="flex items-center gap-3 mb-6">
@@ -359,7 +482,7 @@ const Blog = () => {
                   <div className="glass-panel p-6 rounded-lg border border-accent/20">
                     <h4 className="text-xl font-semibold mb-3 text-accent">Contribute</h4>
                     <p className="opacity-90 leading-relaxed mb-4">
-                      Become an essential part of the Simulix community by sharing your expertise. Whether you’re interested in coding, content development, or outreach, your contributions help drive the evolution of our educational resources and extend their reach to a broader audience.
+                      Become an essential part of the Simulix community by sharing your expertise. Whether you're interested in coding, content development, or outreach, your contributions help drive the evolution of our educational resources and extend their reach to a broader audience.
                     </p>
                   </div>
                   
