@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Info } from 'lucide-react';
 
@@ -27,53 +26,48 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
     if (!iconRef.current) return;
     
     const iconRect = iconRef.current.getBoundingClientRect();
-    const tooltipWidth = maxWidth;
-    const tooltipHeight = 200; // Estimated height
+    const spacing = 4; // Very close to icon
     
     let left = 0;
     let top = 0;
     
-    // Reduced spacing between icon and tooltip
-    const spacing = 8;
-    
+    // Simple positioning - right next to icon
     switch (side) {
       case "right":
         left = iconRect.right + spacing;
-        top = iconRect.top + iconRect.height / 2 - tooltipHeight / 2;
+        top = iconRect.top;
         break;
       case "left":
-        left = iconRect.left - tooltipWidth - spacing;
-        top = iconRect.top + iconRect.height / 2 - tooltipHeight / 2;
+        left = iconRect.left - maxWidth - spacing;
+        top = iconRect.top;
         break;
       case "bottom":
-        left = iconRect.left + iconRect.width / 2 - tooltipWidth / 2;
+        left = iconRect.left;
         top = iconRect.bottom + spacing;
         break;
       case "top":
-        left = iconRect.left + iconRect.width / 2 - tooltipWidth / 2;
-        top = iconRect.top - tooltipHeight - spacing;
+        left = iconRect.left;
+        top = iconRect.top - 100 - spacing; // Estimated tooltip height
         break;
     }
     
-    // Viewport boundary checks with smaller margins
-    const margin = 8;
+    // Only check viewport bounds, don't move too much
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    // Horizontal bounds
-    if (left + tooltipWidth > viewportWidth - margin) {
-      left = viewportWidth - tooltipWidth - margin;
+    // Keep within viewport but stay close to icon
+    if (left + maxWidth > viewportWidth) {
+      left = Math.max(4, viewportWidth - maxWidth - 4);
     }
-    if (left < margin) {
-      left = margin;
+    if (left < 4) {
+      left = 4;
     }
     
-    // Vertical bounds
-    if (top + tooltipHeight > viewportHeight - margin) {
-      top = viewportHeight - tooltipHeight - margin;
+    if (top < 4) {
+      top = 4;
     }
-    if (top < margin) {
-      top = margin;
+    if (top + 200 > viewportHeight) {
+      top = Math.max(4, viewportHeight - 200 - 4);
     }
     
     setPosition({ x: left, y: top });
@@ -85,7 +79,7 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
     }
     showTimeoutRef.current = setTimeout(() => {
       setIsVisible(true);
-    }, 150);
+    }, 100);
   };
 
   const handleMouseLeave = () => {
@@ -123,11 +117,7 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
 
   useEffect(() => {
     if (isVisible) {
-      // Small delay to ensure DOM is updated
-      const timer = setTimeout(() => {
-        positionTooltip();
-      }, 10);
-      return () => clearTimeout(timer);
+      positionTooltip();
     }
   }, [isVisible, side, maxWidth]);
 
@@ -143,8 +133,8 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
     };
 
     const handleScroll = () => {
-      if (isVisible && !isPinned) {
-        setIsVisible(false);
+      if (isVisible) {
+        positionTooltip();
       }
     };
 
@@ -195,41 +185,11 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
     });
   };
 
-  const getArrowPosition = () => {
-    const arrowSize = 6;
-    switch (side) {
-      case "right":
-        return {
-          left: `-${arrowSize}px`,
-          top: '20px',
-          transform: 'translateY(-50%) rotate(45deg)'
-        };
-      case "left":
-        return {
-          right: `-${arrowSize}px`,
-          top: '20px',
-          transform: 'translateY(-50%) rotate(45deg)'
-        };
-      case "bottom":
-        return {
-          left: '20px',
-          top: `-${arrowSize}px`,
-          transform: 'translateX(-50%) rotate(45deg)'
-        };
-      case "top":
-        return {
-          left: '20px',
-          bottom: `-${arrowSize}px`,
-          transform: 'translateX(-50%) rotate(45deg)'
-        };
-    }
-  };
-
   return (
     <>
       <div
         ref={iconRef}
-        className="info-icon inline-flex items-center justify-center w-4 h-4 bg-blue-500 text-white rounded-full cursor-pointer hover:bg-blue-600 transition-colors ml-1 text-xs font-bold flex-shrink-0"
+        className="inline-flex items-center justify-center w-4 h-4 bg-blue-500 text-white rounded-full cursor-pointer hover:bg-blue-600 transition-colors ml-1 text-xs font-bold flex-shrink-0"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
@@ -245,15 +205,13 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
       {isVisible && (
         <div
           ref={tooltipRef}
-          className="tooltip-container fixed z-[99999] bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-blue-500/50 rounded-lg p-3 text-gray-100 shadow-2xl backdrop-blur-sm"
+          className="fixed z-[99999] bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-blue-500/50 rounded-lg p-3 text-gray-100 shadow-2xl backdrop-blur-sm"
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
             maxWidth: `${maxWidth}px`,
             minWidth: '200px',
-            pointerEvents: isPinned ? 'auto' : 'none',
-            opacity: 1,
-            transition: 'opacity 0.15s ease-in-out'
+            pointerEvents: isPinned ? 'auto' : 'none'
           }}
           onMouseEnter={() => {
             if (hideTimeoutRef.current) {
@@ -282,12 +240,6 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
             </div>
           )}
-          
-          {/* Tooltip arrow */}
-          <div 
-            className="absolute w-3 h-3 bg-gradient-to-br from-slate-800 to-slate-900 border-l border-t border-blue-500/50 z-[-1]"
-            style={getArrowPosition()}
-          />
         </div>
       )}
     </>
