@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, Spade, BookOpen, MessageSquare, Layers } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, BarChart3, Target, Sparkles, Zap, Brain, Network, Spade, Search, BookOpen, Gamepad2 } from "lucide-react";
 import MobilePopup from "@/components/MobilePopup";
 import FeedbackForm from "@/components/FeedbackForm";
 import ContributionForm from '@/components/ContributionForm';
@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 
 const Landing = () => {
   const [animatedText, setAnimatedText] = useState("Optimization");
-  const [searchQuery, setSearchQuery] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [showContribution, setShowContribution] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
@@ -102,7 +101,8 @@ const closeContribution = () => {
     document.getElementById('visualizations')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const visualizations = [
+  // Featured visualizations for the main grid (6 items)
+  const featuredVisualizations = [
     {
       id: "simulated-annealing",
       title: "Simulated Annealing: Traveling Salesman Problem",
@@ -111,51 +111,6 @@ const closeContribution = () => {
       icon: <Compass className="h-6 w-6" />,
       tags: ["Optimization", "Metaheuristics", "Combinatorial"],
       gradient: "from-blue-500/20 to-purple-500/20"
-    },
-    {
-      id: "simulated-annealing-toy",
-      title: "Simulated Annealing: Toy Example",
-      description: "Learn simulated annealing concepts through polynomial optimization with binary-encoded solutions.",
-      path: "/simulated-annealing-toy",
-      icon: <Settings className="h-6 w-6" />,
-      tags: ["Optimization", "Educational", "Binary Encoding"],
-      gradient: "from-green-500/20 to-blue-500/20"
-    },
-    {
-      id: "alias-method",
-      title: "Alias Method",
-      description: "Visualize how to efficiently sample from discrete probability distributions with the Alias Method.",
-      path: "/alias-method",
-      icon: <Dices className="h-6 w-6" />,
-      tags: ["Probability", "Sampling", "Algorithm"],
-      gradient: "from-orange-500/20 to-red-500/20"
-    },
-    {
-      id: "bootstrapping",
-      title: "Bootstrapping",
-      description: "Understand statistical inference through resampling techniques and confidence interval construction.",
-      path: "/bootstrapping",
-      icon: <BarChart3 className="h-6 w-6" />,
-      tags: ["Statistics", "Resampling", "Inference"],
-      gradient: "from-purple-500/20 to-pink-500/20"
-    },
-    {
-      id: "huber-mean",
-      title: "Huber M-Estimator",
-      description: "Explore robust statistical estimation with the Huber M-estimator using IRLS. See how it handles outliers gracefully.",
-      path: "/huber-mean",
-      icon: <Target className="h-6 w-6" />,
-      tags: ["Robust Statistics", "M-Estimators", "IRLS"],
-      gradient: "from-cyan-500/20 to-blue-500/20"
-    },
-    {
-      id: "importance-sampling",
-      title: "Importance Sampling",
-      description: "Explore Standard and Normalized Importance Sampling techniques with interactive visualizations and parameter controls.",
-      path: "/importance-sampling",
-      icon: <TrendingUp className="h-6 w-6" />,
-      tags: ["Monte Carlo", "Sampling", "Statistics"],
-      gradient: "from-indigo-500/20 to-teal-500/20"
     },
     {
       id: "neural-network",
@@ -167,24 +122,6 @@ const closeContribution = () => {
       gradient: "from-violet-500/20 to-fuchsia-500/20"
     },
     {
-      id: "random-forest",
-      title: "Random Forest Analyzer",
-      description: "Comprehensive ensemble learning visualization with feature importance, ROC curves, confusion matrices, and decision tree exploration.",
-      path: "/random-forest",
-      icon: <TreePine className="h-6 w-6" />,
-      tags: ["Machine Learning", "Ensemble Learning", "Classification"],
-      gradient: "from-emerald-500/20 to-green-500/20"
-    },
-    {
-      id: "bias-variance",
-      title: "Bias-Variance Tradeoff",
-      description: "Explore the fundamental tradeoff between bias and variance in machine learning models through polynomial regression visualization.",
-      path: "/bias-variance",
-      icon: <Scale className="h-6 w-6" />,
-      tags: ["Machine Learning", "Model Selection", "Tradeoff Analysis"],
-      gradient: "from-pink-500/20 to-rose-500/20"
-    },
-    {
       id: "deep-rl",
       title: "Deep Reinforcement Learning",
       description: "Deep Q-Networks with experience replay, epsilon-greedy exploration, and neural weight evolution.",
@@ -194,14 +131,36 @@ const closeContribution = () => {
       gradient: "from-purple-500/20 to-pink-500/20"
     },
     {
-      id: "low-rank-vae",
-      title: "Low-Rank VAE Compression",
-      description: "Real-time Variational Autoencoder training with nuclear norm and log-determinant majorizer regularization for latent space compression.",
-      path: "/low-rank-vae",
-      icon: <Layers className="h-6 w-6" />,
-      tags: ["Deep Learning", "VAE", "Compression", "Regularization"],
-      gradient: "from-amber-500/20 to-orange-500/20"
+      id: "bootstrapping",
+      title: "Bootstrapping",
+      description: "Understand statistical inference through resampling techniques and confidence interval construction.",
+      path: "/bootstrapping",
+      icon: <BarChart3 className="h-6 w-6" />,
+      tags: ["Statistics", "Resampling", "Inference"],
+      gradient: "from-purple-500/20 to-pink-500/20"
     },
+    {
+      id: "alias-method",
+      title: "Alias Method",
+      description: "Visualize how to efficiently sample from discrete probability distributions with the Alias Method.",
+      path: "/alias-method",
+      icon: <Dices className="h-6 w-6" />,
+      tags: ["Probability", "Sampling", "Algorithm"],
+      gradient: "from-orange-500/20 to-red-500/20"
+    },
+    {
+      id: "huber-mean",
+      title: "Huber M-Estimator",
+      description: "Explore robust statistical estimation with the Huber M-estimator using IRLS. See how it handles outliers gracefully.",
+      path: "/huber-mean",
+      icon: <Target className="h-6 w-6" />,
+      tags: ["Robust Statistics", "M-Estimators", "IRLS"],
+      gradient: "from-cyan-500/20 to-blue-500/20"
+    },
+  ];
+
+  // Featured games for the games section
+  const featuredGames = [
     {
       id: "qlearning-maze",
       title: "Q-Learning Maze Solver",
@@ -211,7 +170,7 @@ const closeContribution = () => {
       tags: ["Reinforcement Learning", "Q-Learning", "Maze Solving", "Interactive"],
       gradient: "from-teal-500/20 to-cyan-500/20"
     },
-        {
+    {
       id: "hi-lo-bayesian",
       title: "Hi-Lo Bayesian Visualization",
       description: "Interactive Hi-Lo card game visualization demonstrating Bayesian probability updates and dynamic probability distribution plots for educational reinforcement of Bayesian inference and decision making.",
@@ -221,22 +180,6 @@ const closeContribution = () => {
       gradient: "from-purple-500/20 to-pink-500/20"
     },
   ];
-
-  // Filter visualizations based on search query
-  const filteredVisualizations = useMemo(() => {
-    if (!searchQuery.trim()) return visualizations;
-    
-    const query = searchQuery.toLowerCase();
-    return visualizations.filter(viz => 
-      viz.title.toLowerCase().includes(query) ||
-      viz.description.toLowerCase().includes(query) ||
-      viz.tags.some(tag => tag.toLowerCase().includes(query))
-    );
-  }, [searchQuery]);
-
-  const clearSearch = () => {
-    setSearchQuery("");
-  };
 
   const features = [
     {
@@ -346,6 +289,22 @@ const closeContribution = () => {
             </a>
             
             <Link 
+              to="/visualizations" 
+              className="group control-btn flex items-center justify-center gap-2 text-lg px-8 py-4 hover:border-accent/40"
+            >
+              <ChartLine className="h-5 w-5 transition-transform group-hover:scale-110 duration-300" />
+              <span>Explore Visualizations</span>
+            </Link>
+
+            <Link 
+              to="/games" 
+              className="group control-btn flex items-center justify-center gap-2 text-lg px-8 py-4 hover:border-accent/40"
+            >
+              <Gamepad2 className="h-5 w-5 transition-transform group-hover:scale-110 duration-300" />
+              <span>Explore Games</span>
+            </Link>
+            
+            <Link 
               to="/about" 
               className="group control-btn flex items-center justify-center gap-2 text-lg px-8 py-4 hover:border-accent/40"
             >
@@ -375,58 +334,17 @@ const closeContribution = () => {
           <div className="text-center space-y-6">
             <div className="inline-flex items-center gap-3 px-6 py-3 glass-panel rounded-full mb-4">
               <ChartLine className="h-6 w-6 text-accent" />
-              <span className="text-lg font-semibold text-accent">Available Tools</span>
+              <span className="text-lg font-semibold text-accent">Featured Tools</span>
             </div>
 
             <h2 className="text-3xl md:text-4xl font-bold">Interactive Visualization Suite</h2>
             <p className="opacity-70 max-w-2xl mx-auto text-lg">
-              Select any of the interactive modules below to explore different concepts and algorithms through hands-on simulations.
+              Explore our most popular interactive modules for learning data science concepts through hands-on simulations.
             </p>
-          </div>
-
-          {/* Creative Search Bar */}
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-accent/20 via-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative glass-panel rounded-2xl p-1 border-2 border-white/10 group-hover:border-accent/30 transition-all duration-300">
-                <div className="relative flex items-center">
-                  <div className="absolute left-4 z-10">
-                    <Search className="h-5 w-5 text-accent/70 group-hover:text-accent transition-colors duration-300" />
-                  </div>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by title, description, or tags..."
-                    className="w-full bg-transparent pl-12 pr-12 py-4 text-lg placeholder:text-muted-foreground/60 focus:outline-none focus:placeholder:text-muted-foreground/40 transition-all duration-300"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={clearSearch}
-                      className="absolute right-4 z-10 p-1 rounded-full hover:bg-accent/20 transition-colors duration-200 group/clear"
-                    >
-                      <X className="h-4 w-4 text-muted-foreground group-hover/clear:text-accent transition-colors" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              {/* Search suggestions/results count */}
-              {searchQuery && (
-                <div className="mt-3 text-center">
-                  <span className="text-sm text-muted-foreground">
-                    {filteredVisualizations.length} visualization{filteredVisualizations.length !== 1 ? 's' : ''} found
-                    {filteredVisualizations.length === 0 && (
-                      <span className="block mt-1 text-accent">Try searching for "optimization", "statistics", or "sampling"</span>
-                    )}
-                  </span>
-                </div>
-              )}
-            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredVisualizations.map((visualization, index) => (
+            {featuredVisualizations.map((visualization, index) => (
               <Link 
                 key={visualization.id}
                 to={visualization.path}
@@ -466,26 +384,95 @@ const closeContribution = () => {
                 </div>
               </Link>
             ))}
+          </div>
 
-            {/* Enhanced Coming Soon Card - only show when no search or search doesn't filter it out */}
-            {(!searchQuery || "coming soon more tools additional concepts algorithms".includes(searchQuery.toLowerCase())) && (
-              <div className="glass-panel p-6 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center text-center space-y-4 min-h-[250px] group hover:border-accent/30 transition-all duration-500">
-                <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <ChartLine className="h-6 w-6 opacity-60 group-hover:opacity-100 transition-opacity" />
+          {/* Explore More Visualizations Button */}
+          <div className="text-center pt-8">
+            <Link 
+              to="/visualizations"
+              className="group control-btn-primary inline-flex items-center justify-center gap-3 text-lg px-10 py-5 relative overflow-hidden animate-pulse hover:animate-none"
+            >
+              <span className="relative z-10">Explore More Visualizations</span>
+              <ChartLine className="h-6 w-6 transition-transform group-hover:scale-110 duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-accent/30 to-blue-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Section Divider */}
+      <div className="container px-4 md:px-8">
+        <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent"></div>
+      </div>
+      
+      {/* Games Section */}
+      <section className="container px-4 md:px-8 py-16">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-6">
+            <div className="inline-flex items-center gap-3 px-6 py-3 glass-panel rounded-full mb-4">
+              <Gamepad2 className="h-6 w-6 text-accent" />
+              <span className="text-lg font-semibold text-accent">Interactive Games</span>
+            </div>
+
+            <h2 className="text-3xl md:text-4xl font-bold">Educational Gaming Suite</h2>
+            <p className="opacity-70 max-w-2xl mx-auto text-lg">
+              Learn complex algorithms and statistical concepts through engaging, interactive game-based visualizations.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {featuredGames.map((game, index) => (
+              <Link 
+                key={game.id}
+                to={game.path}
+                className="group glass-panel p-8 rounded-xl transition-all duration-500 hover:border-primary/40 hover:bg-secondary/30 hover:scale-105 hover:shadow-2xl relative overflow-hidden"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${game.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                
+                <div className="relative z-10">
+                  <div className="w-16 h-16 bg-accent/30 rounded-lg flex items-center justify-center mb-6 group-hover:bg-accent/50 transition-all duration-300 group-hover:scale-110">
+                    {game.icon}
+                  </div>
+                  
+                  <h3 className="text-2xl font-semibold mb-4 group-hover:text-primary transition-colors leading-tight">
+                    {game.title}
+                  </h3>
+                  <p className="opacity-70 mb-6 text-base leading-relaxed">
+                    {game.description}
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-2 mt-4 mb-6">
+                    {game.tags.map((tag) => (
+                      <span 
+                        key={tag} 
+                        className="bg-secondary/50 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium border border-white/10 hover:border-accent/30 transition-colors"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <span className="text-sm flex items-center gap-1 text-primary group-hover:gap-3 transition-all duration-300 font-medium">
+                      Play Game <MoveRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold opacity-70 group-hover:opacity-90 transition-opacity">
-                  More Tools Coming Soon
-                </h3>
-                <p className="text-sm opacity-50 group-hover:opacity-70 transition-opacity">
-                  Additional concepts and algorithms will be added to expand the visualization suite
-                </p>
-                <div className="flex gap-2">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className={`w-2 h-2 rounded-full bg-accent/30 animate-pulse`} style={{ animationDelay: `${i * 200}ms` }}></div>
-                  ))}
-                </div>
-              </div>
-            )}
+              </Link>
+            ))}
+          </div>
+
+          {/* Explore More Games Button */}
+          <div className="text-center pt-8">
+            <Link 
+              to="/games"
+              className="group control-btn-primary inline-flex items-center justify-center gap-3 text-lg px-10 py-5 relative overflow-hidden animate-pulse hover:animate-none"
+            >
+              <span className="relative z-10">Explore More Games</span>
+              <Gamepad2 className="h-6 w-6 transition-transform group-hover:scale-110 duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-accent/30 to-purple-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </Link>
           </div>
         </div>
       </section>
@@ -501,7 +488,7 @@ const closeContribution = () => {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-6 py-3 glass-panel rounded-full mb-4">
               <Sparkles className="h-6 w-6 text-accent" />
-              <span className="text-lg font-semibold text-accent">Platform Featuress</span>
+              <span className="text-lg font-semibold text-accent">Platform Features</span>
             </div>
 
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Simulix</h2>
@@ -555,6 +542,18 @@ const closeContribution = () => {
             >
               Visualizations
             </button>
+            <Link
+              to="/visualizations"
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"
+            >
+              All Visualizations
+            </Link>
+            <Link
+              to="/games"
+              className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"
+            >
+              Games
+            </Link>
             <Link
               to="/about"
               className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"
