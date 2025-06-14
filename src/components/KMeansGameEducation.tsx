@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Target, TrendingDown, Award, BookOpen, Lightbulb, Zap, Users, BarChart3, Activity } from "lucide-react";
+import { Target, TrendingDown, Award, BookOpen, Lightbulb, Zap, Users, BarChart3, Activity, Brain, Calculator } from "lucide-react";
 
 interface KMeansGameEducationProps {
   k: number;
@@ -24,53 +24,6 @@ const KMeansGameEducation: React.FC<KMeansGameEducationProps> = ({
   convergenceData,
   gameLevel,
 }) => {
-  const getGameTip = () => {
-    if (cities.length === 0) {
-      return {
-        icon: <Target className="h-4 w-4" />,
-        title: "Getting Started",
-        content: "Click on the map to place cities. Try to create interesting patterns!",
-        type: "info"
-      };
-    }
-    
-    if (cities.length < k) {
-      return {
-        icon: <Target className="h-4 w-4" />,
-        title: "Need More Cities",
-        content: `You need at least ${k} cities to run K-means clustering with K=${k}.`,
-        type: "warning"
-      };
-    }
-    
-    if (clusters.length === 0) {
-      return {
-        icon: <Zap className="h-4 w-4" />,
-        title: "Ready to Cluster",
-        content: "Great! You have enough cities. Click 'Start' to begin K-means clustering.",
-        type: "success"
-      };
-    }
-    
-    if (iteration < 5) {
-      return {
-        icon: <TrendingDown className="h-4 w-4" />,
-        title: "Algorithm Running",
-        content: "Watch how centroids move to minimize the distance to their assigned cities.",
-        type: "info"
-      };
-    }
-    
-    return {
-      icon: <Award className="h-4 w-4" />,
-      title: "Optimization in Progress",
-      content: "The algorithm is converging! Lower WCSS values indicate better clustering quality.",
-      type: "success"
-    };
-  };
-
-  const tip = getGameTip();
-  
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -79,46 +32,72 @@ const KMeansGameEducation: React.FC<KMeansGameEducationProps> = ({
           <BookOpen className="h-6 w-6 text-blue-400" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold">Learn About K-Means</h2>
-          <p className="text-muted-foreground">K-means clustering is an unsupervised learning algorithm that partitions data into clusters. In this city builder game, watch how the algorithm groups cities based on proximity.</p>
+          <h2 className="text-2xl font-bold">Understanding K-Means Clustering</h2>
+          <p className="text-muted-foreground">Learn how this powerful algorithm groups data points together</p>
         </div>
       </div>
 
       {/* Educational Tabs */}
       <Tabs defaultValue="basics" className="w-full">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="basics">Basics</TabsTrigger>
-          <TabsTrigger value="parameters">Parameters</TabsTrigger>
-          <TabsTrigger value="algorithm">Algorithm</TabsTrigger>
-          <TabsTrigger value="environment">Environment</TabsTrigger>
-          <TabsTrigger value="progress">Progress</TabsTrigger>
+          <TabsTrigger value="basics">What is K-Means?</TabsTrigger>
+          <TabsTrigger value="math">The Math Behind It</TabsTrigger>
+          <TabsTrigger value="steps">How It Works</TabsTrigger>
+          <TabsTrigger value="tips">Pro Tips</TabsTrigger>
+          <TabsTrigger value="realworld">Real Applications</TabsTrigger>
         </TabsList>
         
         <TabsContent value="basics" className="mt-6">
           <div className="space-y-6">
+            <Card className="glass-panel">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Brain className="h-6 w-6 text-accent" />
+                  What is K-Means Clustering?
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-lg leading-relaxed">
+                  Imagine you're organizing a city planning meeting and need to group neighborhoods by their characteristics. 
+                  K-means clustering does exactly this - it's like an intelligent assistant that automatically groups similar things together!
+                </p>
+                <div className="bg-accent/10 p-4 rounded-lg border-l-4 border-accent">
+                  <p className="font-medium text-accent mb-2">Think of it this way:</p>
+                  <p className="text-sm">
+                    You have a bunch of cities scattered on a map. K-means finds the best way to group them into K districts, 
+                    where each district has a central point (like a town hall) and all nearby cities belong to that district.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="glass-panel">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">The K-Means Formula:</CardTitle>
+                  <CardTitle className="text-lg">Why K-Means is Special</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center p-6 bg-slate-800/50 rounded-lg mb-4">
-                    <div className="text-xl font-mono text-blue-400">
-                      J = Σ Σ ||x<sub>i</sub> - μ<sub>k</sub>||²
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                      <div>
+                        <p className="font-medium text-green-400">Automatic Grouping</p>
+                        <p className="text-sm text-muted-foreground">No need to manually decide which cities go together</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="text-blue-400 border-blue-400/50">J</Badge>
-                      <span>Objective function (WCSS - minimize this)</span>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+                      <div>
+                        <p className="font-medium text-blue-400">Finds Natural Patterns</p>
+                        <p className="text-sm text-muted-foreground">Discovers hidden structures in your data</p>
+                      </div>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="text-green-400 border-green-400/50">x<sub>i</sub></Badge>
-                      <span>Data point (city position)</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="text-purple-400 border-purple-400/50">μ<sub>k</sub></Badge>
-                      <span>Cluster centroid (center of cluster)</span>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
+                      <div>
+                        <p className="font-medium text-purple-400">Works with Any Data</p>
+                        <p className="text-sm text-muted-foreground">Cities, customers, genes, or any data with features</p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -126,18 +105,23 @@ const KMeansGameEducation: React.FC<KMeansGameEducationProps> = ({
 
               <Card className="glass-panel">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Key Concepts:</CardTitle>
+                  <CardTitle className="text-lg">In Your Game</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="p-3 glass-panel rounded-lg">
-                      <h4 className="font-medium text-green-400 mb-2">Centroids</h4>
-                      <p className="text-sm text-muted-foreground">The center points of clusters, calculated as the mean of all assigned points</p>
+                      <p className="font-medium text-accent mb-2">Current Setup</p>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>K Value: <span className="font-mono text-blue-400">{k}</span></div>
+                        <div>Cities: <span className="font-mono text-green-400">{cities.length}</span></div>
+                        <div>Steps: <span className="font-mono text-purple-400">{iteration}</span></div>
+                        <div>Level: <span className="font-mono text-orange-400">{gameLevel}</span></div>
+                      </div>
                     </div>
-                    <div className="p-3 glass-panel rounded-lg">
-                      <h4 className="font-medium text-purple-400 mb-2">Within-Cluster Sum of Squares</h4>
-                      <p className="text-sm text-muted-foreground">Measures compactness - sum of squared distances from points to their centroids</p>
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Each city you place becomes a data point that the algorithm will group into {k} clusters. 
+                      Watch how the centroids (cluster centers) move to find the best grouping!
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -145,248 +129,551 @@ const KMeansGameEducation: React.FC<KMeansGameEducationProps> = ({
           </div>
         </TabsContent>
         
-        <TabsContent value="parameters" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <TabsContent value="math" className="mt-6">
+          <div className="space-y-6">
             <Card className="glass-panel">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Target className="h-4 w-4 text-blue-400" />
-                  K Value
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Calculator className="h-6 w-6 text-accent" />
+                  The Mathematical Foundation
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-center p-4 glass-panel rounded-lg">
-                  <div className="text-3xl font-bold text-blue-400">{k}</div>
-                  <div className="text-sm text-muted-foreground">Current K</div>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Number of clusters to create. Choose based on data patterns or use the elbow method.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-panel">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Activity className="h-4 w-4 text-green-400" />
-                  Max Iterations
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-center p-4 glass-panel rounded-lg">
-                  <div className="text-3xl font-bold text-green-400">20</div>
-                  <div className="text-sm text-muted-foreground">Limit</div>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Maximum steps before stopping. Prevents infinite loops in edge cases.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-panel">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Users className="h-4 w-4 text-purple-400" />
-                  Data Points
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-center p-4 glass-panel rounded-lg">
-                  <div className="text-3xl font-bold text-purple-400">{cities.length}</div>
-                  <div className="text-sm text-muted-foreground">Cities</div>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Each city is a data point with x,y coordinates to be clustered.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="algorithm" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-accent">Algorithm Steps</h3>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3 p-4 glass-panel rounded-lg">
-                  <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-bold text-blue-400">1</div>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
                   <div>
-                    <p className="font-medium">Initialize K Centroids</p>
-                    <p className="text-sm text-muted-foreground">Randomly place K centroids in the data space or use smart initialization</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-4 glass-panel rounded-lg">
-                  <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center text-sm font-bold text-green-400">2</div>
-                  <div>
-                    <p className="font-medium">Assign Points to Clusters</p>
-                    <p className="text-sm text-muted-foreground">Each point goes to the nearest centroid based on Euclidean distance</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-4 glass-panel rounded-lg">
-                  <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center text-sm font-bold text-purple-400">3</div>
-                  <div>
-                    <p className="font-medium">Update Centroids</p>
-                    <p className="text-sm text-muted-foreground">Move each centroid to the mean position of its assigned points</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-4 glass-panel rounded-lg">
-                  <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center text-sm font-bold text-orange-400">4</div>
-                  <div>
-                    <p className="font-medium">Check Convergence</p>
-                    <p className="text-sm text-muted-foreground">Repeat steps 2-3 until centroids stop moving significantly</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-accent">Current Status</h3>
-              <div className="space-y-3">
-                <div className="p-4 glass-panel rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm">Algorithm Progress</span>
-                    <span className="text-sm font-mono">{iteration}/20</span>
-                  </div>
-                  <Progress value={(iteration / 20) * 100} className="h-2" />
-                </div>
-                
-                {convergenceData.length > 1 && (
-                  <div className="p-4 glass-panel rounded-lg">
-                    <h4 className="text-sm font-medium mb-3">WCSS Over Time</h4>
-                    <div className="h-32">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={convergenceData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" />
-                          <XAxis dataKey="iteration" stroke="rgba(148, 163, 184, 0.5)" fontSize={10} />
-                          <YAxis stroke="rgba(148, 163, 184, 0.5)" fontSize={10} />
-                          <Tooltip 
-                            contentStyle={{ 
-                              backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                              border: '1px solid rgba(148, 163, 184, 0.2)',
-                              borderRadius: '8px',
-                              fontSize: '11px'
-                            }}
-                          />
-                          <Line type="monotone" dataKey="wcss" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
+                    <h3 className="text-lg font-semibold text-accent mb-3">The Core Formula</h3>
+                    <div className="bg-slate-800/50 p-6 rounded-lg border border-accent/20">
+                      <div className="text-center text-2xl font-mono text-accent mb-4">
+                        J = Σ<sub>i=1</sub><sup>k</sup> Σ<sub>x∈C<sub>i</sub></sub> ||x - μ<sub>i</sub>||²
+                      </div>
+                      <p className="text-sm text-center text-muted-foreground">
+                        This formula measures how "tight" our clusters are
+                      </p>
                     </div>
                   </div>
-                )}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="glass-panel p-4 rounded-lg border border-blue-400/30">
+                      <h4 className="font-semibold text-blue-400 mb-2">J (Objective)</h4>
+                      <p className="text-sm text-muted-foreground">
+                        The total "cost" we want to minimize. Lower is better!
+                      </p>
+                    </div>
+                    <div className="glass-panel p-4 rounded-lg border border-green-400/30">
+                      <h4 className="font-semibold text-green-400 mb-2">x (Data Point)</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Each city's position (x, y coordinates)
+                      </p>
+                    </div>
+                    <div className="glass-panel p-4 rounded-lg border border-purple-400/30">
+                      <h4 className="font-semibold text-purple-400 mb-2">μ<sub>i</sub> (Centroid)</h4>
+                      <p className="text-sm text-muted-foreground">
+                        The center point of cluster i
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-accent">Why This Formula Works</h3>
+                  <div className="bg-blue-500/10 p-4 rounded-lg border border-blue-500/20">
+                    <p className="text-sm leading-relaxed">
+                      The formula calculates the sum of squared distances from each city to its cluster center. 
+                      By minimizing this sum, we ensure that cities in the same cluster are as close together as possible, 
+                      while clusters themselves are well-separated.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="glass-panel">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Distance Calculation</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <div className="text-center font-mono text-lg text-green-400 mb-2">
+                      d = √[(x₁-x₂)² + (y₁-y₂)²]
+                    </div>
+                    <p className="text-xs text-center text-muted-foreground">
+                      Euclidean distance between two points
+                    </p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    This is the same as measuring the straight-line distance between two cities on your map. 
+                    The algorithm uses this to decide which cluster each city should belong to.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-panel">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Centroid Update</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="bg-slate-800/50 p-4 rounded-lg">
+                    <div className="text-center font-mono text-lg text-purple-400 mb-2">
+                      μ = (Σx) / n
+                    </div>
+                    <p className="text-xs text-center text-muted-foreground">
+                      Average position of all points in cluster
+                    </p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    After assigning cities to clusters, we move each centroid to the average position 
+                    of all cities in that cluster. This is like finding the "center of mass" of each group.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="steps" className="mt-6">
+          <div className="space-y-6">
+            <Card className="glass-panel">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Activity className="h-6 w-6 text-accent" />
+                  How K-Means Works Step by Step
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-lg mb-6 text-muted-foreground">
+                  Think of K-means as a dance between cities and district centers, where everyone tries to find their perfect match!
+                </p>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-start gap-4 p-4 glass-panel rounded-lg border-l-4 border-blue-500">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center text-lg font-bold text-blue-400">1</div>
+                  <div>
+                    <h3 className="font-semibold text-blue-400 mb-2">Random Initialization</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Place {k} centroids randomly on the map. These are like temporary district centers - 
+                      they'll move to better positions as the algorithm learns.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 glass-panel rounded-lg border-l-4 border-green-500">
+                  <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center text-lg font-bold text-green-400">2</div>
+                  <div>
+                    <h3 className="font-semibold text-green-400 mb-2">Assign Cities to Clusters</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Each city "looks around" and joins the district center that's closest to it. 
+                      It's like choosing the nearest town hall for city services.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 glass-panel rounded-lg border-l-4 border-purple-500">
+                  <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center text-lg font-bold text-purple-400">3</div>
+                  <div>
+                    <h3 className="font-semibold text-purple-400 mb-2">Update Centroids</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Each district center moves to the geographic center of all its cities. 
+                      This ensures the center is optimally placed to serve all its cities.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 glass-panel rounded-lg border-l-4 border-orange-500">
+                  <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center text-lg font-bold text-orange-400">4</div>
+                  <div>
+                    <h3 className="font-semibold text-orange-400 mb-2">Repeat Until Stable</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Go back to step 2 and repeat. Eventually, cities stop switching districts and 
+                      centers stop moving - that's convergence!
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Card className="glass-panel">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">What You'll See</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-4 h-4 bg-red-500 rounded-full border-2 border-white"></div>
+                        <span className="text-sm">Centroids (large circles with borders)</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm">Cities colored by their cluster</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-1 bg-gradient-to-r from-blue-500/50 to-red-500/50"></div>
+                        <span className="text-sm">Lines connecting cities to centroids</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-panel">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Current Progress</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Algorithm Steps</span>
+                      <span className="font-mono text-accent">{iteration} / {20}</span>
+                    </div>
+                    <Progress value={(iteration / 20) * 100} className="h-2" />
+                    <p className="text-xs text-muted-foreground">
+                      {iteration === 0 ? 'Click Start to begin the algorithm' :
+                       iteration < 5 ? 'Algorithm is finding initial groupings' :
+                       iteration < 15 ? 'Refining cluster assignments' :
+                       'Converging to final solution'}
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
         </TabsContent>
         
-        <TabsContent value="environment" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TabsContent value="tips" className="mt-6">
+          <div className="space-y-6">
             <Card className="glass-panel">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Game Environment</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Lightbulb className="h-6 w-6 text-accent" />
+                  Pro Tips for Better Clustering
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 glass-panel rounded-lg">
-                    <div className="text-lg font-bold text-blue-400">800×400</div>
-                    <div className="text-xs text-muted-foreground">Map Size</div>
-                  </div>
-                  <div className="text-center p-3 glass-panel rounded-lg">
-                    <div className="text-lg font-bold text-green-400">{cities.length}</div>
-                    <div className="text-xs text-muted-foreground">Cities Placed</div>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Click anywhere on the map to place cities. Each city has random population data for visualization.
+              <CardContent>
+                <p className="text-lg mb-6 text-muted-foreground">
+                  Master these techniques to become a K-means clustering expert!
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="glass-panel">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Cluster Visualization</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm">Cities are colored by cluster assignment</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
-                    <span className="text-sm">Centroids shown as larger circles</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-1 bg-gradient-to-r from-blue-500 to-red-500"></div>
-                    <span className="text-sm">Lines connect cities to centroids</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <Card className="glass-panel border border-blue-400/30">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-blue-400">Choosing the Right K</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-start gap-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Look for natural groupings in your city placement</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Use the Elbow Method to find optimal K value</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Start small (K=2-3) and increase gradually</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-red-400">✗</span>
+                        <span>Don't choose K > number of cities</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-panel border border-green-400/30">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-green-400">City Placement Strategy</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-start gap-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Create distinct groups with clear separation</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Place cities in patterns (circles, lines, clusters)</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-green-400">✓</span>
+                        <span>Experiment with different densities</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-red-400">✗</span>
+                        <span>Avoid placing all cities in a single line</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card className="glass-panel border border-purple-400/30">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-purple-400">Interpreting Results</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-3">
+                      <div className="p-3 glass-panel rounded-lg">
+                        <h4 className="font-medium text-sm text-blue-400 mb-1">Low WCSS</h4>
+                        <p className="text-xs text-muted-foreground">Tight, well-separated clusters</p>
+                      </div>
+                      <div className="p-3 glass-panel rounded-lg">
+                        <h4 className="font-medium text-sm text-orange-400 mb-1">High WCSS</h4>
+                        <p className="text-xs text-muted-foreground">Loose clusters, may need different K</p>
+                      </div>
+                      <div className="p-3 glass-panel rounded-lg">
+                        <h4 className="font-medium text-sm text-green-400 mb-1">Quick Convergence</h4>
+                        <p className="text-xs text-muted-foreground">Good initial centroid placement</p>
+                      </div>
+                      <div className="p-3 glass-panel rounded-lg">
+                        <h4 className="font-medium text-sm text-red-400 mb-1">Slow Convergence</h4>
+                        <p className="text-xs text-muted-foreground">Complex data or poor K choice</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-panel border border-orange-400/30">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-orange-400">Common Mistakes</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-start gap-2">
+                        <span className="text-red-400">⚠</span>
+                        <span>Using too many clusters for few data points</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-red-400">⚠</span>
+                        <span>Ignoring the elbow method results</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-red-400">⚠</span>
+                        <span>Expecting perfect clusters with random data</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-red-400">⚠</span>
+                        <span>Not considering the domain knowledge</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </TabsContent>
         
-        <TabsContent value="progress" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Current Game Tip */}
-            <Card className="glass-panel border-accent/20">
+        <TabsContent value="realworld" className="mt-6">
+          <div className="space-y-6">
+            <Card className="glass-panel">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  {tip.icon}
-                  {tip.title}
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Target className="h-6 w-6 text-accent" />
+                  Real-World Applications
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{tip.content}</p>
-              </CardContent>
-            </Card>
-
-            {/* Level Progress */}
-            <Card className="glass-panel">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Award className="h-4 w-4 text-purple-400" />
-                  Level Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>Level {gameLevel}</span>
-                  <Badge variant="outline" className="text-purple-400 border-purple-400/50">
-                    {gameLevel < 5 ? 'Beginner' : gameLevel < 10 ? 'Expert' : 'Master'}
-                  </Badge>
-                </div>
-                <Progress value={(gameLevel % 5) * 20} className="h-2" />
-                <p className="text-xs text-muted-foreground">
-                  Complete efficient clusterings to level up!
+                <p className="text-lg mb-6 text-muted-foreground">
+                  K-means clustering is everywhere! Here's how companies and researchers use it daily.
                 </p>
               </CardContent>
             </Card>
 
-            {/* Strategy Tips */}
-            <Card className="glass-panel">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="glass-panel border border-blue-400/30">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-blue-400">🛒 Customer Segmentation</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    E-commerce companies group customers by shopping behavior
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Big spenders vs budget shoppers</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span>Frequent buyers vs occasional buyers</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                      <span>Product category preferences</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-2 bg-blue-400/10 rounded text-xs">
+                    Result: Personalized marketing campaigns
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-panel border border-green-400/30">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-green-400">🏥 Medical Diagnosis</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Doctors use clustering to identify disease patterns
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                      <span>Gene expression patterns</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <span>Patient symptom groups</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                      <span>Drug response clusters</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-2 bg-green-400/10 rounded text-xs">
+                    Result: Better treatment targeting
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-panel border border-purple-400/30">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-purple-400">📱 Image Recognition</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Apps use clustering to organize and search photos
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                      <span>Color palette extraction</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
+                      <span>Face grouping in galleries</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                      <span>Object detection training</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-2 bg-purple-400/10 rounded text-xs">
+                    Result: Smart photo organization
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-panel border border-orange-400/30">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-orange-400">🌍 City Planning</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Urban planners group neighborhoods and services
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <span>School district boundaries</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                      <span>Emergency service zones</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                      <span>Public transport routes</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-2 bg-orange-400/10 rounded text-xs">
+                    Result: Efficient city services
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-panel border border-cyan-400/30">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-cyan-400">🎵 Music Streaming</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Spotify and others group songs and users
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                      <span>Musical genres and moods</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Listener preference groups</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                      <span>Similar artist discovery</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-2 bg-cyan-400/10 rounded text-xs">
+                    Result: Better recommendations
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-panel border border-pink-400/30">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-pink-400">💰 Finance & Banking</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Banks detect fraud and assess risk patterns
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                      <span>Fraudulent transaction patterns</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span>Credit risk assessment</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Investment portfolio grouping</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-2 bg-pink-400/10 rounded text-xs">
+                    Result: Safer banking for everyone
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="glass-panel bg-accent/5 border border-accent/20">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Lightbulb className="h-4 w-4 text-yellow-400" />
-                  Quick Tips
-                </CardTitle>
+                <CardTitle className="text-lg text-accent">Why K-Means is So Popular</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-xs text-muted-foreground">
-                  <div className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    <span>Place cities in distinct groups for better clustering</span>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">🚀</div>
+                    <h4 className="font-semibold text-sm">Fast & Efficient</h4>
+                    <p className="text-xs text-muted-foreground">Works quickly even with large datasets</p>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    <span>Choose K based on natural city group patterns</span>
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">🎯</div>
+                    <h4 className="font-semibold text-sm">Easy to Understand</h4>
+                    <p className="text-xs text-muted-foreground">Results are intuitive and interpretable</p>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    <span>Watch centroids move toward cluster centers</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-yellow-400">•</span>
-                    <span>Lower WCSS means better clustering quality</span>
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">🔧</div>
+                    <h4 className="font-semibold text-sm">Widely Applicable</h4>
+                    <p className="text-xs text-muted-foreground">Works across many different domains</p>
                   </div>
                 </div>
               </CardContent>
