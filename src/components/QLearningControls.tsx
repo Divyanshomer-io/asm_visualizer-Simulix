@@ -1,12 +1,13 @@
 
-import React from 'react';
-import { Play, Square, RotateCcw, Route, Settings, Zap, Clock, Gauge } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, Square, RotateCcw, Route, Settings, Zap, Clock, Gauge, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface QLearningControlsProps {
   isTraining: boolean;
@@ -51,6 +52,54 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
   onMaxEpisodesChange,
   onSpeedChange
 }) => {
+  const [episodesInput, setEpisodesInput] = useState(maxEpisodes.toString());
+  const [episodesError, setEpisodesError] = useState('');
+  const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
+
+  const validateEpisodes = (value: string) => {
+    const num = parseInt(value);
+    if (isNaN(num) || num < 100 || num > 2000) {
+      setEpisodesError('Please enter a value between 100 and 2000');
+      return false;
+    }
+    setEpisodesError('');
+    return true;
+  };
+
+  const handleEpisodesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEpisodesInput(value);
+    
+    if (value.trim() !== '') {
+      validateEpisodes(value);
+    } else {
+      setEpisodesError('');
+    }
+  };
+
+  const handleEpisodesKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const value = episodesInput.trim();
+      if (value === '' || !validateEpisodes(value)) {
+        setEpisodesInput('500');
+        setEpisodesError('');
+        onMaxEpisodesChange(500);
+      } else {
+        onMaxEpisodesChange(parseInt(value));
+      }
+    }
+  };
+
+  const handleEpisodesBlur = () => {
+    const value = episodesInput.trim();
+    if (value === '' || !validateEpisodes(value)) {
+      setEpisodesInput(maxEpisodes.toString());
+      setEpisodesError('');
+    } else {
+      onMaxEpisodesChange(parseInt(value));
+    }
+  };
+
   const getSpeedIcon = (speedValue: string) => {
     switch (speedValue) {
       case 'slow':
@@ -141,11 +190,35 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
             </Label>
             <div className="text-sm space-y-1">
               <p><strong>Current Episode:</strong> {currentEpisode}</p>
-              <p><strong>Episodes per Session:</strong> {maxEpisodes}</p>
               <p className="text-xs opacity-70">
                 Next session will train episodes {currentEpisode + 1}-{currentEpisode + maxEpisodes}
               </p>
             </div>
+          </div>
+
+          {/* Episodes per Session */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              Episodes per Training Session
+            </Label>
+            <Input
+              type="number"
+              value={episodesInput}
+              onChange={handleEpisodesChange}
+              onKeyPress={handleEpisodesKeyPress}
+              onBlur={handleEpisodesBlur}
+              disabled={isTraining}
+              className="w-full"
+              placeholder="100-2000"
+              min={100}
+              max={2000}
+            />
+            {episodesError && (
+              <p className="text-xs text-red-400">{episodesError}</p>
+            )}
+            <p className="text-xs opacity-70">
+              Enter a value between 100-2000. Press Enter to apply, or it will default to 500.
+            </p>
           </div>
 
           {/* Speed Control */}
@@ -226,7 +299,7 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
               disabled={isTraining}
             />
             <p className="text-xs opacity-70">
-              Decays automatically during training (0.98^episode)
+              Resets to this value at the start of each training session
             </p>
           </div>
 
@@ -247,26 +320,60 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
         </CardContent>
       </Card>
 
-      {/* Instructions */}
+      {/* Instructions Dropdown */}
       <Card className="glass-panel">
-        <CardHeader>
-          <CardTitle className="text-lg">Instructions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm space-y-2 opacity-80">
-            <h4 className="font-medium mb-2">How to Use:</h4>
-            <ul className="text-xs space-y-1">
-              <li>• Click maze cells to add/remove walls</li>
-              <li>• Each training session runs 500 episodes</li>
-              <li>• Progress accumulates across sessions</li>
-              <li>• "RESET ALL" clears training data & parameters</li>
-              <li>• "RESET MAZE" only clears wall layout</li>
-              <li>• Green circle (S) = Start position</li>
-              <li>• Red circle (G) = Goal position</li>
-              <li>• Blue arrows show learned policy</li>
-            </ul>
-          </div>
-        </CardContent>
+        <Collapsible open={isInstructionsOpen} onOpenChange={setIsInstructionsOpen}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-accent/5 transition-colors">
+              <CardTitle className="text-lg flex items-center justify-between">
+                Instructions
+                <ChevronDown className={`h-4 w-4 transition-transform ${isInstructionsOpen ? 'rotate-180' : ''}`} />
+              </CardTitle>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="text-sm space-y-3 opacity-80">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-base">How to Use:</h4>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="bg-accent/10 p-3 rounded-lg">
+                      <h5 className="font-medium mb-1">Maze Setup</h5>
+                      <ul className="text-xs space-y-1">
+                        <li>• Click maze cells to add/remove walls</li>
+                        <li>• Green circle (S) = Start position</li>
+                        <li>• Red circle (G) = Goal position</li>
+                      </ul>
+                    </div>
+                    <div className="bg-accent/10 p-3 rounded-lg">
+                      <h5 className="font-medium mb-1">Training</h5>
+                      <ul className="text-xs space-y-1">
+                        <li>• Set episodes per session (100-2000)</li>
+                        <li>• Training continues from last episode</li>
+                        <li>• Exploration rate resets each session</li>
+                      </ul>
+                    </div>
+                    <div className="bg-accent/10 p-3 rounded-lg">
+                      <h5 className="font-medium mb-1">Visualization</h5>
+                      <ul className="text-xs space-y-1">
+                        <li>• Blue arrows show learned policy</li>
+                        <li>• Heatmap shows Q-value strength</li>
+                        <li>• Yellow path shows optimal route</li>
+                      </ul>
+                    </div>
+                    <div className="bg-accent/10 p-3 rounded-lg">
+                      <h5 className="font-medium mb-1">Reset Options</h5>
+                      <ul className="text-xs space-y-1">
+                        <li>• "RESET ALL" clears training & parameters</li>
+                        <li>• "RESET MAZE" only clears wall layout</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
     </div>
   );

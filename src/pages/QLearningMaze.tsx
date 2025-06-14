@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { ArrowLeft } from "lucide-react";
@@ -37,8 +36,6 @@ const SPEEDS = {
   medium: { plotUpdate: 10, stepDelay: 50 },
   fast: { plotUpdate: 20, stepDelay: 10 }
 };
-
-const EPISODES_PER_TRAINING_SESSION = 500;
 
 const QLearningMaze = () => {
   const [state, setState] = useState<MazeState>(() => {
@@ -152,17 +149,17 @@ const QLearningMaze = () => {
     if (state.isTraining) return;
     
     setState(prev => ({ ...prev, isTraining: true, showPath: false }));
-    toast.success(`Starting training for ${EPISODES_PER_TRAINING_SESSION} episodes!`);
+    toast.success(`Starting training for ${params.maxEpisodes} episodes!`);
     
+    // Reset epsilon to initial value for each training session
     const initialEpsilon = params.epsilon;
     let currentState = { ...state, isTraining: true };
     const newRewards: number[] = [...state.episodeRewards];
     const newSteps: number[] = [...state.episodeSteps];
     const newEpsilons: number[] = [...state.episodeEpsilons];
     
-    // Training session runs for fixed 500 episodes
     const startEpisode = state.currentEpisode;
-    const endEpisode = startEpisode + EPISODES_PER_TRAINING_SESSION;
+    const endEpisode = startEpisode + params.maxEpisodes;
     const speed = SPEEDS[params.speed];
     
     for (let episode = startEpisode; episode < endEpisode; episode++) {
@@ -171,8 +168,8 @@ const QLearningMaze = () => {
         continue;
       }
       
-      // Continuous epsilon decay across all episodes (not reset per session)
-      const sessionEpisode = episode - startEpisode; // Episodes within current session
+      // Reset epsilon decay for each new training session
+      const sessionEpisode = episode - startEpisode;
       const currentEpsilon = Math.max(0.01, initialEpsilon * Math.pow(0.98, sessionEpisode));
       newEpsilons[episode] = currentEpsilon;
       
@@ -191,7 +188,6 @@ const QLearningMaze = () => {
         currentEpisode: episode + 1
       };
       
-      // Update UI based on speed settings
       if (episode % speed.plotUpdate === 0 || episode === endEpisode - 1) {
         setState(currentState);
         await new Promise(resolve => setTimeout(resolve, speed.stepDelay));
@@ -199,7 +195,7 @@ const QLearningMaze = () => {
     }
     
     setState(prev => ({ ...prev, isTraining: false }));
-    toast.success(`Training session completed! ${EPISODES_PER_TRAINING_SESSION} episodes finished.`);
+    toast.success(`Training session completed! ${params.maxEpisodes} episodes finished.`);
   }, [state, params, trainEpisode]);
 
   const findPath = useCallback(() => {
@@ -254,7 +250,6 @@ const QLearningMaze = () => {
   }, [findPath]);
 
   const resetAll = useCallback(() => {
-    // Reset everything except maze cell selection
     setState(prev => ({
       ...prev,
       qTable: Array(params.mazeSize).fill(null).map(() => 
@@ -269,11 +264,9 @@ const QLearningMaze = () => {
       path: []
     }));
     
-    // Reset parameters to defaults
     setParams(prev => ({
       ...prev,
       alpha: 0.3,
-     // epsilon: 0.3,
       maxEpisodes: 500
     }));
     
@@ -281,7 +274,6 @@ const QLearningMaze = () => {
   }, [params.mazeSize]);
 
   const resetMaze = useCallback(() => {
-    // Only reset maze cells and positions
     setState(prev => ({
       ...prev,
       maze: Array(params.mazeSize).fill(null).map(() => Array(params.mazeSize).fill(0)),
@@ -401,6 +393,50 @@ const QLearningMaze = () => {
               episodeEpsilons={state.episodeEpsilons}
               isTraining={state.isTraining}
             />
+
+            {/* Training Status and Instructions Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Training Status - Left 2/3 */}
+              <div className="lg:col-span-2">
+                <Card className="glass-panel">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Training Status</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                      <div className="space-y-1">
+                        <p className="text-xs opacity-70">Current Episode</p>
+                        <p className="font-medium">{state.currentEpisode}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs opacity-70">Episodes per Session</p>
+                        <p className="font-medium">{params.maxEpisodes}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs opacity-70">Maze Size</p>
+                        <p className="font-medium">{params.mazeSize}×{params.mazeSize}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs opacity-70">Total Walls</p>
+                        <p className="font-medium">{totalWalls}</p>
+                      </div>
+                      {bestReward !== undefined && (
+                        <div className="space-y-1">
+                          <p className="text-xs opacity-70">Best Reward</p>
+                          <p className="font-medium text-green-400">{bestReward.toFixed(1)}</p>
+                        </div>
+                      )}
+                      {avgSteps !== undefined && (
+                        <div className="space-y-1">
+                          <p className="text-xs opacity-70">Avg Steps</p>
+                          <p className="font-medium text-blue-400">{avgSteps.toFixed(1)}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
 
           {/* Right column - Controls */}
@@ -408,7 +444,7 @@ const QLearningMaze = () => {
             <QLearningControls
               isTraining={state.isTraining}
               currentEpisode={state.currentEpisode}
-              maxEpisodes={EPISODES_PER_TRAINING_SESSION}
+              maxEpisodes={params.maxEpisodes}
               speed={params.speed}
               mazeSize={params.mazeSize}
               totalWalls={totalWalls}
@@ -429,48 +465,7 @@ const QLearningMaze = () => {
           </div>
         </div>
 
-        {/* Status Information Row - Below plots */}
-        <div className="mt-8">
-          <Card className="glass-panel">
-            <CardHeader>
-              <CardTitle className="text-lg">Training Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-sm">
-                <div className="space-y-1">
-                  <p className="text-xs opacity-70">Current Episode</p>
-                  <p className="font-medium">{state.currentEpisode}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs opacity-70">Episodes Per Session</p>
-                  <p className="font-medium">{EPISODES_PER_TRAINING_SESSION}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs opacity-70">Maze Size</p>
-                  <p className="font-medium">{params.mazeSize}×{params.mazeSize}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs opacity-70">Total Walls</p>
-                  <p className="font-medium">{totalWalls}</p>
-                </div>
-                {bestReward !== undefined && (
-                  <div className="space-y-1">
-                    <p className="text-xs opacity-70">Best Reward</p>
-                    <p className="font-medium text-green-400">{bestReward.toFixed(1)}</p>
-                  </div>
-                )}
-                {avgSteps !== undefined && (
-                  <div className="space-y-1">
-                    <p className="text-xs opacity-70">Avg Steps</p>
-                    <p className="font-medium text-blue-400">{avgSteps.toFixed(1)}</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Educational Content - Full width below status */}
+        {/* Educational Content with Horizontal Tabs */}
         <div className="mt-6">
           <QLearningEducation />
         </div>
