@@ -1,179 +1,198 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+
+import React, { useState } from "react";
+import { Info } from "lucide-react";
 
 interface InfoTooltipProps {
-  content: string | React.ReactNode;
-  className?: string;
-  variant?: 'info' | 'warning' | 'error';
-  side?: 'top' | 'bottom' | 'left' | 'right';
+  content: React.ReactNode;
+  title?: string;
+  side?: "top" | "right" | "bottom" | "left";
+  variant?: 'info' | 'warning' | 'technical';
+  maxWidth?: number;
 }
 
 const InfoTooltip: React.FC<InfoTooltipProps> = ({ 
   content, 
-  className = '', 
+  title, 
+  side = "left", 
   variant = 'info',
-  side = 'right'
+  maxWidth = 320 
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const iconRef = useRef<HTMLSpanElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-
-  const showTooltip = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    
-    if (!iconRef.current) return;
-    
-    const iconRect = iconRef.current.getBoundingClientRect();
-    let x = iconRect.right + 10;
-    let y = iconRect.top;
-    
-    // Adjust position based on side prop
-    switch (side) {
-      case 'left':
-        x = iconRect.left - 10;
-        y = iconRect.top;
-        break;
-      case 'top':
-        x = iconRect.left;
-        y = iconRect.top - 10;
-        break;
-      case 'bottom':
-        x = iconRect.left;
-        y = iconRect.bottom + 10;
-        break;
-      default: // right
-        x = iconRect.right + 10;
-        y = iconRect.top;
-    }
-    
-    setPosition({ x, y });
-    setIsVisible(true);
+  
+  const tooltipVariants = {
+    info: 'bg-slate-800 border-blue-500/50 text-blue-100',
+    warning: 'bg-orange-900/90 border-orange-500/50 text-orange-100',
+    technical: 'bg-slate-900 border-gray-500/50 text-gray-100'
+  };
+  
+  const positionClasses = {
+    top: 'bottom-full mb-2 left-1/2 transform -translate-x-1/2',
+    bottom: 'top-full mt-2 left-1/2 transform -translate-x-1/2',
+    left: 'right-full mr-2 top-1/2 transform -translate-y-1/2',
+    right: 'left-full ml-2 top-1/2 transform -translate-y-1/2'
   };
 
-  const hideTooltip = () => {
-    setIsVisible(false);
-  };
-
-  // Adjust position if tooltip goes off screen
-  useEffect(() => {
-    if (isVisible && tooltipRef.current) {
-      const tooltipRect = tooltipRef.current.getBoundingClientRect();
-      let newX = position.x;
-      let newY = position.y;
-      
-      // Right boundary check
-      if (newX + tooltipRect.width > window.innerWidth - 20) {
-        newX = window.innerWidth - tooltipRect.width - 20;
-      }
-      
-      // Bottom boundary check
-      if (newY + tooltipRect.height > window.innerHeight - 20) {
-        newY = window.innerHeight - tooltipRect.height - 20;
-      }
-      
-      // Top boundary check
-      if (newY < 20) {
-        newY = 20;
-      }
-      
-      // Left boundary check
-      if (newX < 20) {
-        newX = 20;
-      }
-      
-      if (newX !== position.x || newY !== position.y) {
-        setPosition({ x: newX, y: newY });
-      }
-    }
-  }, [isVisible, position.x, position.y]);
-
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'warning':
-        return 'bg-yellow-900/90 border-yellow-500/50 text-yellow-100';
-      case 'error':
-        return 'bg-red-900/90 border-red-500/50 text-red-100';
-      default:
-        return 'bg-gray-900/95 border-gray-500/50 text-white';
-    }
+  const arrowClasses = {
+    top: 'top-full left-1/2 -translate-x-1/2 -mt-1',
+    bottom: 'bottom-full left-1/2 -translate-x-1/2 -mb-1',
+    left: 'left-full top-1/2 -translate-y-1/2 -ml-1',
+    right: 'right-full top-1/2 -translate-y-1/2 -mr-1'
   };
 
   return (
-    <>
-      <span
-        ref={iconRef}
-        role="button"
-        aria-label="More information"
-        tabIndex={0}
-        className={`inline-flex items-center justify-center w-4 h-4 text-xs cursor-help text-blue-400 ml-2 hover:text-blue-300 transition-colors rounded-full border border-blue-400/50 ${className}`}
-        onMouseEnter={showTooltip}
-        onMouseLeave={hideTooltip}
-        onFocus={(e) => showTooltip(e as any)}
-        onBlur={hideTooltip}
+    <div className="relative inline-block">
+      <div
+        className="w-4 h-4 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center cursor-help hover:bg-blue-600 transition-colors"
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
       >
-        ?
-      </span>
+        <Info className="w-2.5 h-2.5" />
+      </div>
       
       {isVisible && (
-        <div
-          ref={tooltipRef}
-          className={`fixed z-[99999] border rounded-lg p-4 text-sm leading-relaxed max-w-[320px] shadow-2xl backdrop-blur-sm ${getVariantStyles()}`}
-          style={{
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-            pointerEvents: 'auto'
+        <div 
+          className={`absolute z-[99999] p-3 rounded-lg border shadow-xl ${tooltipVariants[variant]} ${positionClasses[side]}`}
+          style={{ 
+            width: `${Math.min(maxWidth, 300)}px`,
+            minHeight: 'auto',
+            maxHeight: 'none'
           }}
-          onMouseEnter={() => setIsVisible(true)}
-          onMouseLeave={hideTooltip}
         >
-          <button
-            onClick={hideTooltip}
-            className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
-            aria-label="Close tooltip"
-          >
-            <X size={14} />
-          </button>
-          <div className="pr-6">
-            {typeof content === 'string' ? (
-              <div dangerouslySetInnerHTML={{ __html: content }} />
-            ) : (
-              content
-            )}
+          {title && (
+            <div className="font-semibold text-sm mb-2 border-b border-current/30 pb-1">
+              {title}
+            </div>
+          )}
+          <div className="text-xs leading-relaxed">
+            {content}
           </div>
+          
+          {/* Tooltip arrow */}
+          <div 
+            className={`absolute w-2 h-2 ${tooltipVariants[variant].split(' ')[0]} transform rotate-45 border ${arrowClasses[side]}`}
+          />
         </div>
       )}
-    </>
+    </div>
   );
 };
 
-// VAE Tooltips content definitions
+// VAE-specific tooltip content definitions
 export const VAETooltips = {
   latentDimension: {
-    content: "<b>Latent Dimension:</b><br/>The size of the compressed representation. Lower values = more compression but potentially lower quality. Higher values = less compression but better reconstruction.",
-    variant: "info" as const
+    title: "Latent Dimension",
+    content: (
+      <div>
+        <p className="mb-2">Size of the compressed representation space.</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <strong>Higher values (80-100):</strong> Better reconstruction quality</li>
+          <li>• <strong>Lower values (10-30):</strong> More compression, possible quality loss</li>
+          <li>• <strong>Original MNIST:</strong> 784 dimensions (28×28 pixels)</li>
+        </ul>
+        <p className="mt-2 text-blue-300 text-xs">
+          Current compression ratio: {((50/784)*100).toFixed(1)}% of original size
+        </p>
+      </div>
+    ),
+    variant: 'technical' as const
   },
+  
   nuclearNorm: {
-    content: "<b>Regularization:</b><br/>• <b>Nuclear Norm:</b> Promotes low-rank structure in latent space<br/>• <b>Log-Det Majorizer:</b> Alternative low-rank promotion method<br/>• <b>None:</b> No regularization (may overfit)",
-    variant: "info" as const
+    title: "Nuclear Norm Regularization",
+    content: (
+      <div>
+        <p className="mb-2"><code className="bg-black/30 px-1 rounded">||Z||* = Σσᵢ</code> (sum of singular values)</p>
+        <ul className="space-y-1 text-xs">
+          <li>• Forces latent vectors to be low-rank</li>
+          <li>• Higher λ → stronger compression → blurrier reconstructions</li>
+          <li>• λ=0: No constraint, λ=500: Very aggressive compression</li>
+        </ul>
+        <p className="mt-2 text-yellow-300 text-xs">
+          Trade-off: Compression efficiency vs. reconstruction quality
+        </p>
+      </div>
+    ),
+    variant: 'technical' as const
   },
+  
   epochs: {
-    content: "<b>Training Epochs:</b><br/>Number of complete passes through the training data. More epochs = longer training but potentially better results. Watch for overfitting with too many epochs.",
-    variant: "info" as const
+    title: "Training Epochs",
+    content: (
+      <div>
+        <p className="mb-2">Number of complete passes through the training dataset.</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <strong>Early epochs (1-10):</strong> Rapid loss decrease, poor reconstructions</li>
+          <li>• <strong>Mid epochs (10-30):</strong> Quality improvements, rank reduction</li>
+          <li>• <strong>Late epochs (30-50):</strong> Fine-tuning, diminishing returns</li>
+        </ul>
+        <p className="mt-2 text-green-300 text-xs">
+          More epochs = better convergence but longer training time
+        </p>
+      </div>
+    ),
+    variant: 'info' as const
   },
-  mnistReconstruction: {
-    content: "<b>MNIST Reconstruction:</b><br/>Shows how well the VAE can reconstruct handwritten digits after compression through the latent space. Better reconstruction indicates better learned representations.",
-    variant: "info" as const
-  },
+  
   lossComponents: {
-    content: "<b>Loss Components:</b><br/>• <b>Total Loss:</b> Overall training objective<br/>• <b>Reconstruction:</b> How well images are rebuilt<br/>• <b>KL Divergence:</b> Regularization term<br/>• <b>Regularization:</b> Low-rank penalty",
-    variant: "info" as const
+    title: "VAE Loss Components",
+    content: (
+      <div>
+        <p className="mb-2">Total Loss = Reconstruction + KL + Regularization</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <span className="text-blue-300">Total Loss:</span> Combined optimization objective</li>
+          <li>• <span className="text-green-300">Reconstruction:</span> How well images are rebuilt (MSE)</li>
+          <li>• <span className="text-purple-300">KL Divergence:</span> Latent space regularization</li>
+          <li>• <span className="text-orange-300">Regularization:</span> Rank penalty (nuclear/majorizer)</li>
+        </ul>
+        <p className="mt-2 text-gray-300 text-xs">
+          Watch for: Exponential decay pattern indicates good training
+        </p>
+      </div>
+    ),
+    variant: 'technical' as const
   },
+  
   qualityEvolution: {
-    content: "<b>Quality Evolution:</b><br/>Tracks reconstruction fidelity over training epochs. Quality improves as the model learns better representations of the input data.",
-    variant: "info" as const
+    title: "Reconstruction Quality Evolution",
+    content: (
+      <div>
+        <p className="mb-2">Measures how closely reconstructions match original digits.</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <strong>0-30%:</strong> Very blurry, barely recognizable</li>
+          <li>• <strong>30-60%:</strong> Recognizable shapes, some blur</li>
+          <li>• <strong>60-90%:</strong> Clear digits with minor artifacts</li>
+        </ul>
+        <p className="mt-2 text-green-300 text-xs">
+          S-curve shape indicates healthy VAE training progression
+        </p>
+      </div>
+    ),
+    variant: 'info' as const
+  },
+  
+  mnistReconstruction: {
+    title: "Progressive MNIST Reconstruction",
+    content: (
+      <div>
+        <p className="mb-2"><strong className="text-yellow-300">⚠️ Synthetic Data Notice:</strong></p>
+        <p className="mb-2 text-xs">We use algorithmically generated digit patterns instead of real MNIST data due to:</p>
+        <ul className="space-y-1 text-xs">
+          <li>• Browser CORS limitations for external datasets</li>
+          <li>• Bundle size constraints (real MNIST = 60,000 images)</li>
+          <li>• Performance optimization for smooth real-time training</li>
+        </ul>
+        <p className="mt-2 text-blue-300 text-xs">
+          The synthetic patterns demonstrate the same VAE principles as real handwritten digits.
+        </p>
+        <p className="mt-2 text-gray-300 text-xs">
+          <strong>Training Effect:</strong> Images progressively improve from blurry noise to clear digit shapes.
+        </p>
+      </div>
+    ),
+    variant: 'warning' as const
   }
 };
 
 export default InfoTooltip;
+

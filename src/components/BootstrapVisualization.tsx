@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -227,7 +228,21 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
             Bootstrap Distribution
             <InfoTooltip 
               side="left"
-              content="<b>Bootstrap Distribution:</b><br>Shows the histogram of bootstrap statistics (means/medians) computed from bootstrap samples. <b>Key Elements:</b><br>• Sky blue bars: Frequency of bootstrap statistics<br>• Purple curve: Normal distribution fit<br>• Red dashed lines: 95% confidence interval bounds<br>• Green line: Bootstrap mean estimate<br>• Red shaded area: Confidence interval region<br>As sample size increases, this distribution approaches normality (Central Limit Theorem)."
+              content={
+                <div className="space-y-2">
+                  <p><strong>Bootstrap Distribution:</strong></p>
+                  <p>Shows the histogram of bootstrap statistics (means/medians) computed from {state.currentIteration} bootstrap samples.</p>
+                  <p><strong>Key Elements:</strong></p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Sky blue bars: Frequency of bootstrap statistics</li>
+                    <li>Purple curve: Normal distribution fit</li>
+                    <li>Red dashed lines: 95% confidence interval bounds</li>
+                    <li>Green line: Bootstrap mean estimate</li>
+                    <li>Red shaded area: Confidence interval region</li>
+                  </ul>
+                  <p>As sample size increases, this distribution approaches normality (Central Limit Theorem).</p>
+                </div>
+              }
             />
           </CardTitle>
         </CardHeader>
@@ -381,7 +396,20 @@ const BootstrapVisualization: React.FC<BootstrapVisualizationProps> = ({
 Original Data vs Bootstrap Statistics
 <InfoTooltip
 side="left"
-content="<b>Comparison Chart:</b><br>Compares the distribution of original raw data with computed bootstrap statistics. <b>Key Insights:</b><br>• Gray bars: Original data distribution (discrete if integer mode)<br>• Orange bars: Bootstrap statistics distribution (continuous)<br>• Different supports are expected - bootstrap statistics are computed means<br>• Bootstrap distribution is typically more concentrated around the true parameter<br>This demonstrates how bootstrap statistics converge to the sampling distribution of the estimator."
+content={
+<div className="space-y-2">
+<p><strong>Comparison Chart:</strong></p>
+<p>Compares the distribution of original raw data with computed bootstrap statistics.</p>
+<p><strong>Key Insights:</strong></p>
+<ul className="list-disc list-inside space-y-1">
+<li>Gray bars: Original data distribution (discrete if integer mode)</li>
+<li>Orange bars: Bootstrap statistics distribution (continuous)</li>
+<li>Different supports are expected - bootstrap statistics are computed means</li>
+<li>Bootstrap distribution is typically more concentrated around the true parameter</li>
+</ul>
+<p>This demonstrates how bootstrap statistics converge to the sampling distribution of the estimator.</p>
+</div>
+}
 />
 </CardTitle>
 </CardHeader>
@@ -455,7 +483,20 @@ style: { fill: "#ff8c00", fontSize: "10px", fontWeight: "bold" }
             Bias and MSE Convergence
             <InfoTooltip 
               side="left"
-              content="<b>Convergence Analysis:</b><br>Tracks how bias and MSE of bootstrap estimates change with increasing bootstrap samples. <b>Key Elements:</b><br>• Blue line: Bootstrap bias over iterations<br>• Red line: Bootstrap MSE over iterations<br>• Yellow dashed line: Classical MSE baseline for comparison<br><b>Expected Behavior:</b><br>Both bias and MSE should stabilize as bootstrap samples increase, with MSE approaching the classical estimator's MSE."
+              content={
+                <div className="space-y-2">
+                  <p><strong>Convergence Analysis:</strong></p>
+                  <p>Tracks how bias and MSE of bootstrap estimates change with increasing bootstrap samples.</p>
+                  <p><strong>Key Elements:</strong></p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Blue line: Bootstrap bias over iterations</li>
+                    <li>Red line: Bootstrap MSE over iterations</li>
+                    <li>Yellow dashed line: Classical MSE baseline for comparison</li>
+                  </ul>
+                  <p><strong>Expected Behavior:</strong></p>
+                  <p>Both bias and MSE should stabilize as bootstrap samples increase, with MSE approaching the classical estimator's MSE.</p>
+                </div>
+              }
             />
           </CardTitle>
         </CardHeader>

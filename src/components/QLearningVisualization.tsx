@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import InfoTooltip from './InfoTooltip';
 
 interface QLearningVisualizationProps {
   maze: number[][];
@@ -341,7 +340,6 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
           <CardTitle className="text-lg flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 to-blue-500 animate-pulse"></div>
             Interactive Maze
-            <InfoTooltip content="<b>Interactive Maze:</b><br>• Click cells to add/remove walls<br>• Green circle = Start position<br>• Red circle = Goal position<br>• Blue arrows show learned policy<br>• Yellow path shows optimal route" />
             <span className="text-sm font-normal opacity-70 ml-auto">
               {isTraining ? `Training Episode ${currentEpisode}` : "Ready to Train"}
             </span>
@@ -366,7 +364,6 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
           <CardTitle className="text-lg flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-gradient-to-r from-cyan-400 to-green-500"></div>
             Q-Values Heatmap
-            <InfoTooltip content="<b>Q-Values Explained:</b><br>• Color intensity shows expected rewards<br>• Darker = Lower Q-values (worse states)<br>• Brighter = Higher Q-values (better states)<br>• Updated via Q-learning rule: Q(s,a) ← Q(s,a) + α[r + γmax Q(s',a') - Q(s,a)]" />
             <span className="text-sm font-normal opacity-70 ml-auto">Learning Progress</span>
           </CardTitle>
         </CardHeader>
