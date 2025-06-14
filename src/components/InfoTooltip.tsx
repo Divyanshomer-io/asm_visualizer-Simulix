@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Info } from "lucide-react";
 
@@ -51,7 +50,7 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
       
       {isVisible && (
         <div 
-          className={`absolute z-[99999] p-4 rounded-lg border shadow-2xl ${tooltipVariants[variant]} ${positionClasses[side]}`}
+          className={`absolute z-[999999] p-4 rounded-lg border shadow-2xl ${tooltipVariants[variant]} ${positionClasses[side]}`}
           style={{ 
             width: `${Math.min(maxWidth, 350)}px`,
             minWidth: '250px'
@@ -254,7 +253,7 @@ export const HiLoTooltips = {
           <li>• <strong>Optimal play:</strong> 70%+ win rate possible</li>
         </ul>
         <p className="mt-2 text-emerald-300 text-xs">
-          <strong>Target:</strong> Sustained {'>'}60% indicates effective Bayesian learning
+          <strong>Target:</strong> Sustained &gt;60% indicates effective Bayesian learning
         </p>
       </div>
     ),
