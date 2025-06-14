@@ -1,6 +1,6 @@
-
 import React, { useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import QLearningTooltip from './QLearningTooltip';
 
 interface QLearningVisualizationProps {
   maze: number[][];
@@ -342,6 +342,14 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
           <CardTitle className="text-lg flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 to-blue-500 animate-pulse"></div>
             Interactive Maze
+            <QLearningTooltip
+              content="🎯 Interactive Maze Environment
+• Green circle (S): Agent's starting position
+• Red circle (G): Goal/reward location
+• Arrows: Current policy (learned action preferences)
+• Click cells to add/remove walls and modify environment
+• The agent learns optimal paths through trial and error"
+            />
             <span className="text-sm font-normal opacity-70 ml-auto">
               {isTraining ? `Training Episode ${currentEpisode}` : "Ready to Train"}
             </span>
@@ -354,14 +362,6 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
               className="w-full h-80 border border-white/20 rounded-lg cursor-pointer bg-gradient-to-br from-slate-800 to-slate-900 shadow-2xl"
               onClick={handleMazeClick}
             />
-{/*             <div className="absolute top-2 left-2 flex gap-2">
-              <div className="px-2 py-1 bg-black/50 rounded text-xs text-green-400 font-mono">
-                START
-              </div>
-              <div className="px-2 py-1 bg-black/50 rounded text-xs text-red-400 font-mono">
-                GOAL
-              </div>
-            </div> */}
           </div>
           <p className="text-sm opacity-70 mt-3 text-center">
             🎯 Click cells to add/remove walls • 🤖 Blue arrows show learned policy
@@ -374,6 +374,14 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
           <CardTitle className="text-lg flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-gradient-to-r from-cyan-400 to-green-500"></div>
             Q-Values Heatmap
+            <QLearningTooltip
+              content="🔥 Q-Values Visualization
+• Color intensity = Expected future reward
+• Darker blue = Lower Q-values (avoid these states)
+• Brighter colors = Higher Q-values (preferred states)
+• Q(s,a) represents quality of taking action 'a' in state 's'
+• Updated via: Q(s,a) ← Q(s,a) + α[r + γ max Q(s',a') - Q(s,a)]"
+            />
             <span className="text-sm font-normal opacity-70 ml-auto">Learning Progress</span>
           </CardTitle>
         </CardHeader>
@@ -385,9 +393,7 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
             />
             <div className="absolute bottom-2 right-2">
               <div className="flex items-center gap-2 px-2 py-1 bg-black/50 rounded text-xs">
-{/*                 <div className="w-3 h-3 bg-gradient-to-r from-blue-600 to-green-400 rounded"></div>
-                <span className="text-white">Low → High</span>
-              </div> */}
+              </div>
             </div>
           </div>
           <p className="text-sm opacity-70 mt-3 text-center">

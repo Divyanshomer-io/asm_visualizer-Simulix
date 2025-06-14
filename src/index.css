@@ -141,6 +141,49 @@
     @apply bg-gradient-to-br from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
   }
 
+  /* Enhanced Q-Learning Tooltip Styling */
+  .info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background-color: #4a9eff;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 8px;
+    position: relative;
+    font-size: 10px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+  }
+
+  .info-icon:hover {
+    background-color: #3b82f6;
+    transform: scale(1.1);
+  }
+
+  .tooltip-container {
+    position: fixed !important;
+    z-index: 9999 !important;
+    background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+    border: 2px solid #4a9eff !important;
+    border-radius: 8px;
+    padding: 12px;
+    color: #ecf0f1;
+    font-size: 13px;
+    max-width: 320px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    line-height: 1.4;
+  }
+
+  .tooltip-container.pinned {
+    pointer-events: auto !important;
+  }
+
   /* Enhanced Tooltip Styling - Maximum Overlap */
   .tooltip-content {
     max-width: 350px;
@@ -226,5 +269,36 @@
 
   .custom-tooltip div {
     white-space: nowrap;
+  }
+
+  /* Animation keyframes for tooltips */
+  @keyframes slideInFromRight {
+    from {
+      opacity: 0;
+      transform: translateX(10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  @keyframes slideOutToRight {
+    from {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(10px) scale(0.95);
+    }
+  }
+
+  .tooltip-enter {
+    animation: slideInFromRight 0.2s ease-out forwards;
+  }
+
+  .tooltip-exit {
+    animation: slideOutToRight 0.15s ease-in forwards;
   }
 }

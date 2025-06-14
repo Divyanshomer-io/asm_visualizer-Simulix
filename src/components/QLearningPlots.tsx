@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Timer, Search } from 'lucide-react';
+import QLearningTooltip from './QLearningTooltip';
 
 interface QLearningPlotsProps {
   episodeRewards: number[];
@@ -18,9 +18,6 @@ const QLearningPlots: React.FC<QLearningPlotsProps> = ({
   episodeEpsilons,
   isTraining
 }) => {
-  const [activeTab, setActiveTab] = useState('rewards');
-
-  // Prepare data for charts
   const rewardsData = episodeRewards.map((reward, index) => ({
     episode: index + 1,
     value: reward
@@ -39,181 +36,158 @@ const QLearningPlots: React.FC<QLearningPlotsProps> = ({
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-          <p className="text-sm font-medium">{`Episode: ${label}`}</p>
-          <p className="text-sm text-primary">
-            {`${getYAxisLabel(activeTab)}: ${payload[0].value.toFixed(3)}`}
-          </p>
+        <div className="bg-slate-800 border border-blue-500/50 rounded p-2 text-xs">
+          <p className="text-blue-300">{`Episode: ${label}`}</p>
+          <p className="text-green-300">{`Value: ${payload[0].value.toFixed(3)}`}</p>
         </div>
       );
     }
     return null;
   };
 
-  const getYAxisLabel = (tab: string) => {
-    switch (tab) {
-      case 'rewards':
-        return 'Cumulative Reward';
-      case 'steps':
-        return 'Steps Taken';
-      case 'exploration':
-        return 'Exploration Rate (ε)';
-      default:
-        return 'Value';
-    }
-  };
-
-  const getChartColor = (tab: string) => {
-    switch (tab) {
-      case 'rewards':
-        return '#3b82f6'; // Blue
-      case 'steps':
-        return '#ef4444'; // Red
-      case 'exploration':
-        return '#22c55e'; // Green
-      default:
-        return '#3b82f6';
-    }
-  };
-
-  const getChartData = (tab: string) => {
-    switch (tab) {
-      case 'rewards':
-        return rewardsData;
-      case 'steps':
-        return stepsData;
-      case 'exploration':
-        return epsilonData;
-      default:
-        return [];
-    }
-  };
-
-  const getIcon = (tab: string) => {
-    switch (tab) {
-      case 'rewards':
-        return <TrendingUp className="h-4 w-4" />;
-      case 'steps':
-        return <Timer className="h-4 w-4" />;
-      case 'exploration':
-        return <Search className="h-4 w-4" />;
-      default:
-        return null;
-    }
-  };
-
   return (
-    <Card className="glass-panel">
-      <CardHeader>
-        <CardTitle className="text-lg">
-          Training Progress {isTraining && <span className="text-sm opacity-70 ml-2">(LIVE)</span>}
+    <Card className="glass-panel col-span-full">
+      <CardHeader className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-b border-white/10">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 to-blue-500"></div>
+          Training Analytics
+          <span className="text-sm font-normal opacity-70 ml-auto">
+            Real-time Learning Metrics
+          </span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
+      <CardContent className="p-6">
+        <Tabs defaultValue="rewards" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="rewards" className="flex items-center gap-2">
-              {getIcon('rewards')}
               Rewards
+              <QLearningTooltip
+                content="🏆 Cumulative Reward Progress
+• Y-axis: Total reward accumulated per episode
+• Shows learning progress over time
+• Initial volatility normal (random exploration)
+• Should stabilize and increase as policy improves
+• Plateaus indicate convergence to optimal policy"
+              />
             </TabsTrigger>
             <TabsTrigger value="steps" className="flex items-center gap-2">
-              {getIcon('steps')}
               Steps
+              <QLearningTooltip
+                content="👣 Steps per Episode
+• Number of actions taken to reach goal
+• Decreasing trend = more efficient pathfinding
+• Spikes indicate exploration of new paths
+• Optimal path length depends on maze layout
+• Measures policy efficiency improvement"
+              />
             </TabsTrigger>
             <TabsTrigger value="exploration" className="flex items-center gap-2">
-              {getIcon('exploration')}
               Exploration
+              <QLearningTooltip
+                content="🔍 Exploration Rate Decay
+• Shows ε-greedy exploration probability over time
+• Typically starts high (0.9) and decays to low (0.01)
+• Exponential decay: ε = ε₀ × decay^episode
+• High early: Discover environment
+• Low later: Exploit learned knowledge"
+              />
             </TabsTrigger>
           </TabsList>
 
-          <div className="h-64 w-full">
-            <TabsContent value="rewards" className="h-full mt-0">
+          <TabsContent value="rewards" className="space-y-4">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={rewardsData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis 
                     dataKey="episode" 
                     stroke="#9ca3af"
-                    label={{ value: 'Training Episode', position: 'insideBottom', offset: -5 }}
+                    fontSize={12}
                   />
                   <YAxis 
                     stroke="#9ca3af"
-                    label={{ value: 'Cumulative Reward', angle: -90, position: 'insideLeft' }}
+                    fontSize={12}
                   />
-                  <Tooltip content={<CustomTooltip />} />
                   <Line 
                     type="monotone" 
                     dataKey="value" 
-                    stroke={getChartColor('rewards')} 
+                    stroke="#10b981" 
                     strokeWidth={2}
                     dot={false}
-                    activeDot={{ r: 4, stroke: getChartColor('rewards'), strokeWidth: 2 }}
+                    activeDot={{ r: 4, stroke: '#10b981', strokeWidth: 2 }}
                   />
+                  <CustomTooltip />
                 </LineChart>
               </ResponsiveContainer>
-            </TabsContent>
+            </div>
+            <p className="text-sm opacity-70 text-center">
+              Episode Rewards - Higher values indicate better performance
+            </p>
+          </TabsContent>
 
-            <TabsContent value="steps" className="h-full mt-0">
+          <TabsContent value="steps" className="space-y-4">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={stepsData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis 
                     dataKey="episode" 
                     stroke="#9ca3af"
-                    label={{ value: 'Training Episode', position: 'insideBottom', offset: -5 }}
+                    fontSize={12}
                   />
                   <YAxis 
                     stroke="#9ca3af"
-                    label={{ value: 'Steps Taken', angle: -90, position: 'insideLeft' }}
+                    fontSize={12}
                   />
-                  <Tooltip content={<CustomTooltip />} />
                   <Line 
                     type="monotone" 
                     dataKey="value" 
-                    stroke={getChartColor('steps')} 
+                    stroke="#3b82f6" 
                     strokeWidth={2}
                     dot={false}
-                    activeDot={{ r: 4, stroke: getChartColor('steps'), strokeWidth: 2 }}
+                    activeDot={{ r: 4, stroke: '#3b82f6', strokeWidth: 2 }}
                   />
+                  <CustomTooltip />
                 </LineChart>
               </ResponsiveContainer>
-            </TabsContent>
+            </div>
+            <p className="text-sm opacity-70 text-center">
+              Steps per Episode - Lower values indicate more efficient paths
+            </p>
+          </TabsContent>
 
-            <TabsContent value="exploration" className="h-full mt-0">
+          <TabsContent value="exploration" className="space-y-4">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={epsilonData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis 
                     dataKey="episode" 
                     stroke="#9ca3af"
-                    label={{ value: 'Training Episode', position: 'insideBottom', offset: -5 }}
+                    fontSize={12}
                   />
                   <YAxis 
                     stroke="#9ca3af"
-                    label={{ value: 'Exploration Rate (ε)', angle: -90, position: 'insideLeft' }}
+                    fontSize={12}
+                    domain={[0, 1]}
                   />
-                  <Tooltip content={<CustomTooltip />} />
                   <Line 
                     type="monotone" 
                     dataKey="value" 
-                    stroke={getChartColor('exploration')} 
+                    stroke="#f59e0b" 
                     strokeWidth={2}
                     dot={false}
-                    activeDot={{ r: 4, stroke: getChartColor('exploration'), strokeWidth: 2 }}
+                    activeDot={{ r: 4, stroke: '#f59e0b', strokeWidth: 2 }}
                   />
+                  <CustomTooltip />
                 </LineChart>
               </ResponsiveContainer>
-            </TabsContent>
-          </div>
+            </div>
+            <p className="text-sm opacity-70 text-center">
+              Exploration Rate - Shows the balance between exploration and exploitation
+            </p>
+          </TabsContent>
         </Tabs>
-
-        {episodeRewards.length > 0 && (
-          <div className="mt-4 text-xs opacity-70 text-center">
-            Total Episodes: {episodeRewards.length} | 
-            Best Reward: {Math.max(...episodeRewards).toFixed(2)} | 
-            Avg Steps: {(episodeSteps.reduce((a, b) => a + b, 0) / episodeSteps.length).toFixed(1)}
-          </div>
-        )}
       </CardContent>
     </Card>
   );

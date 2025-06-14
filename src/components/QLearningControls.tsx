@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import QLearningTooltip from './QLearningTooltip';
 
 interface QLearningControlsProps {
   isTraining: boolean;
@@ -132,6 +133,14 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
           <CardTitle className="text-lg flex items-center gap-2">
             <Settings className="h-5 w-5" />
             Training Controls
+            <QLearningTooltip
+              content="⚙️ Training Management
+• START TRAINING: Begin/resume learning episodes
+• SHOW PATH: Visualize current optimal policy path
+• RESET ALL: Clear all learned values and restart
+• RESET MAZE: Generate new random maze layout
+• Episodes train in batches for computational efficiency"
+            />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -178,7 +187,17 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
       {/* Training Configuration */}
       <Card className="glass-panel">
         <CardHeader>
-          <CardTitle className="text-lg">Training Configuration</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            Training Configuration
+            <QLearningTooltip
+              content="⚡ Batch Training Settings
+• Episodes per session: Training batch size
+• Current Episode: Progress within current batch
+• Higher batch sizes: Better learning stability
+• Lower batch sizes: More frequent visual updates
+• Balance between performance and real-time feedback"
+            />
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Training Session Info */}
@@ -269,8 +288,16 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium flex items-center">
               Learning Rate (α): {alpha.toFixed(2)}
+              <QLearningTooltip
+                content="📈 Learning Rate (α)
+• Controls how much new information overrides old knowledge
+• Higher α (0.5-1.0): Fast learning, potentially unstable
+• Lower α (0.1-0.3): Slow, stable convergence
+• Formula impact: Q_new = Q_old + α × (reward_error)
+• Too high: Oscillation, too low: Slow convergence"
+              />
             </Label>
             <Slider
               value={[alpha]}
@@ -284,8 +311,16 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium flex items-center">
               Initial Exploration Rate (ε): {epsilon.toFixed(2)}
+              <QLearningTooltip
+                content="🎲 Exploration Rate (ε-greedy)
+• Probability of taking random actions vs. best known action
+• High ε: More exploration (good early in training)
+• Low ε: More exploitation (good later in training)
+• Typically decays: ε = ε₀ × decay^episode
+• Balances exploration vs. exploitation tradeoff"
+              />
             </Label>
             <Slider
               value={[epsilon]}
@@ -302,8 +337,16 @@ const QLearningControls: React.FC<QLearningControlsProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">
+            <Label className="text-sm font-medium flex items-center">
               Maze Size: {mazeSize}x{mazeSize}
+              <QLearningTooltip
+                content="🗺️ Environment Complexity
+• Larger mazes = More states to learn (exponential growth)
+• 6×6 = 36 states, 8×8 = 64 states, etc.
+• Affects convergence time and memory requirements
+• Smaller: Quick learning, less complex behaviors
+• Larger: Realistic complexity, longer training needed"
+              />
             </Label>
             <Slider
               value={[mazeSize]}
