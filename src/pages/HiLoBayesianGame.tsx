@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -28,23 +29,28 @@ const HiLoBayesianGame = () => {
   });
 
   const initializeGame = useCallback(() => {
-    const newDeck = createDeck(params.numDecks);
-    const firstCard = drawCard(newDeck);
-    
-    setState({
-      currentCard: firstCard,
-      deck: newDeck,
-      alpha: params.priorStrength,
-      beta: params.priorStrength,
-      score: 0,
-      history: [],
-      cardHistory: [firstCard],
-      bayesianEstimates: [],
-      trueProbabilities: [],
-      isGameActive: true
-    });
-    
-    toast.success('New game started!');
+    try {
+      const newDeck = createDeck(params.numDecks);
+      const firstCard = drawCard(newDeck);
+      
+      setState({
+        currentCard: firstCard,
+        deck: newDeck,
+        alpha: params.priorStrength,
+        beta: params.priorStrength,
+        score: 0,
+        history: [],
+        cardHistory: [firstCard],
+        bayesianEstimates: [],
+        trueProbabilities: [],
+        isGameActive: true
+      });
+      
+      toast.success('New game started!');
+    } catch (error) {
+      console.error('Error initializing game:', error);
+      toast.error('Failed to initialize game');
+    }
   }, [params.numDecks, params.priorStrength]);
 
   const handleParamsChange = useCallback((newParams: Partial<GameParams>) => {
@@ -52,58 +58,63 @@ const HiLoBayesianGame = () => {
   }, []);
 
   const makeGuess = useCallback((guess: 'high' | 'low') => {
-    if (state.deck.length === 0) {
-      toast.error('Deck is empty! Starting new game...');
-      initializeGame();
-      return;
-    }
-
-    const nextCard = drawCard(state.deck);
-    const correct = (guess === 'high' && nextCard > state.currentCard) || 
-                   (guess === 'low' && nextCard < state.currentCard);
-
-    // Bayesian update with learning rate
-    const updateAmount = params.learningRate;
-    let newAlpha = state.alpha;
-    let newBeta = state.beta;
-
-    if (correct) {
-      if (guess === 'high') {
-        newAlpha += updateAmount;
-      } else {
-        newBeta += updateAmount;
+    try {
+      if (state.deck.length === 0) {
+        toast.error('Deck is empty! Starting new game...');
+        initializeGame();
+        return;
       }
-    } else {
-      if (guess === 'high') {
-        newBeta += updateAmount;
+
+      const nextCard = drawCard(state.deck);
+      const correct = (guess === 'high' && nextCard > state.currentCard) || 
+                     (guess === 'low' && nextCard < state.currentCard);
+
+      // Bayesian update with learning rate
+      const updateAmount = params.learningRate;
+      let newAlpha = state.alpha;
+      let newBeta = state.beta;
+
+      if (correct) {
+        if (guess === 'high') {
+          newAlpha += updateAmount;
+        } else {
+          newBeta += updateAmount;
+        }
       } else {
-        newAlpha += updateAmount;
+        if (guess === 'high') {
+          newBeta += updateAmount;
+        } else {
+          newAlpha += updateAmount;
+        }
       }
-    }
 
-    // Ensure alpha and beta don't go too low
-    newAlpha = Math.max(0.1, newAlpha);
-    newBeta = Math.max(0.1, newBeta);
+      // Ensure alpha and beta don't go too low
+      newAlpha = Math.max(0.1, newAlpha);
+      newBeta = Math.max(0.1, newBeta);
 
-    const bayesianEstimate = newAlpha / (newAlpha + newBeta);
-    const trueProbability = calculateTrueProbability(state.currentCard, state.deck);
+      const bayesianEstimate = newAlpha / (newAlpha + newBeta);
+      const trueProbability = calculateTrueProbability(state.currentCard, state.deck);
 
-    setState(prev => ({
-      ...prev,
-      currentCard: nextCard,
-      alpha: newAlpha,
-      beta: newBeta,
-      score: correct ? prev.score + 1 : prev.score,
-      history: [...prev.history, correct ? 'correct' : 'incorrect'],
-      cardHistory: [...prev.cardHistory, nextCard],
-      bayesianEstimates: [...prev.bayesianEstimates, bayesianEstimate],
-      trueProbabilities: [...prev.trueProbabilities, trueProbability]
-    }));
+      setState(prev => ({
+        ...prev,
+        currentCard: nextCard,
+        alpha: newAlpha,
+        beta: newBeta,
+        score: correct ? prev.score + 1 : prev.score,
+        history: [...prev.history, correct ? 'correct' : 'incorrect'],
+        cardHistory: [...prev.cardHistory, nextCard],
+        bayesianEstimates: [...prev.bayesianEstimates, bayesianEstimate],
+        trueProbabilities: [...prev.trueProbabilities, trueProbability]
+      }));
 
-    if (correct) {
-      toast.success('Correct guess! 🎉');
-    } else {
-      toast.error('Wrong guess! 😔');
+      if (correct) {
+        toast.success('Correct guess! 🎉');
+      } else {
+        toast.error('Wrong guess! 😔');
+      }
+    } catch (error) {
+      console.error('Error making guess:', error);
+      toast.error('Error processing guess');
     }
   }, [state, params.learningRate, initializeGame]);
 
@@ -193,7 +204,7 @@ const HiLoBayesianGame = () => {
       <footer className="w-full glass-panel border-t border-white/5 mt-16">
         <div className="container py-4 px-4 md:px-8 text-center">
           <p className="text-sm opacity-70">
-            Bootstrap Visualization • Statistical Resampling • BITS Pilani, K.K. Birla Goa Campus
+            Bayesian Visualization • Statistical Learning • BITS Pilani, K.K. Birla Goa Campus
           </p>
         </div>
       </footer>
