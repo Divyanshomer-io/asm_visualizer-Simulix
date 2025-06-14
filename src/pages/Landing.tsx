@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, BookOpen, MessageSquare, Layers } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, Settings, BarChart3, Target, Sparkles, Zap, Brain, TrendingUp, Search, X, Network, TreePine, Scale, PlayingCards, BookOpen, MessageSquare, Layers } from "lucide-react";
 import MobilePopup from "@/components/MobilePopup";
 import FeedbackForm from "@/components/FeedbackForm";
 import ContributionForm from '@/components/ContributionForm';
@@ -211,6 +211,15 @@ const closeContribution = () => {
       icon: <Search className="h-6 w-6" />,
       tags: ["Reinforcement Learning", "Q-Learning", "Maze Solving", "Interactive"],
       gradient: "from-teal-500/20 to-cyan-500/20"
+    },
+        {
+      id: "hi-lo-bayesian",
+      title: "Hi-Lo Bayesian Visualization",
+      description: "Interactive Hi-Lo card game visualization demonstrating Bayesian probability updates and dynamic probability distribution plots for educational reinforcement of Bayesian inference and decision making.",
+      path: "/hi-lo-bayesian",
+      icon: <PlayingCards className="h-6 w-6" />,
+      tags: ["Bayesian Inference", "Probability", "Card Game", "Visualization"],
+      gradient: "from-purple-500/20 to-pink-500/20"
     },
   ];
 
