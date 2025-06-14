@@ -506,7 +506,7 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                 valAccuracy: { label: "Validation Accuracy", color: "#f59e0b" }
               }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={displayData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                  <LineChart data={displayData} margin={{ top: 20, right: 30, bottom: 40, left: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis 
                       dataKey="epoch" 
@@ -600,13 +600,13 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <div className="h-80 relative">
+                <div className="h-64 relative overflow-hidden">
                   <ChartContainer config={{ 
                     trainLoss: { label: "Training Loss", color: "#3b82f6" },
                     valLoss: { label: "Validation Loss", color: "#ef4444" }
                   }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={displayData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                      <LineChart data={displayData} margin={{ top: 10, right: 20, bottom: 30, left: 30 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis 
                           dataKey="epoch" 
@@ -690,11 +690,11 @@ const NeuralNetworkVisualization: React.FC<NeuralNetworkVisualizationProps> = ({
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <div className="h-80 relative">
+                <div className="h-64 relative overflow-hidden">
                   {weightData.length > 0 ? (
                     <ChartContainer config={{ count: { label: "Count", color: "#8b5cf6" } }}>
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={weightData} margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+                        <BarChart data={weightData} margin={{ top: 10, right: 20, bottom: 30, left: 30 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                           <XAxis 
                             dataKey="bin" 
