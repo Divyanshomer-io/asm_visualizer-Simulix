@@ -1,10 +1,13 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Home, MapPin, Users, Target, Brain } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import KMeansGameControls from "@/components/KMeansGameControls";
 import KMeansGameVisualization from "@/components/KMeansGameVisualization";
 import KMeansGameEducation from "@/components/KMeansGameEducation";
+import KMeansConvergencePlots from "@/components/KMeansConvergencePlots";
+import KMeansElbowPlot from "@/components/KMeansElbowPlot";
+import KMeansClusteringComparison from "@/components/KMeansClusteringComparison";
 
 const KMeansGame = () => {
   // Game state
@@ -22,7 +25,7 @@ const KMeansGame = () => {
   const [maxIterations, setMaxIterations] = useState(20);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
       <header className="w-full glass-panel border-b border-white/5 sticky top-0 z-50 backdrop-blur-xl">
         <div className="container py-6 px-4 md:px-8">
@@ -84,12 +87,12 @@ const KMeansGame = () => {
       </header>
 
       {/* Main Content */}
-      <div className="container px-4 md:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[calc(100vh-12rem)]">
+      <div className="flex-1 container px-4 md:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
           
           {/* Main Visualization - Left Side */}
           <div className="lg:col-span-3 space-y-6">
-            <div className="glass-panel p-6 rounded-xl h-full">
+            <div className="glass-panel p-6 rounded-xl">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-lg flex items-center justify-center">
@@ -184,7 +187,7 @@ const KMeansGame = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-lg flex items-center justify-center">
                   <Brain className="h-5 w-5 text-green-400" />
                 </div>
-                <h3 className="text-xl font-semibold">Learn K-Means</h3>
+                <h3 className="text-xl font-semibold">Quick Tips</h3>
               </div>
               
               <KMeansGameEducation
@@ -198,10 +201,115 @@ const KMeansGame = () => {
             </div>
           </div>
         </div>
+
+        {/* Educational Content - Full Width Tabs */}
+        <div className="glass-panel p-6 rounded-xl">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-lg flex items-center justify-center">
+              <Brain className="h-6 w-6 text-accent" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold">K-Means Learning Center</h2>
+              <p className="text-muted-foreground">Explore different aspects of K-means clustering</p>
+            </div>
+          </div>
+
+          <Tabs defaultValue="convergence" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="convergence">Convergence Analysis</TabsTrigger>
+              <TabsTrigger value="elbow">Elbow Method</TabsTrigger>
+              <TabsTrigger value="comparison">Algorithm Comparison</TabsTrigger>
+              <TabsTrigger value="concepts">Core Concepts</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="convergence" className="mt-6">
+              <KMeansConvergencePlots
+                convergenceData={convergenceData}
+                clusters={clusters}
+                cities={cities}
+                iteration={iteration}
+              />
+            </TabsContent>
+            
+            <TabsContent value="elbow" className="mt-6">
+              <KMeansElbowPlot
+                cities={cities}
+                currentK={k}
+              />
+            </TabsContent>
+            
+            <TabsContent value="comparison" className="mt-6">
+              <KMeansClusteringComparison
+                cities={cities}
+                k={k}
+              />
+            </TabsContent>
+            
+            <TabsContent value="concepts" className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-accent">Algorithm Steps</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
+                      <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-xs font-bold text-blue-400">1</div>
+                      <div>
+                        <p className="font-medium">Initialize Centroids</p>
+                        <p className="text-muted-foreground">Randomly place K centroids in the data space</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
+                      <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center text-xs font-bold text-green-400">2</div>
+                      <div>
+                        <p className="font-medium">Assign Points</p>
+                        <p className="text-muted-foreground">Assign each point to the nearest centroid</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
+                      <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center text-xs font-bold text-purple-400">3</div>
+                      <div>
+                        <p className="font-medium">Update Centroids</p>
+                        <p className="text-muted-foreground">Move centroids to the center of assigned points</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 glass-panel rounded-lg">
+                      <div className="w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center text-xs font-bold text-orange-400">4</div>
+                      <div>
+                        <p className="font-medium">Check Convergence</p>
+                        <p className="text-muted-foreground">Repeat until centroids stop moving</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-accent">Key Metrics</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="p-3 glass-panel rounded-lg">
+                      <p className="font-medium text-blue-400">WCSS (Within-Cluster Sum of Squares)</p>
+                      <p className="text-muted-foreground">Measures how tight clusters are. Lower is better.</p>
+                    </div>
+                    <div className="p-3 glass-panel rounded-lg">
+                      <p className="font-medium text-green-400">Inertia</p>
+                      <p className="text-muted-foreground">Sum of squared distances from points to centroids.</p>
+                    </div>
+                    <div className="p-3 glass-panel rounded-lg">
+                      <p className="font-medium text-purple-400">Silhouette Score</p>
+                      <p className="text-muted-foreground">Measures how well points fit in their clusters.</p>
+                    </div>
+                    <div className="p-3 glass-panel rounded-lg">
+                      <p className="font-medium text-orange-400">Elbow Point</p>
+                      <p className="text-muted-foreground">Optimal K where WCSS reduction starts diminishing.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       {/* Footer */}
-      <footer className="w-full glass-panel border-t border-white/5">
+      <footer className="w-full glass-panel border-t border-white/5 mt-auto">
         <div className="container py-4 px-4 md:px-8 text-center opacity-70">
           <p className="text-sm">
             K-Means Clustering City Builder • Interactive Machine Learning Game • Simulix
