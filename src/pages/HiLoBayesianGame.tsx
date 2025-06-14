@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import HiLoControls from '@/components/HiLoControls';
 import HiLoVisualization from '@/components/HiLoVisualization';
 import HiLoEducation from '@/components/HiLoEducation';
-import { GameState, GameParams, createDeck, drawCard, calculateTrueProbability } from '@/utils/hiLoGame';
+import { GameState, GameParams, createDeck, drawCard, calculateTrueProbability, calculateBestStreak, calculateCurrentStreak } from '@/utils/hiLoGame';
 import { toast } from 'sonner';
 
 const HiLoBayesianGame = () => {
@@ -122,6 +123,12 @@ const HiLoBayesianGame = () => {
     }
   }, [params.numDecks, params.priorStrength, initializeGame]);
 
+  // Calculate statistics for the enhanced statistics panel
+  const bayesianEstimate = state.alpha / (state.alpha + state.beta);
+  const confidence = state.alpha + state.beta;
+  const winRate = state.history.length > 0 ? 
+    state.history.filter(h => h === 'correct').length / state.history.length : 0;
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 antialiased overflow-x-hidden">
       {/* Header */}
@@ -169,6 +176,89 @@ const HiLoBayesianGame = () => {
                 </div>
               </div>
             )}
+
+            {/* Enhanced Statistics Panel - Spanning Full Width */}
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-xl">
+              <h3 className="text-lg font-semibold text-blue-400 mb-6">Game Analytics Dashboard</h3>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {/* Performance Metrics */}
+                <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30">
+                  <h4 className="text-sm font-medium text-slate-300 mb-3">Performance</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Score:</span>
+                      <span className="text-green-400 font-medium">{state.score}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Games:</span>
+                      <span className="text-blue-400 font-medium">{state.history.length}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Win Rate:</span>
+                      <span className="text-emerald-400 font-medium">{(winRate * 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Streak Information */}
+                <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30">
+                  <h4 className="text-sm font-medium text-slate-300 mb-3">Streaks</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Best:</span>
+                      <span className="text-yellow-400 font-medium">{calculateBestStreak(state.history)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Current:</span>
+                      <span className="text-orange-400 font-medium">{calculateCurrentStreak(state.history)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Cards Left:</span>
+                      <span className="text-cyan-400 font-medium">{state.deck.length}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bayesian Parameters */}
+                <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30">
+                  <h4 className="text-sm font-medium text-slate-300 mb-3">Bayesian State</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Estimate:</span>
+                      <span className="text-purple-400 font-medium">{bayesianEstimate.toFixed(3)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Confidence:</span>
+                      <span className="text-indigo-400 font-medium">{confidence.toFixed(1)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Learning:</span>
+                      <span className="text-pink-400 font-medium">{params.learningRate.toFixed(1)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Model Parameters */}
+                <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30">
+                  <h4 className="text-sm font-medium text-slate-300 mb-3">Model Params</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Alpha (α):</span>
+                      <span className="text-green-400 font-medium">{state.alpha.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Beta (β):</span>
+                      <span className="text-red-400 font-medium">{state.beta.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Decks:</span>
+                      <span className="text-slate-300 font-medium">{params.numDecks}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Controls Panel - Right Side */}
