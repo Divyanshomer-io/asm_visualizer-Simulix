@@ -1,9 +1,9 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Play, Pause, RotateCcw, Shuffle, Zap, Settings } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -60,12 +60,54 @@ const KMeansGameControls: React.FC<KMeansGameControlsProps> = ({
   gameLevel,
   setGameLevel,
 }) => {
+  const [cityCount, setCityCount] = useState(20);
+  const [cityCountError, setCityCountError] = useState("");
+
+  const validateCityCount = (value: string) => {
+    const num = parseInt(value);
+    if (isNaN(num)) {
+      setCityCountError("Please enter a valid number");
+      return false;
+    }
+    if (num < 10) {
+      setCityCountError("Minimum 10 cities required");
+      return false;
+    }
+    if (num > 70) {
+      setCityCountError("Maximum 70 cities allowed");
+      return false;
+    }
+    setCityCountError("");
+    return true;
+  };
+
+  const handleCityCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Allow empty input for user to type freely
+    if (value === "") {
+      setCityCount(0);
+      setCityCountError("");
+      return;
+    }
+    
+    const num = parseInt(value);
+    setCityCount(num);
+    validateCityCount(value);
+  };
+
   const generateRandomCities = () => {
+    // Use the current cityCount value, but validate it first
+    const finalCityCount = cityCount || 20; // Default to 20 if empty
+    
+    if (!validateCityCount(finalCityCount.toString())) {
+      return; // Don't generate if invalid
+    }
+
     const cityNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Echo', 'Foxtrot', 'Golf', 'Hotel', 'India', 'Juliet'];
     const newCities = [];
-    const numCities = Math.min(gameLevel + 4, 15); // Increase cities with level
     
-    for (let i = 0; i < numCities; i++) {
+    for (let i = 0; i < finalCityCount; i++) {
       newCities.push({
         x: Math.random() * 760 + 20, // Keep within canvas bounds
         y: Math.random() * 360 + 20,
@@ -182,6 +224,29 @@ const KMeansGameControls: React.FC<KMeansGameControlsProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* City Count Input */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">Number of Cities</Label>
+          <span className="text-xs text-muted-foreground">10-70</span>
+        </div>
+        <Input
+          type="number"
+          value={cityCount || ""}
+          onChange={handleCityCountChange}
+          placeholder="20"
+          min={10}
+          max={70}
+          className={`w-full ${cityCountError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+          disabled={isRunning}
+        />
+        {cityCountError && (
+          <p className="text-xs text-red-500 mt-1">{cityCountError}</p>
+        )}
+      </div>
+
+      <Separator />
+
       {/* Game Actions */}
       <div className="space-y-4">
         <div className="flex gap-2">
@@ -209,6 +274,7 @@ const KMeansGameControls: React.FC<KMeansGameControlsProps> = ({
             onClick={generateRandomCities}
             variant="outline"
             className="flex-1"
+            disabled={!!cityCountError && cityCount !== 0}
           >
             <Shuffle className="h-4 w-4 mr-2" />
             New Level
