@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import HiLoControls from '@/components/HiLoControls';
 import HiLoVisualization from '@/components/HiLoVisualization';
 import HiLoEducation from '@/components/HiLoEducation';
+import InfoTooltip, { HiLoTooltips } from '@/components/InfoTooltip';
 import { GameState, GameParams, createDeck, drawCard, calculateTrueProbability, calculateBestStreak, calculateCurrentStreak } from '@/utils/hiLoGame';
 import { toast } from 'sonner';
 
@@ -180,7 +180,7 @@ const HiLoBayesianGame = () => {
               </div>
             )}
 
-            {/* Enhanced Statistics Panel - Spanning Full Width */}
+            {/* Enhanced Statistics Panel with Tooltips */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-xl">
               <h3 className="text-lg font-semibold text-blue-400 mb-6">Game Analytics Dashboard</h3>
               
@@ -189,16 +189,32 @@ const HiLoBayesianGame = () => {
                 <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30">
                   <h4 className="text-sm font-medium text-slate-300 mb-3">Performance</h4>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">Score:</span>
+                    <div className="flex justify-between items-center text-xs">
+                      <div className="flex items-center gap-1">
+                        <span className="text-slate-400">Score:</span>
+                        <InfoTooltip
+                          title={HiLoTooltips.score.title}
+                          content={HiLoTooltips.score.content}
+                          variant={HiLoTooltips.score.variant}
+                          side="left"
+                        />
+                      </div>
                       <span className={`font-medium ${state.score >= 0 ? 'text-green-400' : 'text-red-400'}`}>{state.score}</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-400">Games:</span>
                       <span className="text-blue-400 font-medium">{state.history.length}</span>
                     </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">Win Rate:</span>
+                    <div className="flex justify-between items-center text-xs">
+                      <div className="flex items-center gap-1">
+                        <span className="text-slate-400">Win Rate:</span>
+                        <InfoTooltip
+                          title={HiLoTooltips.winRate.title}
+                          content={HiLoTooltips.winRate.content}
+                          variant={HiLoTooltips.winRate.variant}
+                          side="left"
+                        />
+                      </div>
                       <span className="text-emerald-400 font-medium">{(winRate * 100).toFixed(1)}%</span>
                     </div>
                   </div>
