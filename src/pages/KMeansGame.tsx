@@ -1,0 +1,215 @@
+
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Home, MapPin, Users, Target, Brain } from "lucide-react";
+import KMeansGameControls from "@/components/KMeansGameControls";
+import KMeansGameVisualization from "@/components/KMeansGameVisualization";
+import KMeansGameEducation from "@/components/KMeansGameEducation";
+
+const KMeansGame = () => {
+  // Game state
+  const [cities, setCities] = useState<{x: number, y: number, name: string, population: number}[]>([]);
+  const [k, setK] = useState(3);
+  const [clusters, setClusters] = useState<{center: {x: number, y: number}, cities: number[], color: string}[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [iteration, setIteration] = useState(0);
+  const [gameScore, setGameScore] = useState(0);
+  const [gameLevel, setGameLevel] = useState(1);
+  const [convergenceData, setConvergenceData] = useState<{iteration: number, wcss: number}[]>([]);
+  const [showCentroids, setShowCentroids] = useState(true);
+  const [showConnections, setShowConnections] = useState(true);
+  const [animationSpeed, setAnimationSpeed] = useState(500);
+  const [maxIterations, setMaxIterations] = useState(20);
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Header */}
+      <header className="w-full glass-panel border-b border-white/5 sticky top-0 z-50 backdrop-blur-xl">
+        <div className="container py-6 px-4 md:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4">
+                {/* Logo */}
+                <div className="relative group">
+                  <div className="absolute -inset-2 bg-gradient-to-r from-accent/20 via-blue-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                  <img 
+                    src="/social-preview.png" 
+                    alt="Simulix Logo" 
+                    className="relative h-12 w-12 md:h-14 md:w-14 object-contain transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 filter drop-shadow-lg group-hover:drop-shadow-2xl group-hover:brightness-110"
+                    style={{
+                      filter: 'drop-shadow(0 4px 12px rgba(56, 189, 248, 0.3)) brightness(1.1)'
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
+                </div>
+                
+                {/* Simulix Text */}
+                <div className="relative">
+                  <span
+                    className="simulix-logo text-3xl md:text-4xl font-black tracking-tight transition-all duration-500 hover:scale-105"
+                    style={{
+                      background: 'linear-gradient(135deg, #fff 0%, #38bdf8 50%, #818cf8 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      filter: 'drop-shadow(0 2px 8px rgba(56, 189, 248, 0.3))',
+                    }}
+                  >
+                    Simulix
+                  </span>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+                </div>
+              </div>
+              
+              {/* Game Title */}
+              <div className="hidden md:flex items-center gap-3 px-4 py-2 glass-panel rounded-full">
+                <MapPin className="h-5 w-5 text-accent" />
+                <span className="text-lg font-semibold bg-gradient-to-r from-accent via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  K-Means City Builder
+                </span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <Link
+                to="/"
+                className="control-btn flex items-center gap-2 text-sm hover:border-accent/40"
+              >
+                <Home className="h-4 w-4" />
+                Home
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="container px-4 md:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[calc(100vh-12rem)]">
+          
+          {/* Main Visualization - Left Side */}
+          <div className="lg:col-span-3 space-y-6">
+            <div className="glass-panel p-6 rounded-xl h-full">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-lg flex items-center justify-center">
+                    <MapPin className="h-6 w-6 text-accent" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">City Builder Map</h2>
+                    <p className="text-muted-foreground">Click to place cities and watch K-means clustering in action</p>
+                  </div>
+                </div>
+                
+                {/* Game Stats */}
+                <div className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-accent">{gameScore}</div>
+                    <div className="text-sm text-muted-foreground">Score</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-400">{gameLevel}</div>
+                    <div className="text-sm text-muted-foreground">Level</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-400">{cities.length}</div>
+                    <div className="text-sm text-muted-foreground">Cities</div>
+                  </div>
+                </div>
+              </div>
+              
+              <KMeansGameVisualization
+                cities={cities}
+                setCities={setCities}
+                clusters={clusters}
+                setClusters={setClusters}
+                k={k}
+                isRunning={isRunning}
+                iteration={iteration}
+                setIteration={setIteration}
+                convergenceData={convergenceData}
+                setConvergenceData={setConvergenceData}
+                showCentroids={showCentroids}
+                showConnections={showConnections}
+                animationSpeed={animationSpeed}
+                maxIterations={maxIterations}
+                gameScore={gameScore}
+                setGameScore={setGameScore}
+                gameLevel={gameLevel}
+                setGameLevel={setGameLevel}
+              />
+            </div>
+          </div>
+
+          {/* Control Panel - Right Side */}
+          <div className="space-y-6">
+            <div className="glass-panel p-6 rounded-xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg flex items-center justify-center">
+                  <Target className="h-5 w-5 text-purple-400" />
+                </div>
+                <h3 className="text-xl font-semibold">Game Controls</h3>
+              </div>
+              
+              <KMeansGameControls
+                cities={cities}
+                setCities={setCities}
+                k={k}
+                setK={setK}
+                clusters={clusters}
+                setClusters={setClusters}
+                isRunning={isRunning}
+                setIsRunning={setIsRunning}
+                iteration={iteration}
+                setIteration={setIteration}
+                convergenceData={convergenceData}
+                setConvergenceData={setConvergenceData}
+                showCentroids={showCentroids}
+                setShowCentroids={setShowCentroids}
+                showConnections={showConnections}
+                setShowConnections={setShowConnections}
+                animationSpeed={animationSpeed}
+                setAnimationSpeed={setAnimationSpeed}
+                maxIterations={maxIterations}
+                setMaxIterations={setMaxIterations}
+                gameScore={gameScore}
+                setGameScore={setGameScore}
+                gameLevel={gameLevel}
+                setGameLevel={setGameLevel}
+              />
+            </div>
+
+            <div className="glass-panel p-6 rounded-xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-lg flex items-center justify-center">
+                  <Brain className="h-5 w-5 text-green-400" />
+                </div>
+                <h3 className="text-xl font-semibold">Learn K-Means</h3>
+              </div>
+              
+              <KMeansGameEducation
+                k={k}
+                cities={cities}
+                clusters={clusters}
+                iteration={iteration}
+                convergenceData={convergenceData}
+                gameLevel={gameLevel}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="w-full glass-panel border-t border-white/5">
+        <div className="container py-4 px-4 md:px-8 text-center opacity-70">
+          <p className="text-sm">
+            K-Means Clustering City Builder • Interactive Machine Learning Game • Simulix
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default KMeansGame;

@@ -24,6 +24,7 @@ import QLearningMaze from "./pages/QLearningMaze";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import HiLoBayesianGame from "./pages/HiLoBayesianGame";
+import KMeansGame from "./pages/KMeansGame";
 
 // Configure React Query with safe defaults
 const queryClient = new QueryClient({
@@ -135,6 +136,11 @@ const App = () => (
                 <Route path="/qlearning-maze" element={
                   <ErrorBoundary>
                     <QLearningMaze />
+                  </ErrorBoundary>
+                } />
+                <Route path="/kmeans-game" element={
+                  <ErrorBoundary>
+                    <KMeansGame />
                   </ErrorBoundary>
                 } />
                 <Route path="/about" element={

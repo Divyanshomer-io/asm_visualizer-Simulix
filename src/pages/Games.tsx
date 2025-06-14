@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Search, X, Home, Gamepad2, Spade, Target, ChevronDown, Sparkles } from "lucide-react";
+import { MoveRight, Search, X, Home, Gamepad2, Spade, Target, ChevronDown, Sparkles, MapPin } from "lucide-react";
 import FeedbackForm from "@/components/FeedbackForm";
 import ContributionForm from "@/components/ContributionForm";
 
@@ -27,6 +27,15 @@ const Games = () => {
       icon: <Spade className="h-6 w-6" />,
       tags: ["Bayesian Inference", "Probability", "Card Game", "Visualization"],
       gradient: "from-purple-500/20 to-pink-500/20"
+    },
+    {
+      id: "kmeans-game",
+      title: "K-Means City Builder",
+      description: "Build cities and watch K-means clustering group them in real-time. Learn clustering concepts through interactive city planning and algorithm visualization.",
+      path: "/kmeans-game",
+      icon: <MapPin className="h-6 w-6" />,
+      tags: ["Machine Learning", "Clustering", "K-Means", "City Building", "Interactive"],
+      gradient: "from-emerald-500/20 to-blue-500/20"
     },
   ];
 

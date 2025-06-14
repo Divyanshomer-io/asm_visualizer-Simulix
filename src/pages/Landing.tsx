@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Compass, Atom, ChartLine, Code, Dices, BarChart3, Target, Sparkles, Zap, Brain, Network, Spade, Search, BookOpen, Gamepad2, ChevronDown } from "lucide-react";
+import { MoveRight, Compass, Atom, ChartLine, Code, Dices, BarChart3, Target, Sparkles, Zap, Brain, Network, Spade, Search, BookOpen, Gamepad2, ChevronDown, MapPin } from "lucide-react";
 import MobilePopup from "@/components/MobilePopup";
 import FeedbackForm from "@/components/FeedbackForm";
 import ContributionForm from '@/components/ContributionForm';
@@ -159,7 +159,7 @@ const closeContribution = () => {
     },
   ];
 
-  // Featured games for the games section
+  // Featured games for the games section - ADD NEW GAME HERE
   const featuredGames = [
     {
       id: "qlearning-maze",
@@ -179,8 +179,18 @@ const closeContribution = () => {
       tags: ["Bayesian Inference", "Probability", "Card Game", "Visualization"],
       gradient: "from-purple-500/20 to-pink-500/20"
     },
+    {
+      id: "kmeans-game",
+      title: "K-Means City Builder",
+      description: "Build cities and watch K-means clustering group them in real-time. Learn clustering concepts through interactive city planning and algorithm visualization.",
+      path: "/kmeans-game",
+      icon: <MapPin className="h-6 w-6" />,
+      tags: ["Machine Learning", "Clustering", "K-Means", "City Building", "Interactive"],
+      gradient: "from-emerald-500/20 to-blue-500/20"
+    },
   ];
 
+  // Featured games for the games section
   const features = [
     {
       icon: <Code className="h-6 w-6" />,
@@ -396,7 +406,7 @@ const closeContribution = () => {
         <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent"></div>
       </div>
       
-      {/* Games Section */}
+      {/* Games Section with Updated featuredGames */}
       <section className="container px-4 md:px-8 py-16">
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-6">
@@ -411,7 +421,7 @@ const closeContribution = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredGames.map((game, index) => (
               <Link 
                 key={game.id}
