@@ -203,7 +203,7 @@ const HiLoEducation: React.FC = () => {
                     <h4 className="font-semibold text-blue-400 mb-2">Reward Structure</h4>
                     <ul className="text-sm text-gray-300 space-y-1">
                       <li>• <strong>+1:</strong> Correct prediction</li>
-                      <li>• <strong>0:</strong> Incorrect prediction</li>
+                      <li>• <strong>-2:</strong> Incorrect prediction</li>
                       <li>• Goal: Maximize cumulative score</li>
                     </ul>
                   </div>
