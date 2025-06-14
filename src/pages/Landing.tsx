@@ -279,14 +279,14 @@ const closeContribution = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <a 
+{/*             <a 
               href="#visualizations" 
               className="group control-btn-primary flex items-center justify-center gap-2 text-lg px-8 py-4 relative overflow-hidden"
             >
               <span className="relative z-10">Explore Visualizations</span>
               <MoveRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </a>
+            </a> */}
             
             <Link 
               to="/visualizations" 
@@ -536,12 +536,12 @@ const closeContribution = () => {
             >
               Home
             </button>
-            <button
+{/*             <button
               onClick={scrollToVisualizations}
               className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105 cursor-pointer"
             >
               Visualizations
-            </button>
+            </button> */}
             <Link
               to="/visualizations"
               className="text-sm font-medium opacity-70 hover:opacity-100 hover:text-accent transition-all duration-300 hover:scale-105"
