@@ -66,10 +66,11 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
     setIsVisible(false);
   };
 
-  // Close on outside click
+  // Close on outside click when visible
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
+      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node) &&
+          iconRef.current && !iconRef.current.contains(event.target as Node)) {
         hideTooltip();
       }
     };
@@ -99,11 +100,18 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
         aria-label="More information"
         tabIndex={0}
         className={`info-icon cursor-help text-blue-400 ml-2 text-sm hover:text-blue-300 transition-colors ${className}`}
-        onClick={showTooltip}
+        onMouseEnter={showTooltip}
+        onMouseLeave={hideTooltip}
+        onFocus={(e) => showTooltip(e as any)}
+        onBlur={hideTooltip}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            showTooltip(e as any);
+            if (isVisible) {
+              hideTooltip();
+            } else {
+              showTooltip(e as any);
+            }
           }
         }}
       >
@@ -118,6 +126,8 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
             left: `${position.x}px`,
             top: `${position.y}px`,
           }}
+          onMouseEnter={() => setIsVisible(true)}
+          onMouseLeave={hideTooltip}
         >
           <button
             onClick={hideTooltip}
