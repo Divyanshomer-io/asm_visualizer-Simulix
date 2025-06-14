@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import HiLoControls from '@/components/HiLoControls';
 import HiLoVisualization from '@/components/HiLoVisualization';
 import HiLoEducation from '@/components/HiLoEducation';
-import { GameState, GameParams, createDeck, drawCard, calculateTrueProbability } from '@/utils/hiLoGame';
+import { GameState, GameParams, createDeck, drawCard, calculateTrueProbability, calculateBestStreak, calculateCurrentStreak } from '@/utils/hiLoGame';
 import { toast } from 'sonner';
 
 const HiLoBayesianGame = () => {
@@ -148,27 +148,6 @@ const HiLoBayesianGame = () => {
           {/* Visualization Panel - Left Side */}
           <div className="xl:col-span-3 space-y-6">
             <HiLoVisualization state={state} params={params} />
-            
-            {/* Game History */}
-            {state.history.length > 0 && (
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-blue-400 mb-4">Recent Game History</h3>
-                <div className="flex flex-wrap gap-2">
-                  {state.history.slice(-20).map((result, i) => (
-                    <div
-                      key={i}
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                        result === 'correct' 
-                          ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                          : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                      }`}
-                    >
-                      {result === 'correct' ? '✓' : '✗'}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Controls Panel - Right Side */}
@@ -180,6 +159,105 @@ const HiLoBayesianGame = () => {
               onMakeGuess={makeGuess}
               onResetGame={resetGame}
             />
+          </div>
+        </div>
+
+        {/* Game History and Statistics Row */}
+        <div className="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* Game History - Left Side */}
+          {state.history.length > 0 && (
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-xl">
+              <h3 className="text-lg font-semibold text-blue-400 mb-4">Recent Game History</h3>
+              <div className="flex flex-wrap gap-2">
+                {state.history.slice(-20).map((result, i) => (
+                  <div
+                    key={i}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                      result === 'correct' 
+                        ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                        : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                    }`}
+                  >
+                    {result === 'correct' ? '✓' : '✗'}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Game Statistics - Right Side */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-blue-400 mb-4">Game Statistics</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              {/* Core Stats */}
+              <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30">
+                <h4 className="text-sm font-medium text-slate-300 mb-3">Performance</h4>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Score:</span>
+                    <span className="text-blue-400 font-medium">{state.score}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Games Played:</span>
+                    <span className="text-blue-400 font-medium">{state.history.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Win Rate:</span>
+                    <span className="text-blue-400 font-medium">
+                      {state.history.length > 0 ? 
+                        (state.history.filter(h => h === 'correct').length / state.history.length * 100).toFixed(1) : 0}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Cards Left:</span>
+                    <span className="text-blue-400 font-medium">{state.deck.length}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Streaks */}
+              <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30">
+                <h4 className="text-sm font-medium text-slate-300 mb-3">Streaks</h4>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Best Streak:</span>
+                    <span className="text-green-400 font-medium">{calculateBestStreak(state.history)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Current Streak:</span>
+                    <span className="text-green-400 font-medium">{calculateCurrentStreak(state.history)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bayesian Info */}
+              <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30 col-span-2">
+                <h4 className="text-sm font-medium text-slate-300 mb-3">Bayesian Analysis</h4>
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Bayesian Est.:</span>
+                      <span className="text-blue-400 font-medium">{(state.alpha / (state.alpha + state.beta)).toFixed(3)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Confidence:</span>
+                      <span className="text-blue-400 font-medium">{(state.alpha + state.beta).toFixed(1)}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Alpha (α):</span>
+                      <span className="text-green-400 font-medium">{state.alpha.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Beta (β):</span>
+                      <span className="text-red-400 font-medium">{state.beta.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
