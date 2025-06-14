@@ -254,7 +254,7 @@ export const HiLoTooltips = {
           <li>• <strong>Optimal play:</strong> 70%+ win rate possible</li>
         </ul>
         <p className="mt-2 text-emerald-300 text-xs">
-          <strong>Target:</strong> Sustained >60% indicates effective Bayesian learning
+          <strong>Target:</strong> Sustained {'>'}60% indicates effective Bayesian learning
         </p>
       </div>
     ),
