@@ -1,4 +1,5 @@
-mport React from 'react';
+
+import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Area, AreaChart, ReferenceLine } from 'recharts';
 import { GameState, GameParams, generateBetaPDF, calculateTrueProbability, getCardName } from '@/utils/hiLoGame';
 
