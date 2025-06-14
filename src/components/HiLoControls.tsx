@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { GameState, GameParams } from '@/utils/hiLoGame';
+import { GameState, GameParams, calculateBestStreak, calculateCurrentStreak } from '@/utils/hiLoGame';
 import HiLoCardDisplay from './HiLoCardDisplay';
 
 interface HiLoControlsProps {
@@ -23,6 +23,11 @@ const HiLoControls: React.FC<HiLoControlsProps> = ({
   onResetGame
 }) => {
   
+  const bayesianEstimate = state.alpha / (state.alpha + state.beta);
+  const confidence = state.alpha + state.beta;
+  const winRate = state.history.length > 0 ? 
+    state.history.filter(h => h === 'correct').length / state.history.length : 0;
+
   return (
     <div className="space-y-6">
       {/* Game Controls */}
@@ -129,6 +134,62 @@ const HiLoControls: React.FC<HiLoControlsProps> = ({
             <span>0.1</span>
             <span>1.0</span>
             <span>2.0</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Game Statistics */}
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-xl space-y-4">
+        <h4 className="text-md font-semibold text-blue-400">Statistics</h4>
+        
+        <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30">
+          <div className="text-xs text-slate-300 space-y-2">
+            <div className="flex justify-between">
+              <span>Score:</span>
+              <span className="text-blue-400 font-medium">{state.score}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Games Played:</span>
+              <span className="text-blue-400 font-medium">{state.history.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Win Rate:</span>
+              <span className="text-blue-400 font-medium">{(winRate * 100).toFixed(1)}%</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Best Streak:</span>
+              <span className="text-blue-400 font-medium">{calculateBestStreak(state.history)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Current Streak:</span>
+              <span className="text-blue-400 font-medium">{calculateCurrentStreak(state.history)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Cards Left:</span>
+              <span className="text-blue-400 font-medium">{state.deck.length}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bayesian Info */}
+        <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-600/30">
+          <div className="text-xs text-slate-300 space-y-2">
+            <div className="flex justify-between">
+              <span>Bayesian Est.:</span>
+              <span className="text-blue-400 font-medium">{bayesianEstimate.toFixed(3)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Confidence:</span>
+              <span className="text-blue-400 font-medium">{confidence.toFixed(1)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Alpha (α):</span>
+              <span className="text-green-400 font-medium">{state.alpha.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Beta (β):</span>
+              <span className="text-red-400 font-medium">{state.beta.toFixed(2)}</span>
+            </div>
           </div>
         </div>
       </div>
