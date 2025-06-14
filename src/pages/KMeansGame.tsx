@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Home, MapPin, Users, Target, Brain } from "lucide-react";
+import { Home, MapPin, Users, Target, Brain, BarChart3 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import KMeansGameControls from "@/components/KMeansGameControls";
 import KMeansGameVisualization from "@/components/KMeansGameVisualization";

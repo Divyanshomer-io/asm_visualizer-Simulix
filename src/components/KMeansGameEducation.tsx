@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -662,7 +661,7 @@ const KMeansGameEducation: React.FC<KMeansGameEducationProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center">
                     <div className="text-2xl mb-2">🚀</div>
-                    <h4 className="font-semibold text-sm">Fast & Efficient</h4>
+                    <h4 className="font-semibold text-sm">Fast &amp; Efficient</h4>
                     <p className="text-xs text-muted-foreground">Works quickly even with large datasets</p>
                   </div>
                   <div className="text-center">
