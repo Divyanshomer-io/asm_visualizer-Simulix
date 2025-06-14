@@ -23,63 +23,53 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
   const showTooltip = (event: React.MouseEvent) => {
     event.stopPropagation();
     
-    if (!iconRef.current || !tooltipRef.current) return;
+    if (!iconRef.current) return;
     
-    setIsVisible(true);
-    
-    // Get icon position
+    // Get icon position immediately
     const iconRect = iconRef.current.getBoundingClientRect();
-    let x = iconRect.right + 10;
-    let y = iconRect.top;
+    const x = iconRect.right + 10;
+    const y = iconRect.top;
     
-    // Wait for next frame to get tooltip dimensions
-    setTimeout(() => {
-      if (!tooltipRef.current) return;
-      
-      const tooltipRect = tooltipRef.current.getBoundingClientRect();
-      
-      // Right boundary check
-      if (x + tooltipRect.width > window.innerWidth - 10) {
-        x = iconRect.left - tooltipRect.width - 10;
-      }
-      
-      // Bottom boundary check
-      if (y + tooltipRect.height > window.innerHeight - 10) {
-        y = iconRect.bottom - tooltipRect.height;
-      }
-      
-      // Top boundary check
-      if (y < 10) {
-        y = 10;
-      }
-      
-      // Left boundary check
-      if (x < 10) {
-        x = 10;
-      }
-      
-      setPosition({ x, y });
-    }, 0);
+    setPosition({ x, y });
+    setIsVisible(true);
   };
 
   const hideTooltip = () => {
     setIsVisible(false);
   };
 
-  // Close on outside click when visible
+  // Adjust position if tooltip goes off screen
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node) &&
-          iconRef.current && !iconRef.current.contains(event.target as Node)) {
-        hideTooltip();
+    if (isVisible && tooltipRef.current) {
+      const tooltipRect = tooltipRef.current.getBoundingClientRect();
+      let newX = position.x;
+      let newY = position.y;
+      
+      // Right boundary check
+      if (newX + tooltipRect.width > window.innerWidth - 20) {
+        newX = position.x - tooltipRect.width - 20;
       }
-    };
-
-    if (isVisible) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      
+      // Bottom boundary check
+      if (newY + tooltipRect.height > window.innerHeight - 20) {
+        newY = window.innerHeight - tooltipRect.height - 20;
+      }
+      
+      // Top boundary check
+      if (newY < 20) {
+        newY = 20;
+      }
+      
+      // Left boundary check
+      if (newX < 20) {
+        newX = 20;
+      }
+      
+      if (newX !== position.x || newY !== position.y) {
+        setPosition({ x: newX, y: newY });
+      }
     }
-  }, [isVisible]);
+  }, [isVisible, position.x, position.y]);
 
   const getVariantStyles = () => {
     switch (variant) {
@@ -104,16 +94,6 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
         onMouseLeave={hideTooltip}
         onFocus={(e) => showTooltip(e as any)}
         onBlur={hideTooltip}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            if (isVisible) {
-              hideTooltip();
-            } else {
-              showTooltip(e as any);
-            }
-          }
-        }}
       >
         ⓘ
       </span>
@@ -121,10 +101,11 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
       {isVisible && (
         <div
           ref={tooltipRef}
-          className={`fixed z-[9999] border rounded-md p-3 text-sm leading-relaxed max-w-[280px] shadow-lg ${getVariantStyles()}`}
+          className={`fixed z-[99999] border rounded-md p-3 text-sm leading-relaxed max-w-[280px] shadow-xl ${getVariantStyles()}`}
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
+            pointerEvents: 'auto'
           }}
           onMouseEnter={() => setIsVisible(true)}
           onMouseLeave={hideTooltip}
