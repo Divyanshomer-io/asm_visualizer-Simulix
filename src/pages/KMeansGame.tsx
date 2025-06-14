@@ -88,99 +88,96 @@ const KMeansGame = () => {
 
       {/* Main Content */}
       <div className="flex-1 container px-4 md:px-8 py-6">
-        {/* City Builder Map and Control Panel Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-4">
-          {/* City Builder Map - Left 3 columns */}
-          <div className="lg:col-span-3">
-            <div className="glass-panel p-6 rounded-xl">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-lg flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-accent" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold">City Builder Map</h2>
-                    <p className="text-muted-foreground">Click to place cities and watch K-means clustering in action</p>
-                  </div>
+        {/* City Builder Map - Separate Container */}
+        <div className="mb-6">
+          <div className="glass-panel p-6 rounded-xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-accent/20 to-blue-500/20 rounded-lg flex items-center justify-center">
+                  <MapPin className="h-6 w-6 text-accent" />
                 </div>
-                
-                {/* Game Stats */}
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-accent">{gameScore}</div>
-                    <div className="text-sm text-muted-foreground">Score</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-400">{gameLevel}</div>
-                    <div className="text-sm text-muted-foreground">Level</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-400">{cities.length}</div>
-                    <div className="text-sm text-muted-foreground">Cities</div>
-                  </div>
+                <div>
+                  <h2 className="text-2xl font-bold">City Builder Map</h2>
+                  <p className="text-muted-foreground">Click to place cities and watch K-means clustering in action</p>
                 </div>
               </div>
               
-              <KMeansGameVisualization
-                cities={cities}
-                setCities={setCities}
-                clusters={clusters}
-                setClusters={setClusters}
-                k={k}
-                isRunning={isRunning}
-                iteration={iteration}
-                setIteration={setIteration}
-                convergenceData={convergenceData}
-                setConvergenceData={setConvergenceData}
-                showCentroids={showCentroids}
-                showConnections={showConnections}
-                animationSpeed={animationSpeed}
-                maxIterations={maxIterations}
-                gameScore={gameScore}
-                setGameScore={setGameScore}
-                gameLevel={gameLevel}
-                setGameLevel={setGameLevel}
-              />
+              {/* Game Stats */}
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-accent">{gameScore}</div>
+                  <div className="text-sm text-muted-foreground">Score</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-400">{gameLevel}</div>
+                  <div className="text-sm text-muted-foreground">Level</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-400">{cities.length}</div>
+                  <div className="text-sm text-muted-foreground">Cities</div>
+                </div>
+              </div>
             </div>
+            
+            <KMeansGameVisualization
+              cities={cities}
+              setCities={setCities}
+              clusters={clusters}
+              setClusters={setClusters}
+              k={k}
+              isRunning={isRunning}
+              iteration={iteration}
+              setIteration={setIteration}
+              convergenceData={convergenceData}
+              setConvergenceData={setConvergenceData}
+              showCentroids={showCentroids}
+              showConnections={showConnections}
+              animationSpeed={animationSpeed}
+              maxIterations={maxIterations}
+              gameScore={gameScore}
+              setGameScore={setGameScore}
+              gameLevel={gameLevel}
+              setGameLevel={setGameLevel}
+            />
           </div>
+        </div>
 
-          {/* Control Panel - Right 1 column */}
-          <div className="space-y-6">
-            <div className="glass-panel p-6 rounded-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg flex items-center justify-center">
-                  <Target className="h-5 w-5 text-purple-400" />
-                </div>
-                <h3 className="text-xl font-semibold">Game Controls</h3>
+        {/* Game Controls - Separate Container */}
+        <div className="mb-6">
+          <div className="glass-panel p-6 rounded-xl max-w-md mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg flex items-center justify-center">
+                <Target className="h-5 w-5 text-purple-400" />
               </div>
-              
-              <KMeansGameControls
-                cities={cities}
-                setCities={setCities}
-                k={k}
-                setK={setK}
-                clusters={clusters}
-                setClusters={setClusters}
-                isRunning={isRunning}
-                setIsRunning={setIsRunning}
-                iteration={iteration}
-                setIteration={setIteration}
-                convergenceData={convergenceData}
-                setConvergenceData={setConvergenceData}
-                showCentroids={showCentroids}
-                setShowCentroids={setShowCentroids}
-                showConnections={showConnections}
-                setShowConnections={setShowConnections}
-                animationSpeed={animationSpeed}
-                setAnimationSpeed={setAnimationSpeed}
-                maxIterations={maxIterations}
-                setMaxIterations={setMaxIterations}
-                gameScore={gameScore}
-                setGameScore={setGameScore}
-                gameLevel={gameLevel}
-                setGameLevel={setGameLevel}
-              />
+              <h3 className="text-xl font-semibold">Game Controls</h3>
             </div>
+            
+            <KMeansGameControls
+              cities={cities}
+              setCities={setCities}
+              k={k}
+              setK={setK}
+              clusters={clusters}
+              setClusters={setClusters}
+              isRunning={isRunning}
+              setIsRunning={setIsRunning}
+              iteration={iteration}
+              setIteration={setIteration}
+              convergenceData={convergenceData}
+              setConvergenceData={setConvergenceData}
+              showCentroids={showCentroids}
+              setShowCentroids={setShowCentroids}
+              showConnections={showConnections}
+              setShowConnections={setShowConnections}
+              animationSpeed={animationSpeed}
+              setAnimationSpeed={setAnimationSpeed}
+              maxIterations={maxIterations}
+              setMaxIterations={setMaxIterations}
+              gameScore={gameScore}
+              setGameScore={setGameScore}
+              gameLevel={gameLevel}
+              setGameLevel={setGameLevel}
+            />
           </div>
         </div>
 
