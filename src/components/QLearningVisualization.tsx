@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -272,8 +273,8 @@ const QLearningVisualization: React.FC<QLearningVisualizationProps> = ({
         
         // Add subtle gradient overlay for depth
         const gradient = ctx.createLinearGradient(x, y, x + cellSize, y + cellSize);
-        gradient.addColorStep(0, `rgba(255, 255, 255, ${normalized * 0.1})`);
-        gradient.addColorStep(1, `rgba(0, 0, 0, ${(1 - normalized) * 0.1})`);
+        gradient.addColorStop(0, `rgba(255, 255, 255, ${normalized * 0.1})`);
+        gradient.addColorStop(1, `rgba(0, 0, 0, ${(1 - normalized) * 0.1})`);
         ctx.fillStyle = gradient;
         ctx.fillRect(x, y, cellSize, cellSize);
         
