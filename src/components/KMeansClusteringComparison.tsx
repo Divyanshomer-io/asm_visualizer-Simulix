@@ -18,23 +18,26 @@ const KMeansClusteringComparison: React.FC<KMeansClusteringComparisonProps> = ({
     
     // Use real K-means clustering data from the main visualization
     const kmeansData = cities.map((city, cityIndex) => {
-      // Find which cluster this city belongs to
       let clusterIndex = 0;
       let clusterColor = colors[0];
       
+      // Find which cluster this city belongs to
       if (clusters.length > 0) {
         for (let i = 0; i < clusters.length; i++) {
-          if (clusters[i].cities.includes(cityIndex)) {
+          if (clusters[i].cities && clusters[i].cities.includes(cityIndex)) {
             clusterIndex = i;
-            // Use the cluster's actual color or fallback to predefined colors
-            clusterColor = clusters[i].color || colors[i % colors.length];
+            // Use the cluster's actual color
+            clusterColor = clusters[i].color;
             break;
           }
         }
       }
       
       return {
-        ...city,
+        x: city.x,
+        y: city.y,
+        name: city.name,
+        population: city.population,
         cluster: clusterIndex,
         color: clusterColor
       };
@@ -44,9 +47,12 @@ const KMeansClusteringComparison: React.FC<KMeansClusteringComparisonProps> = ({
     const hierarchicalData = cities.map((city, index) => {
       const distanceCluster = Math.floor((city.x + city.y) / 200) % k;
       return {
-        ...city,
+        x: city.x,
+        y: city.y,
+        name: city.name,
+        population: city.population,
         cluster: distanceCluster,
-        color: colors[distanceCluster]
+        color: colors[distanceCluster % colors.length]
       };
     });
     
@@ -54,9 +60,12 @@ const KMeansClusteringComparison: React.FC<KMeansClusteringComparisonProps> = ({
     const densityData = cities.map((city, index) => {
       const popCluster = city.population > 50000 ? 0 : city.population > 30000 ? 1 : 2;
       return {
-        ...city,
+        x: city.x,
+        y: city.y,
+        name: city.name,
+        population: city.population,
         cluster: popCluster % k,
-        color: colors[popCluster % k]
+        color: colors[(popCluster % k) % colors.length]
       };
     });
     
@@ -98,7 +107,10 @@ const KMeansClusteringComparison: React.FC<KMeansClusteringComparisonProps> = ({
                     borderRadius: '8px',
                     fontSize: '11px'
                   }}
-                  formatter={(value, name, props) => [props.payload.name, 'City']}
+                  formatter={(value, name, props) => [
+                    `${props.payload.name} (${Math.floor(props.payload.population / 1000)}K)`, 
+                    'City'
+                  ]}
                 />
                 <Scatter dataKey="population" fill="#8884d8">
                   {data.map((entry, index) => (
