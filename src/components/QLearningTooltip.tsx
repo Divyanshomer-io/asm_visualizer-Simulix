@@ -13,7 +13,7 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
   content, 
   title, 
   side = "right", 
-  maxWidth = 320 
+  maxWidth = 280 
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
@@ -24,41 +24,56 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
   const hideTimeoutRef = useRef<NodeJS.Timeout>();
 
   const positionTooltip = () => {
-    if (!iconRef.current || !tooltipRef.current) return;
+    if (!iconRef.current) return;
     
     const iconRect = iconRef.current.getBoundingClientRect();
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    const tooltipWidth = maxWidth;
+    const tooltipHeight = 200; // Estimated height
     
     let left = 0;
     let top = 0;
     
+    // Reduced spacing between icon and tooltip
+    const spacing = 8;
+    
     switch (side) {
       case "right":
-        left = iconRect.right + 10;
-        top = iconRect.top - tooltipRect.height / 2;
+        left = iconRect.right + spacing;
+        top = iconRect.top + iconRect.height / 2 - tooltipHeight / 2;
         break;
       case "left":
-        left = iconRect.left - tooltipRect.width - 10;
-        top = iconRect.top - tooltipRect.height / 2;
+        left = iconRect.left - tooltipWidth - spacing;
+        top = iconRect.top + iconRect.height / 2 - tooltipHeight / 2;
         break;
       case "bottom":
-        left = iconRect.left - tooltipRect.width / 2 + iconRect.width / 2;
-        top = iconRect.bottom + 10;
+        left = iconRect.left + iconRect.width / 2 - tooltipWidth / 2;
+        top = iconRect.bottom + spacing;
         break;
       case "top":
-        left = iconRect.left - tooltipRect.width / 2 + iconRect.width / 2;
-        top = iconRect.top - tooltipRect.height - 10;
+        left = iconRect.left + iconRect.width / 2 - tooltipWidth / 2;
+        top = iconRect.top - tooltipHeight - spacing;
         break;
     }
     
-    // Smart positioning to avoid screen edges
-    if (left + tooltipRect.width > window.innerWidth - 10) {
-      left = window.innerWidth - tooltipRect.width - 10;
+    // Viewport boundary checks with smaller margins
+    const margin = 8;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Horizontal bounds
+    if (left + tooltipWidth > viewportWidth - margin) {
+      left = viewportWidth - tooltipWidth - margin;
     }
-    if (left < 10) left = 10;
-    if (top < 10) top = 10;
-    if (top + tooltipRect.height > window.innerHeight - 10) {
-      top = window.innerHeight - tooltipRect.height - 10;
+    if (left < margin) {
+      left = margin;
+    }
+    
+    // Vertical bounds
+    if (top + tooltipHeight > viewportHeight - margin) {
+      top = viewportHeight - tooltipHeight - margin;
+    }
+    if (top < margin) {
+      top = margin;
     }
     
     setPosition({ x: left, y: top });
@@ -70,7 +85,7 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
     }
     showTimeoutRef.current = setTimeout(() => {
       setIsVisible(true);
-    }, 200);
+    }, 150);
   };
 
   const handleMouseLeave = () => {
@@ -108,9 +123,13 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
 
   useEffect(() => {
     if (isVisible) {
-      positionTooltip();
+      // Small delay to ensure DOM is updated
+      const timer = setTimeout(() => {
+        positionTooltip();
+      }, 10);
+      return () => clearTimeout(timer);
     }
-  }, [isVisible]);
+  }, [isVisible, side, maxWidth]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -123,11 +142,27 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
       }
     };
 
+    const handleScroll = () => {
+      if (isVisible && !isPinned) {
+        setIsVisible(false);
+      }
+    };
+
     if (isPinned) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [isPinned]);
+    
+    if (isVisible) {
+      window.addEventListener('scroll', handleScroll, true);
+      window.addEventListener('resize', positionTooltip);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', positionTooltip);
+    };
+  }, [isPinned, isVisible]);
 
   const formatContent = (text: string) => {
     return text.split('\n').map((line, index) => {
@@ -161,29 +196,30 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
   };
 
   const getArrowPosition = () => {
+    const arrowSize = 6;
     switch (side) {
       case "right":
         return {
-          left: '-5px',
-          top: '50%',
+          left: `-${arrowSize}px`,
+          top: '20px',
           transform: 'translateY(-50%) rotate(45deg)'
         };
       case "left":
         return {
-          right: '-5px',
-          top: '50%',
+          right: `-${arrowSize}px`,
+          top: '20px',
           transform: 'translateY(-50%) rotate(45deg)'
         };
       case "bottom":
         return {
-          left: '50%',
-          top: '-5px',
+          left: '20px',
+          top: `-${arrowSize}px`,
           transform: 'translateX(-50%) rotate(45deg)'
         };
       case "top":
         return {
-          left: '50%',
-          bottom: '-5px',
+          left: '20px',
+          bottom: `-${arrowSize}px`,
           transform: 'translateX(-50%) rotate(45deg)'
         };
     }
@@ -193,7 +229,7 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
     <>
       <div
         ref={iconRef}
-        className="info-icon inline-flex items-center justify-center w-4 h-4 bg-blue-500 text-white rounded-full cursor-pointer hover:bg-blue-600 transition-colors ml-2 text-xs font-bold"
+        className="info-icon inline-flex items-center justify-center w-4 h-4 bg-blue-500 text-white rounded-full cursor-pointer hover:bg-blue-600 transition-colors ml-1 text-xs font-bold flex-shrink-0"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
@@ -209,14 +245,27 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
       {isVisible && (
         <div
           ref={tooltipRef}
-          className="tooltip-container fixed z-[9999] bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-blue-500/50 rounded-lg p-3 text-gray-100 shadow-2xl backdrop-blur-sm"
+          className="tooltip-container fixed z-[99999] bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-blue-500/50 rounded-lg p-3 text-gray-100 shadow-2xl backdrop-blur-sm"
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
             maxWidth: `${maxWidth}px`,
+            minWidth: '200px',
             pointerEvents: isPinned ? 'auto' : 'none',
             opacity: 1,
             transition: 'opacity 0.15s ease-in-out'
+          }}
+          onMouseEnter={() => {
+            if (hideTimeoutRef.current) {
+              clearTimeout(hideTimeoutRef.current);
+            }
+          }}
+          onMouseLeave={() => {
+            if (!isPinned) {
+              hideTimeoutRef.current = setTimeout(() => {
+                setIsVisible(false);
+              }, 100);
+            }
           }}
         >
           {title && (
@@ -236,7 +285,7 @@ const QLearningTooltip: React.FC<QLearningTooltipProps> = ({
           
           {/* Tooltip arrow */}
           <div 
-            className="absolute w-2 h-2 bg-gradient-to-br from-slate-800 to-slate-900 border-l border-t border-blue-500/50"
+            className="absolute w-3 h-3 bg-gradient-to-br from-slate-800 to-slate-900 border-l border-t border-blue-500/50 z-[-1]"
             style={getArrowPosition()}
           />
         </div>
