@@ -262,7 +262,11 @@ const closeContribution = () => {
       
       {/* Enhanced Hero Section */}
       <section className="container px-4 md:px-8 py-16 md:py-24 relative">
+        {/* Background Effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-purple-500/5 rounded-3xl"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(56,189,248,0.1),transparent)] opacity-60"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.1),transparent)] opacity-40"></div>
+        
         <div className="max-w-4xl mx-auto space-y-8 relative">
           <div className="space-y-6">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gradient-primary leading-tight">
@@ -320,18 +324,47 @@ const closeContribution = () => {
       </div>
       
       {/* Enhanced Visualizations Section */}
-      <section id="visualizations" className="container px-4 md:px-8 py-16">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-6">
-            <div className="inline-flex items-center gap-3 px-6 py-3 glass-panel rounded-full mb-4">
-              <ChartLine className="h-6 w-6 text-accent" />
-              <span className="text-lg font-semibold text-accent">Featured Tools</span>
+      <section id="visualizations" className="container px-4 md:px-8 py-24 relative">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-purple-500/5 rounded-3xl"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(56,189,248,0.1),transparent)] opacity-60"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.1),transparent)] opacity-40"></div>
+        
+        <div className="max-w-6xl mx-auto space-y-16 relative z-10">
+          <div className="text-center space-y-8">
+            {/* Enhanced Badge */}
+            <div className="inline-flex items-center gap-4 px-8 py-4 glass-panel rounded-full mb-6 group hover:scale-105 transition-all duration-500 border-2 border-white/10 hover:border-accent/30">
+              <div className="relative">
+                <ChartLine className="h-7 w-7 text-accent transition-transform group-hover:scale-110 duration-300" />
+                <div className="absolute -inset-1 bg-accent/20 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-accent to-blue-400 bg-clip-text text-transparent">
+                All Visualizations
+              </span>
+              <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
             </div>
 
-            <h2 className="text-3xl md:text-4xl font-bold">Interactive Visualization Suite</h2>
-            <p className="opacity-70 max-w-2xl mx-auto text-lg">
-              Explore our most popular interactive modules for learning data science concepts through hands-on simulations.
+            {/* Enhanced Title */}
+            <div className="space-y-6">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight">
+                <span className="bg-gradient-to-r from-white via-accent to-purple-400 bg-clip-text text-transparent drop-shadow-2xl">
+                  Complete Visualization Suite
+                </span>
+              </h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-accent to-purple-400 mx-auto rounded-full shadow-lg shadow-accent/50"></div>
+            </div>
+            
+            {/* Enhanced Description */}
+            <p className="text-xl md:text-2xl opacity-80 max-w-4xl mx-auto leading-relaxed font-medium">
+              Explore our comprehensive collection of 
+              <span className="text-accent font-semibold"> interactive data science</span> and 
+              <span className="text-purple-400 font-semibold"> machine learning visualizations</span>.
             </p>
+
+            {/* Floating Elements */}
+            <div className="absolute top-20 left-10 w-20 h-20 bg-accent/10 rounded-full blur-xl animate-pulse opacity-60"></div>
+            <div className="absolute top-40 right-16 w-16 h-16 bg-purple-500/10 rounded-full blur-xl animate-pulse opacity-40" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-blue-500/10 rounded-full blur-xl animate-pulse opacity-50" style={{ animationDelay: '2s' }}></div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -377,15 +410,16 @@ const closeContribution = () => {
             ))}
           </div>
 
-          {/* Explore More Visualizations Button - Updated with down arrow */}
-          <div className="text-center pt-8">
+          {/* Enhanced Explore More Button */}
+          <div className="text-center pt-12">
             <Link 
               to="/visualizations"
-              className="group control-btn-primary inline-flex items-center justify-center gap-3 text-lg px-10 py-5 relative overflow-hidden"
+              className="group relative inline-flex items-center justify-center gap-4 text-xl px-12 py-6 bg-gradient-to-r from-accent/90 to-blue-500/90 hover:from-accent hover:to-blue-500 rounded-2xl font-bold text-background transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-accent/25 overflow-hidden"
             >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <span className="relative z-10">Explore More Visualizations</span>
-              <ChevronDown className="h-6 w-6 transition-transform group-hover:translate-y-1 duration-300" />
-              <div className="absolute inset-0 bg-gradient-to-r from-accent/30 to-blue-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <ChevronDown className="h-7 w-7 transition-transform group-hover:translate-y-1 duration-300 relative z-10" />
+              <div className="absolute -inset-2 bg-gradient-to-r from-accent/30 to-blue-500/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </Link>
           </div>
         </div>
@@ -393,22 +427,52 @@ const closeContribution = () => {
 
       {/* Section Divider */}
       <div className="container px-4 md:px-8">
-        <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent"></div>
+        <div className="h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent shadow-lg shadow-accent/20"></div>
       </div>
       
-      {/* Games Section */}
-      <section className="container px-4 md:px-8 py-16">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-6">
-            <div className="inline-flex items-center gap-3 px-6 py-3 glass-panel rounded-full mb-4">
-              <Gamepad2 className="h-6 w-6 text-accent" />
-              <span className="text-lg font-semibold text-accent">Interactive Games</span>
+      {/* Enhanced Games Section */}
+      <section className="container px-4 md:px-8 py-24 relative">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-bl from-purple-500/5 via-transparent to-accent/5 rounded-3xl"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(168,85,247,0.15),transparent)] opacity-60"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_70%,rgba(56,189,248,0.1),transparent)] opacity-50"></div>
+        
+        <div className="max-w-6xl mx-auto space-y-16 relative z-10">
+          <div className="text-center space-y-8">
+            {/* Enhanced Badge */}
+            <div className="inline-flex items-center gap-4 px-8 py-4 glass-panel rounded-full mb-6 group hover:scale-105 transition-all duration-500 border-2 border-white/10 hover:border-purple-400/30">
+              <div className="relative">
+                <Gamepad2 className="h-7 w-7 text-purple-400 transition-transform group-hover:scale-110 duration-300" />
+                <div className="absolute -inset-1 bg-purple-400/20 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Interactive Games
+              </span>
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
             </div>
 
-            <h2 className="text-3xl md:text-4xl font-bold">Educational Gaming Suite</h2>
-            <p className="opacity-70 max-w-2xl mx-auto text-lg">
-              Learn complex algorithms and statistical concepts through engaging, interactive game-based visualizations.
+            {/* Enhanced Title */}
+            <div className="space-y-6">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight">
+                <span className="bg-gradient-to-r from-white via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-2xl">
+                  Educational Gaming Suite
+                </span>
+              </h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-purple-400 to-pink-400 mx-auto rounded-full shadow-lg shadow-purple-400/50"></div>
+            </div>
+            
+            {/* Enhanced Description */}
+            <p className="text-xl md:text-2xl opacity-80 max-w-4xl mx-auto leading-relaxed font-medium">
+              Learn complex 
+              <span className="text-purple-400 font-semibold"> algorithms</span> and 
+              <span className="text-pink-400 font-semibold"> statistical concepts</span> through engaging, 
+              interactive game-based visualizations.
             </p>
+
+            {/* Floating Elements */}
+            <div className="absolute top-16 right-12 w-18 h-18 bg-purple-500/10 rounded-full blur-xl animate-pulse opacity-60"></div>
+            <div className="absolute top-32 left-20 w-14 h-14 bg-pink-500/10 rounded-full blur-xl animate-pulse opacity-40" style={{ animationDelay: '1.5s' }}></div>
+            <div className="absolute bottom-24 right-1/4 w-10 h-10 bg-purple-400/10 rounded-full blur-xl animate-pulse opacity-50" style={{ animationDelay: '3s' }}></div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -454,15 +518,16 @@ const closeContribution = () => {
             ))}
           </div>
 
-          {/* Explore More Games Button - Updated with down arrow */}
-          <div className="text-center pt-8">
+          {/* Enhanced Explore More Button */}
+          <div className="text-center pt-12">
             <Link 
               to="/games"
-              className="group control-btn-primary inline-flex items-center justify-center gap-3 text-lg px-10 py-5 relative overflow-hidden"
+              className="group relative inline-flex items-center justify-center gap-4 text-xl px-12 py-6 bg-gradient-to-r from-purple-500/90 to-pink-500/90 hover:from-purple-500 hover:to-pink-500 rounded-2xl font-bold text-background transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 overflow-hidden"
             >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <span className="relative z-10">Explore More Games</span>
-              <ChevronDown className="h-6 w-6 transition-transform group-hover:translate-y-1 duration-300" />
-              <div className="absolute inset-0 bg-gradient-to-r from-accent/30 to-purple-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <ChevronDown className="h-7 w-7 transition-transform group-hover:translate-y-1 duration-300 relative z-10" />
+              <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/30 to-pink-500/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </Link>
           </div>
         </div>
