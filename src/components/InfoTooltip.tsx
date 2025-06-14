@@ -262,4 +262,115 @@ export const HiLoTooltips = {
   }
 };
 
+// VAE-specific tooltip content definitions
+export const VAETooltips = {
+  latentDimension: {
+    title: "Latent Dimension",
+    content: (
+      <div>
+        <p className="mb-2">Dimensionality of the compressed latent representation.</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <strong>Lower values:</strong> Higher compression, potential information loss</li>
+          <li>• <strong>Higher values:</strong> More detailed representation, less compression</li>
+          <li>• <strong>Sweet spot:</strong> Balance between compression and quality</li>
+        </ul>
+        <p className="mt-2 text-blue-300 text-xs">
+          <strong>Technical note:</strong> Original MNIST has 784 dimensions (28×28 pixels)
+        </p>
+      </div>
+    ),
+    variant: 'technical' as const
+  },
+
+  nuclearNorm: {
+    title: "Nuclear Norm Regularization",
+    content: (
+      <div>
+        <p className="mb-2">Promotes low-rank structure in latent representations.</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <strong>Purpose:</strong> Encourages sparse, interpretable features</li>
+          <li>• <strong>Effect:</strong> Reduces effective dimensionality</li>
+          <li>• <strong>Trade-off:</strong> Compression vs reconstruction quality</li>
+        </ul>
+        <p className="mt-2 text-orange-300 text-xs">
+          <strong>Mathematical insight:</strong> ||Z||* = sum of singular values
+        </p>
+      </div>
+    ),
+    variant: 'technical' as const
+  },
+
+  epochs: {
+    title: "Training Epochs",
+    content: (
+      <div>
+        <p className="mb-2">Number of complete passes through the training data.</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <strong>Few epochs:</strong> Fast training, potential underfitting</li>
+          <li>• <strong>Many epochs:</strong> Better convergence, risk of overfitting</li>
+          <li>• <strong>Optimal range:</strong> Usually 10-30 for VAE models</li>
+        </ul>
+        <p className="mt-2 text-green-300 text-xs">
+          <strong>Tip:</strong> Watch for plateau in loss curves to determine optimal stopping
+        </p>
+      </div>
+    ),
+    variant: 'info' as const
+  },
+
+  mnistReconstruction: {
+    title: "MNIST Reconstruction Quality",
+    content: (
+      <div>
+        <p className="mb-2">Visual comparison of original vs reconstructed handwritten digits.</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <strong>Sharp images:</strong> High reconstruction fidelity</li>
+          <li>• <strong>Blurry images:</strong> Information loss in compression</li>
+          <li>• <strong>Progressive improvement:</strong> Quality increases with training</li>
+        </ul>
+        <p className="mt-2 text-purple-300 text-xs">
+          <strong>Goal:</strong> Maintain digit recognizability with maximum compression
+        </p>
+      </div>
+    ),
+    variant: 'info' as const
+  },
+
+  lossComponents: {
+    title: "VAE Loss Components",
+    content: (
+      <div>
+        <p className="mb-2">Decomposition of the total variational autoencoder loss.</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <strong>Reconstruction Loss:</strong> How well we recreate input images</li>
+          <li>• <strong>KL Divergence:</strong> Regularization term for latent distribution</li>
+          <li>• <strong>Regularization Loss:</strong> Additional penalty for low-rank structure</li>
+        </ul>
+        <p className="mt-2 text-cyan-300 text-xs">
+          <strong>Balance:</strong> All components should decrease together for good training
+        </p>
+      </div>
+    ),
+    variant: 'technical' as const
+  },
+
+  qualityEvolution: {
+    title: "Quality Evolution",
+    content: (
+      <div>
+        <p className="mb-2">Tracks reconstruction quality improvement over training epochs.</p>
+        <ul className="space-y-1 text-xs">
+          <li>• <strong>Steep initial rise:</strong> Rapid early learning</li>
+          <li>• <strong>Plateau phase:</strong> Convergence to optimal quality</li>
+          <li>• <strong>Final quality:</strong> Depends on regularization strength</li>
+        </ul>
+        <p className="mt-2 text-emerald-300 text-xs">
+          <strong>Expected:</strong> 60-90% quality for well-tuned parameters
+        </p>
+      </div>
+    ),
+    variant: 'info' as const
+  }
+};
+
 export default InfoTooltip;
