@@ -302,7 +302,7 @@ const HiLoBayesianGame = () => {
       <footer className="w-full glass-panel border-t border-white/5 mt-16">
         <div className="container py-4 px-4 md:px-8 text-center">
           <p className="text-sm opacity-70">
-            Bootstrap Visualization • Statistical Resampling • BITS Pilani, K.K. Birla Goa Campus
+            Bayesian Visualization • Statistical Resampling • BITS Pilani, K.K. Birla Goa Campus
           </p>
         </div>
       </footer>
