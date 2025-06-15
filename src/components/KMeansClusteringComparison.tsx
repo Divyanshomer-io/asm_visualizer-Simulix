@@ -1,3 +1,4 @@
+
 import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -105,7 +106,8 @@ const KMeansClusteringComparison: React.FC<KMeansClusteringComparisonProps> = ({
                     backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                     border: '1px solid rgba(148, 163, 184, 0.2)',
                     borderRadius: '8px',
-                    fontSize: '11px'
+                    fontSize: '11px',
+                    color: 'white'
                   }}
                   formatter={(value, name, props) => [
                     `${props.payload.name} (${Math.floor(props.payload.population / 1000)}K)`, 

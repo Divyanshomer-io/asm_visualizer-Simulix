@@ -172,7 +172,7 @@ const KMeansConvergencePlots: React.FC<KMeansConvergencePlotsProps> = ({
                       fontSize: '12px',
                       color: 'white'
                     }}
-                    formatter={(value: any) => [typeof value === 'number' ? value.toFixed(3) : value, 'Size']}
+                    formatter={(value: any) => [typeof value === 'number' ? value.toFixed(0) : value, 'Cities']}
                     labelFormatter={(label) => `${label}`}
                   />
                   <Bar dataKey="size" radius={[4, 4, 0, 0]}>
@@ -194,7 +194,7 @@ const KMeansConvergencePlots: React.FC<KMeansConvergencePlotsProps> = ({
         </CardContent>
       </Card>
 
-      {/* Iteration Progress */}
+      {/* Algorithm Progress */}
       <Card className="glass-panel border-accent/20">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
