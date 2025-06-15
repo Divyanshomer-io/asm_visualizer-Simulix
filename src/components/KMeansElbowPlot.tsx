@@ -105,9 +105,10 @@ const KMeansElbowPlot: React.FC<KMeansElbowPlotProps> = ({ cities, currentK }) =
                       backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                       border: '1px solid rgba(148, 163, 184, 0.2)',
                       borderRadius: '8px',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      color: 'white'
                     }}
-                    formatter={(value, name) => [value, 'WCSS']}
+                    formatter={(value: any) => [typeof value === 'number' ? value.toFixed(3) : value, 'WCSS']}
                     labelFormatter={(label) => `K = ${label}`}
                   />
                   <ReferenceLine 

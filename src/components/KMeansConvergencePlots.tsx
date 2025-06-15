@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, Cell, BarChart, Bar } from 'recharts';
@@ -60,8 +59,11 @@ const KMeansConvergencePlots: React.FC<KMeansConvergencePlotsProps> = ({
                       backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                       border: '1px solid rgba(148, 163, 184, 0.2)',
                       borderRadius: '8px',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      color: 'white'
                     }}
+                    formatter={(value: any) => [typeof value === 'number' ? value.toFixed(3) : value, 'WCSS']}
+                    labelFormatter={(label) => `Iteration ${label}`}
                   />
                   <Line 
                     type="monotone" 
@@ -112,8 +114,11 @@ const KMeansConvergencePlots: React.FC<KMeansConvergencePlotsProps> = ({
                       backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                       border: '1px solid rgba(148, 163, 184, 0.2)',
                       borderRadius: '8px',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      color: 'white'
                     }}
+                    formatter={(value: any) => [typeof value === 'number' ? value.toFixed(3) : value, 'Movement']}
+                    labelFormatter={(label) => `Iteration ${label}`}
                   />
                   <Line 
                     type="monotone" 
@@ -164,8 +169,11 @@ const KMeansConvergencePlots: React.FC<KMeansConvergencePlotsProps> = ({
                       backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                       border: '1px solid rgba(148, 163, 184, 0.2)',
                       borderRadius: '8px',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      color: 'white'
                     }}
+                    formatter={(value: any) => [typeof value === 'number' ? value.toFixed(3) : value, 'Size']}
+                    labelFormatter={(label) => `${label}`}
                   />
                   <Bar dataKey="size" radius={[4, 4, 0, 0]}>
                     {clusterSizes.map((entry, index) => (
