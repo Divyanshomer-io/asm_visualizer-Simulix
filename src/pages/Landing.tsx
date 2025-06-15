@@ -270,10 +270,83 @@ const closeContribution = () => {
         </div>
       </header>
       
-      {/* Enhanced Hero Section */}
-      <section className="container px-4 md:px-8 py-16 md:py-24 relative">
+      {/* Enhanced Hero Section with Background Elements */}
+      <section className="container px-4 md:px-8 py-16 md:py-24 relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Neural network nodes */}
+          <div className="absolute top-10 left-10 w-2 h-2 bg-blue-400/10 rounded-full animate-pulse"></div>
+          <div className="absolute top-32 left-20 w-1.5 h-1.5 bg-purple-400/10 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-20 left-32 w-2.5 h-2.5 bg-cyan-400/10 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+          
+          {/* Right side nodes */}
+          <div className="absolute top-16 right-16 w-2 h-2 bg-green-400/10 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute top-40 right-12 w-1.5 h-1.5 bg-blue-400/10 rounded-full animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+          <div className="absolute top-28 right-28 w-2.5 h-2.5 bg-purple-400/10 rounded-full animate-pulse" style={{ animationDelay: '2.5s' }}></div>
+          
+          {/* Connection lines */}
+          <svg className="absolute inset-0 w-full h-full" style={{ zIndex: -1 }}>
+            <defs>
+              <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="rgb(56, 189, 248)" stopOpacity="0.05" />
+                <stop offset="100%" stopColor="rgb(147, 51, 234)" stopOpacity="0.05" />
+              </linearGradient>
+            </defs>
+            {/* Diagonal connections */}
+            <line x1="10%" y1="20%" x2="25%" y2="35%" stroke="url(#connectionGradient)" strokeWidth="1" />
+            <line x1="20%" y1="15%" x2="35%" y2="25%" stroke="url(#connectionGradient)" strokeWidth="1" />
+            <line x1="75%" y1="25%" x2="90%" y2="40%" stroke="url(#connectionGradient)" strokeWidth="1" />
+            <line x1="80%" y1="20%" x2="95%" y2="30%" stroke="url(#connectionGradient)" strokeWidth="1" />
+          </svg>
+          
+          {/* Data visualization elements */}
+          <div className="absolute bottom-20 left-8 opacity-5">
+            <div className="flex items-end space-x-1">
+              <div className="w-2 h-8 bg-blue-400 rounded-sm"></div>
+              <div className="w-2 h-12 bg-purple-400 rounded-sm"></div>
+              <div className="w-2 h-6 bg-cyan-400 rounded-sm"></div>
+              <div className="w-2 h-16 bg-green-400 rounded-sm"></div>
+            </div>
+          </div>
+          
+          <div className="absolute bottom-16 right-12 opacity-5">
+            <div className="flex items-end space-x-1">
+              <div className="w-2 h-10 bg-purple-400 rounded-sm"></div>
+              <div className="w-2 h-14 bg-blue-400 rounded-sm"></div>
+              <div className="w-2 h-8 bg-cyan-400 rounded-sm"></div>
+            </div>
+          </div>
+          
+          {/* Mathematical symbols */}
+          <div className="absolute top-1/3 left-1/4 text-6xl font-thin text-blue-400/5 select-none">∑</div>
+          <div className="absolute top-2/3 right-1/4 text-5xl font-thin text-purple-400/5 select-none">∂</div>
+          <div className="absolute top-1/2 left-1/6 text-4xl font-thin text-cyan-400/5 select-none">∫</div>
+          <div className="absolute bottom-1/3 right-1/6 text-5xl font-thin text-green-400/5 select-none">λ</div>
+          
+          {/* Scatter plot points */}
+          <div className="absolute top-1/4 right-1/3">
+            <div className="relative w-24 h-24 opacity-8">
+              <div className="absolute top-2 left-3 w-1 h-1 bg-blue-400/8 rounded-full"></div>
+              <div className="absolute top-6 left-8 w-1 h-1 bg-blue-400/8 rounded-full"></div>
+              <div className="absolute top-4 left-12 w-1 h-1 bg-blue-400/8 rounded-full"></div>
+              <div className="absolute top-8 left-16 w-1 h-1 bg-blue-400/8 rounded-full"></div>
+              <div className="absolute top-12 left-6 w-1 h-1 bg-blue-400/8 rounded-full"></div>
+              <div className="absolute top-14 left-14 w-1 h-1 bg-blue-400/8 rounded-full"></div>
+            </div>
+          </div>
+          
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 opacity-5" 
+               style={{
+                 backgroundImage: `linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px),
+                                  linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px)`,
+                 backgroundSize: '50px 50px'
+               }}>
+          </div>
+        </div>
+        
         <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-purple-500/5 rounded-3xl"></div>
-        <div className="max-w-4xl mx-auto space-y-8 relative">
+        <div className="max-w-4xl mx-auto space-y-8 relative z-10">
           <div className="space-y-6">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gradient-primary leading-tight">
               Explore Data Science Through 
