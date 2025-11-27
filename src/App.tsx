@@ -25,6 +25,7 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import HiLoBayesianGame from "./pages/HiLoBayesianGame";
 import KMeansGame from "./pages/KMeansGame";
+import PairsTrading from "./pages/PairsTrading";
 
 // Configure React Query with safe defaults
 const queryClient = new QueryClient({
@@ -141,6 +142,11 @@ const App = () => (
                 <Route path="/kmeans-game" element={
                   <ErrorBoundary>
                     <KMeansGame />
+                  </ErrorBoundary>
+                } />
+                <Route path="/pairs-trading" element={
+                  <ErrorBoundary>
+                    <PairsTrading />
                   </ErrorBoundary>
                 } />
                 <Route path="/about" element={

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MoveRight, Search, X, Home, ChartLine, Compass, Atom, BarChart3, Target, TrendingUp, Network, TreePine, Scale, Layers, Settings, Dices, ChevronDown, Sparkles } from "lucide-react";
+import { MoveRight, Search, X, Home, ChartLine, Compass, Atom, BarChart3, Target, TrendingUp, Network, TreePine, Scale, Layers, Settings, Dices, ChevronDown, Sparkles, GitCompare } from "lucide-react";
 import FeedbackForm from "@/components/FeedbackForm";
 import ContributionForm from "@/components/ContributionForm";
 
@@ -108,6 +108,15 @@ const Visualizations = () => {
       icon: <Layers className="h-6 w-6" />,
       tags: ["Deep Learning", "VAE", "Compression", "Regularization"],
       gradient: "from-amber-500/20 to-orange-500/20"
+    },
+    {
+      id: "pairs-trading",
+      title: "Cointegration Pairs Trading",
+      description: "Statistical arbitrage strategy using cointegrated stock pairs, z-score signals, and backtesting with Sharpe ratio analysis.",
+      path: "/pairs-trading",
+      icon: <GitCompare className="h-6 w-6" />,
+      tags: ["Finance", "Quantitative Trading", "Time Series"],
+      gradient: "from-teal-500/20 to-cyan-500/20"
     },
   ];
 
